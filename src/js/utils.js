@@ -15,7 +15,6 @@ export function wireDropdown(pesquisas){
   const panel = dd?.querySelector(".dropdown-panel");
   if (!dd || !btn || !panel) return;
 
-  // monta itens
   panel.innerHTML = pesquisas.map(p => `
     <a class="dropdown-item" href="/${escapeHtml(p.slug)}" data-link role="menuitem">
       <strong>${escapeHtml(p.titulo)}</strong>
@@ -23,7 +22,7 @@ export function wireDropdown(pesquisas){
     </a>
   `).join("");
 
-  // começa FECHADO
+  // GARANTE FECHADO SEMPRE
   dd.classList.remove("open");
   btn.setAttribute("aria-expanded","false");
 
@@ -54,10 +53,8 @@ export function wireDropdown(pesquisas){
 export function spaLinkHandler(e, navigate){
   const a = e.target.closest("a[data-link]");
   if (!a) return;
-
   const href = a.getAttribute("href");
   if (!href) return;
-
   if (href.startsWith("http")) return;
 
   e.preventDefault();
