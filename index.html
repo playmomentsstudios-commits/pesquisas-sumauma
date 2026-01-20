@@ -3,42 +3,61 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Pesquisa – Instituto Sumaúma</title>
+  <title>Pesquisas – Instituto Sumaúma</title>
+
+  <!-- CSS do novo projeto (visual no padrão do site aprovado) -->
   <link rel="stylesheet" href="./src/css/style.css" />
 </head>
-<body>
-  <header class="topbar">
-    <div class="topbar-inner">
-      <a class="brand" href="/" data-link>
-        <img class="brand-logo" src="./public/assets/logos/sumauma-logo.png" alt="Instituto Sumaúma" />
-      </a>
 
-      <nav class="nav">
-        <div class="dropdown" id="pesquisasDropdown">
-          <button class="nav-btn" type="button" aria-haspopup="true" aria-expanded="false">
+<body>
+
+  <!-- HEADER (padrão visual do site anterior) -->
+  <header class="header">
+    <div class="header-overlay">
+      <div class="header-left">
+        <a href="/" data-link style="text-decoration:none;">
+          <h1 class="brand-title">
             Pesquisas
-            <span class="chev">▾</span>
+            <span class="brand-subtitle">INSTITUTO SUMAÚMA</span>
+          </h1>
+        </a>
+      </div>
+
+      <nav class="menu">
+        <!-- Logo Instituto Sumaúma (superior esquerdo do header no seu padrão) -->
+        <img
+          src="./public/assets/logos/sumauma-logo.png"
+          class="menu-logo"
+          alt="Instituto Sumaúma"
+        />
+
+        <!-- Dropdown Pesquisas -->
+        <div class="dropdown" id="pesquisasDropdown">
+          <button type="button" aria-haspopup="true" aria-expanded="false">
+            Pesquisas ▾
           </button>
           <div class="dropdown-panel" role="menu" aria-label="Pesquisas"></div>
         </div>
 
-        <a class="nav-btn ghost" href="https://sumauma.org" target="_blank" rel="noopener noreferrer">
+        <!-- Institucional -->
+        <a href="https://sumauma.org" target="_blank" rel="noopener noreferrer">
           Institucional
         </a>
       </nav>
     </div>
   </header>
 
+  <!-- CONTEÚDO SPA -->
   <main id="app" class="app" aria-live="polite"></main>
 
+  <!-- FOOTER (barra escura simples, padrão clean) -->
   <footer class="footer">
     <div class="footer-inner">
-      <span>© <span id="year"></span> Instituto Sumaúma</span>
-      <span class="dot">•</span>
-      <a href="https://sumauma.org" target="_blank" rel="noopener noreferrer">sumauma.org</a>
+      © <span id="year"></span> Instituto Sumaúma — <a href="https://sumauma.org" target="_blank" rel="noopener noreferrer" style="color:#fff;">sumauma.org</a>
     </div>
   </footer>
 
+  <!-- APP JS (rotas por slug + render da home/grid) -->
   <script type="module" src="./src/js/app.js"></script>
 </body>
 </html>
