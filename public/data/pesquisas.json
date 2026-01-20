@@ -4,7 +4,12 @@
     "titulo": "Corpos, Territórios Quilombolas e o Fio Conectado da Ancestralidade",
     "anoBase": "2025",
     "slug": "corpos-territorios-quilombolas-e-o-fio-conectado-da-ancestralidade",
-    "capa": "./public/assets/img/capa-corpos-territorios.jpg",
-    "relatorioPdf": "./public/assets/docs/relatorio-corpos-territorios.pdf"
+    "capa": "./public/assets/img/capa%20corpos%20territ%C3%B3rios.jpg",
+    "banner": "./public/assets/img/banner-capa.png",
+    "relatorioPdf": "./public/assets/docs/relatorio-corpos-territorios.pdf",
+    "sinopse": "Este relatório apresenta resultados e reflexões sobre práticas comunicacionais e culturais quilombolas nos meios digitais, compreendendo a comunicação como ato político, ancestral e estratégico.",
+    "mapa": {
+      "csvUrl": "./public/data/mapeamento-corpos-territorios.csv"
+    }
   }
 ]
