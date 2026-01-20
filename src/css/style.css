@@ -160,3 +160,131 @@ body{
   .grid{ grid-template-columns:1fr; }
   .menu{ display:none; }
 }
+
+/* ===== Layout Mapa (modelo aprovado) ===== */
+.pesquisa-top{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:20px;
+  margin-bottom:18px;
+  flex-wrap:wrap;
+}
+.pesquisa-title h2{
+  margin:0;
+  color:var(--green);
+  font-size:22px;
+}
+.pesquisa-menu{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.layout-mapa{
+  display:grid;
+  grid-template-columns: 380px 1fr;
+  gap:16px;
+}
+
+.sidebar{
+  background:#fff;
+  border-radius:6px;
+  box-shadow:var(--shadow);
+  overflow:hidden;
+  min-height: 560px;
+}
+.sidebar-head{
+  padding:16px;
+  border-bottom:1px solid #eee;
+}
+.sidebar-head h3{ margin:0 0 6px; color:var(--green); }
+.sidebar-head p{ margin:0; color:#666; font-size:13px; line-height:1.5; }
+
+.filters{
+  padding:14px 16px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  border-bottom:1px solid #eee;
+}
+.field{
+  width:100%;
+  padding:11px 12px;
+  border:1px solid #ddd;
+  border-radius:6px;
+  outline:none;
+  font-size:14px;
+}
+.field:focus{
+  border-color:#0f3d2e55;
+  box-shadow:0 0 0 3px rgba(15,61,46,.10);
+}
+
+.list{
+  padding:8px;
+  max-height: 420px;
+  overflow:auto;
+}
+.list-item{
+  padding:10px 10px;
+  border-radius:6px;
+  cursor:pointer;
+}
+.list-item:hover{ background:#f4f4f4; }
+.list-item strong{ display:block; }
+.list-item small{ display:block; color:#666; margin-top:2px; }
+
+.maparea{
+  background:#fff;
+  border-radius:6px;
+  box-shadow:var(--shadow);
+  min-height:560px;
+  overflow:hidden;
+}
+.map-placeholder{
+  height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:30px;
+  color:#666;
+  text-align:center;
+}
+
+/* Modal Relatório */
+.modal{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.65);
+  z-index:4000;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+}
+.modal.show{ display:flex; }
+
+.modal-content{
+  background:#fff;
+  width:100%;
+  max-width:560px;
+  padding:26px;
+  border-radius:8px;
+  text-align:center;
+  position:relative;
+}
+.close{
+  position:absolute;
+  top:10px;
+  right:14px;
+  font-size:22px;
+  cursor:pointer;
+}
+
+/* Responsivo mapa */
+@media(max-width: 980px){
+  .layout-mapa{ grid-template-columns: 1fr; }
+  .sidebar{ min-height:auto; }
+  .maparea{ min-height:420px; }
+}
