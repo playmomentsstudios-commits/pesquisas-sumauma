@@ -1,70 +1,258 @@
-/* ===== Header: evitar “estourar” o título quando for nome grande ===== */
-.header-titlelink{
-  text-decoration:none;
-  display:block;
-  max-width: 520px;
-}
-#headerTitle{
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  max-width:520px;
-}
-#headerSubtitle{
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  max-width:520px;
+:root{
+  --green:#0f3d2e;
+  --brown:#5a2a12;
+  --gold:#ffdd9a;
+
+  --bg:#f4f4f4;
+  --text:#222;
+  --muted:#555;
+  --white:#fff;
+  --line:#e5e5e5;
+
+  --shadow:0 4px 15px rgba(0,0,0,.08);
 }
 
-/* ===== Subbar (abaixo do header): ano base + submenus ===== */
-.subbar{
-  max-width:1100px;
-  margin:18px auto 0;
-  padding:0 30px;
+*{ box-sizing:border-box; }
+html,body{ margin:0; padding:0; font-family:Arial,sans-serif; background:var(--bg); color:var(--text); }
+a{ color:inherit; text-decoration:none; }
+img{ display:block; max-width:100%; }
+
+/* HEADER */
+.header{
+  height:160px;
+  background: url("../../public/assets/img/banner-capa.png") center/cover no-repeat;
+  position:relative;
+}
+.header-overlay{
+  height:100%;
+  background:rgba(0,0,0,.35);
   display:flex;
   align-items:center;
   justify-content:space-between;
-  gap:12px;
-  flex-wrap:wrap;
+  padding:0 30px;
 }
-.pill{
-  display:inline-block;
-  padding:8px 12px;
-  border-radius:999px;
+.header-logo img{
+  height:52px;
+  width:auto;
+}
+
+/* MENU */
+.menu{
+  display:flex;
+  align-items:center;
+  gap:18px;
+}
+.menu-btn, .menu-link{
+  color:#fff;
+  font-size:16px;
+  background:transparent;
+  border:0;
+  cursor:pointer;
+  padding:0;
+  text-decoration:underline;
+}
+.chev{ opacity:.9; }
+
+/* DROPDOWN */
+.dropdown{ position:relative; }
+.dropdown-panel{
+  position:absolute;
+  right:0;
+  top:34px;
+  min-width:360px;
   background:#fff;
-  border:1px solid #e5e5e5;
-  color:#333;
-  font-size:13px;
+  border:1px solid var(--line);
+  border-radius:8px;
   box-shadow:var(--shadow);
+  padding:8px;
+  display:none;      /* <- aqui garante que NÃO aparece sozinho */
+  z-index:999;
+}
+.dropdown.open .dropdown-panel{ display:block; }
+
+.dropdown-item{
+  display:block;
+  padding:10px 10px;
+  border-radius:6px;
+  color:#222;
+}
+.dropdown-item:hover{ background:#f4f4f4; }
+.dropdown-item strong{ display:block; color:var(--green); }
+.dropdown-item small{ display:block; color:#666; margin-top:3px; }
+
+/* APP */
+.app{
+  max-width:1100px;
+  margin:18px auto 50px;
+  padding:0 30px;
+}
+
+/* GRID HOME */
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:20px;
+}
+.card{
+  background:#fff;
+  border-radius:6px;
+  overflow:hidden;
+  box-shadow:var(--shadow);
+  transition:.25s;
+}
+.card:hover{ transform:translateY(-6px); }
+.card-cover{ height:220px; background:#ddd; }
+.card-cover img{ width:100%; height:100%; object-fit:cover; }
+.card-body{ padding:18px; }
+.badge{
+  font-size:12px;
+  background:#eee;
+  padding:6px 10px;
+  border-radius:999px;
+  color:#444;
+}
+.card-title{ color:var(--green); margin:10px 0; }
+.card-actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
+
+.btn{
+  padding:10px 14px;
+  border-radius:4px;
+  font-weight:bold;
+  border:0;
+  cursor:pointer;
+}
+.btn.primary{ background:var(--green); color:#fff; }
+.btn.light{ background:#fff; border:1px solid #ddd; color:#222; }
+
+/* SUBBAR (abaixo do header): abas marrom/verde */
+.subbar{
+  max-width:1100px;
+  margin:18px auto 14px;
+  padding:0 30px;
+  display:flex;
+  justify-content:flex-end;
 }
 .subbar-right{
   display:flex;
   gap:10px;
   flex-wrap:wrap;
 }
-.subbtn{
+.tab{
   display:inline-block;
-  padding:10px 12px;
+  padding:10px 14px;
   border-radius:6px;
-  background:#fff;
-  border:1px solid #ddd;
   font-weight:bold;
-  color:#222;
+  color:#fff;
 }
-.subbtn:hover{
+.tab-idle{ background:var(--brown); }
+.tab-active{ background:var(--green); }
+
+/* Layout mapa */
+.layout-mapa{
+  display:grid;
+  grid-template-columns: 380px 1fr;
+  gap:16px;
+}
+.sidebar{
+  background:#fff;
+  border-radius:6px;
+  box-shadow:var(--shadow);
+  overflow:hidden;
+  min-height:560px;
+}
+.sidebar-head{ padding:16px; border-bottom:1px solid #eee; }
+.sidebar-head h3{ margin:0 0 6px; color:var(--green); }
+.sidebar-head p{ margin:0; color:#666; font-size:13px; line-height:1.5; }
+
+.filters{
+  padding:14px 16px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  border-bottom:1px solid #eee;
+}
+.field{
+  width:100%;
+  padding:11px 12px;
+  border:1px solid #ddd;
+  border-radius:6px;
+  outline:none;
+  font-size:14px;
+}
+.field:focus{
   border-color:#0f3d2e55;
   box-shadow:0 0 0 3px rgba(15,61,46,.10);
 }
 
-/* Ajuste do app pra pesquisa começar logo após a subbar */
-.app{
-  margin:18px auto 50px;
+.list{ padding:8px; max-height:420px; overflow:auto; }
+.list-item{ padding:10px 10px; border-radius:6px; cursor:pointer; }
+.list-item:hover{ background:#f4f4f4; }
+.list-item small{ display:block; color:#666; margin-top:2px; }
+
+.maparea{
+  background:#fff;
+  border-radius:6px;
+  box-shadow:var(--shadow);
+  min-height:560px;
+  overflow:hidden;
+}
+.map-placeholder{
+  height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:30px;
+  color:#666;
+  text-align:center;
 }
 
-/* Mobile: título do header menor */
-@media(max-width: 768px){
-  #headerTitle{ max-width: 260px; font-size:22px; }
-  #headerSubtitle{ max-width: 260px; }
-  .subbar{ padding:0 20px; }
+/* Modal */
+.modal{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.65);
+  z-index:4000;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+}
+.modal.show{ display:flex; }
+.modal-content{
+  background:#fff;
+  width:100%;
+  max-width:560px;
+  padding:26px;
+  border-radius:8px;
+  text-align:center;
+  position:relative;
+}
+.close{
+  position:absolute;
+  top:10px;
+  right:14px;
+  font-size:22px;
+  cursor:pointer;
+}
+
+/* FOOTER */
+.footer{
+  background:#111;
+  color:#ccc;
+  text-align:center;
+  padding:20px;
+  margin-top:60px;
+}
+
+/* Responsivo */
+@media(max-width:980px){
+  .layout-mapa{ grid-template-columns:1fr; }
+  .maparea{ min-height:420px; }
+}
+@media(max-width:900px){
+  .grid{ grid-template-columns:1fr; }
+}
+@media(max-width:768px){
+  .header{ height:200px; }
+  .header-overlay{ padding:0 20px; }
 }
