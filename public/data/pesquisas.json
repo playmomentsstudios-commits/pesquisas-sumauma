@@ -7,5 +7,7 @@
     "capa": "./public/assets/img/capa-corposterritorios.jpg",
     "relatorioPdf": "./public/assets/docs/relatorio-corpos-territorios.pdf",
     "sinopse": "Sinopse do relatório (depois editável no admin)."
+    "mapa": { "csvUrl": "./public/data/mapeamento-corpos-territorios.csv" }
+
   }
 ]
