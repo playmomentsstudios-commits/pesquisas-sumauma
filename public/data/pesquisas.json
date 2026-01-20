@@ -5,10 +5,6 @@
     "anoBase": "2025",
     "slug": "corpos-territorios-quilombolas-e-o-fio-conectado-da-ancestralidade",
     "capa": "./public/assets/img/capa-corpos-territorios.jpg",
-    "relatorioPdf": "./public/assets/docs/relatorio-corpos-territorios.pdf",
-    "mapa": {
-      "csvUrl": "./public/data/mapeamento-corpos-territorios.csv"
-    },
-    "resumo": "Pesquisa do Instituto Sumaúma. (Aqui entra um texto curto de apresentação.)"
+    "relatorioPdf": "./public/assets/docs/relatorio-corpos-territorios.pdf"
   }
 ]
