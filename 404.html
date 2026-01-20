@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Redirecionando…</title>
+</head>
+<body>
+  <script>
+    // SPA fallback: reescreve a URL para index.html mantendo o path
+    // Funciona bem no GitHub Pages para rotas como /meu-slug
+    var redirect = location.pathname + location.search + location.hash;
+    sessionStorage.setItem("spa_redirect", redirect);
+    location.replace("/");
+  </script>
+</body>
+</html>
