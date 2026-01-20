@@ -22,7 +22,6 @@ export function wireDropdown(pesquisas){
     </a>
   `).join("");
 
-  // GARANTE FECHADO SEMPRE
   dd.classList.remove("open");
   btn.setAttribute("aria-expanded","false");
 
@@ -53,8 +52,10 @@ export function wireDropdown(pesquisas){
 export function spaLinkHandler(e, navigate){
   const a = e.target.closest("a[data-link]");
   if (!a) return;
+
   const href = a.getAttribute("href");
   if (!href) return;
+
   if (href.startsWith("http")) return;
 
   e.preventDefault();
