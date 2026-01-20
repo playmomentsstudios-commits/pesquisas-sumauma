@@ -3,8 +3,8 @@ import { escapeHtml } from "../utils.js";
 export function renderMapaPesquisa(p, opts = {}){
   const slug = escapeHtml(p.slug);
   const csvUrl = escapeHtml(p?.mapa?.csvUrl || "");
+  const openRelatorio = !!opts.openRelatorio;
 
-  // submenus com ativo automático
   const path = (location.pathname || "").replace(/\/+$/,"");
   const active =
     path.endsWith(`/${slug}/pesquisa`) ? "pesquisa" :
@@ -17,7 +17,6 @@ export function renderMapaPesquisa(p, opts = {}){
     return `<a class="tab ${isActive ? "tab-active" : "tab-idle"}" href="/${slug}/${sub}" data-link>${label}</a>`;
   };
 
-  // IDs únicos (pra não conflitar)
   const mapId = `map-${slug}`;
   const listId = `list-${slug}`;
   const searchId = `search-${slug}`;
@@ -59,6 +58,8 @@ export function renderMapaPesquisa(p, opts = {}){
       </section>
     </div>
 
+    ${renderRelatorioModal(p, openRelatorio)}
+
     <script>
       (function(){
         const opts = {
@@ -70,13 +71,57 @@ export function renderMapaPesquisa(p, opts = {}){
           cityId: "${cityId}",
           catId: "${catId}"
         };
-
-        // inicia quando o DOM desta view existir
         setTimeout(function(){
           if (window.SumaumaMap && window.SumaumaMap.init) {
             window.SumaumaMap.init(opts);
           }
         }, 0);
+      })();
+    </script>
+  `;
+}
+
+function renderRelatorioModal(p, open){
+  const cls = open ? "modal show" : "modal";
+  const pdf = p.relatorioPdf ? escapeHtml(p.relatorioPdf) : "";
+
+  return `
+    <div class="${cls}" id="relatorioModal" aria-hidden="${open ? "false" : "true"}">
+      <div class="modal-content">
+        <span class="close" data-close-modal="1">×</span>
+
+        <h3 style="margin:0 0 10px; color:#0f3d2e;">Relatório</h3>
+        <p style="margin:0 0 12px; color:#555; line-height:1.6;">
+          ${escapeHtml(p.sinopse || "Sinopse do relatório (editável no admin).")}
+        </p>
+
+        <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-top:10px;">
+          ${pdf ? `<a class="btn primary" href="${pdf}" target="_blank" rel="noopener noreferrer">Ler</a>` : ""}
+          ${pdf ? `<a class="btn light" href="${pdf}" download>Baixar</a>` : ""}
+          <a class="btn light" href="/${escapeHtml(p.slug)}/mapa" data-link>Fechar</a>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      (function(){
+        const modal = document.getElementById("relatorioModal");
+        if(!modal) return;
+
+        function close(){
+          window.history.pushState({}, "", "/${escapeHtml(p.slug)}/mapa");
+          window.dispatchEvent(new PopStateEvent("popstate"));
+        }
+
+        modal.addEventListener("click", (e)=>{
+          if(e.target === modal) close();
+          const btn = e.target.closest("[data-close-modal]");
+          if(btn) close();
+        });
+
+        document.addEventDeepKeyDown = document.addEventListener("keydown", (e)=>{
+          if(e.key === "Escape" && modal.classList.contains("show")) close();
+        });
       })();
     </script>
   `;
