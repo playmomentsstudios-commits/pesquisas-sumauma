@@ -4,25 +4,23 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Pesquisas – Instituto Sumaúma</title>
-
-  <!-- CSS -->
   <link rel="stylesheet" href="./src/css/style.css" />
 </head>
 
 <body>
 
-  <!-- HEADER -->
+  <!-- HEADER (título dinâmico via JS) -->
   <header class="header">
     <div class="header-overlay">
+      <!-- ESQUERDA: título muda (Home: Pesquisas / Instituto Sumaúma | Pesquisa: Título da pesquisa) -->
       <div class="header-left">
-        <a href="/" data-link style="text-decoration:none;">
-          <h1 class="brand-title">
-            Pesquisas
-            <span class="brand-subtitle">INSTITUTO SUMAÚMA</span>
-          </h1>
+        <a href="/" data-link class="header-titlelink">
+          <h1 class="brand-title" id="headerTitle">Pesquisas</h1>
+          <span class="brand-subtitle" id="headerSubtitle">INSTITUTO SUMAÚMA</span>
         </a>
       </div>
 
+      <!-- DIREITA: logo + dropdown + institucional -->
       <nav class="menu">
         <img
           src="./public/assets/logos/sumauma-logo.png"
@@ -31,19 +29,22 @@
         />
 
         <div class="dropdown" id="pesquisasDropdown">
-          <button type="button">Pesquisas ▾</button>
-          <div class="dropdown-panel"></div>
+          <button type="button" class="menu-btn" aria-haspopup="true" aria-expanded="false">
+            Pesquisas <span class="chev">▾</span>
+          </button>
+          <div class="dropdown-panel" role="menu" aria-label="Pesquisas"></div>
         </div>
 
-        <a href="https://sumauma.org" target="_blank">Institucional</a>
+        <a class="menu-link" href="https://sumauma.org" target="_blank" rel="noopener noreferrer">
+          Institucional
+        </a>
       </nav>
     </div>
   </header>
 
-  <!-- CONTEÚDO -->
-  <main id="app" class="app"></main>
+  <!-- SPA -->
+  <main id="app" class="app" aria-live="polite"></main>
 
-  <!-- FOOTER -->
   <footer class="footer">
     © <span id="year"></span> Instituto Sumaúma
   </footer>
