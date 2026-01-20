@@ -8,26 +8,15 @@
 </head>
 
 <body>
-
-  <!-- HEADER (título dinâmico via JS) -->
   <header class="header">
     <div class="header-overlay">
-      <!-- ESQUERDA: título muda (Home: Pesquisas / Instituto Sumaúma | Pesquisa: Título da pesquisa) -->
-      <div class="header-left">
-        <a href="/" data-link class="header-titlelink">
-          <h1 class="brand-title" id="headerTitle">Pesquisas</h1>
-          <span class="brand-subtitle" id="headerSubtitle">INSTITUTO SUMAÚMA</span>
-        </a>
-      </div>
+      <!-- Logo à esquerda -->
+      <a class="header-logo" href="/" data-link>
+        <img src="./public/assets/logos/sumauma-logo.png" alt="Instituto Sumaúma">
+      </a>
 
-      <!-- DIREITA: logo + dropdown + institucional -->
+      <!-- Menu à direita -->
       <nav class="menu">
-        <img
-          src="./public/assets/logos/sumauma-logo.png"
-          class="menu-logo"
-          alt="Instituto Sumaúma"
-        />
-
         <div class="dropdown" id="pesquisasDropdown">
           <button type="button" class="menu-btn" aria-haspopup="true" aria-expanded="false">
             Pesquisas <span class="chev">▾</span>
@@ -42,7 +31,6 @@
     </div>
   </header>
 
-  <!-- SPA -->
   <main id="app" class="app" aria-live="polite"></main>
 
   <footer class="footer">
