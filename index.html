@@ -4,10 +4,16 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Pesquisas – Instituto Sumaúma</title>
+
+  <!-- Leaflet (OpenStreetMap) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+  <!-- CSS do projeto -->
   <link rel="stylesheet" href="./src/css/style.css" />
 </head>
 
 <body>
+  <!-- HEADER: logo à esquerda + menu à direita -->
   <header class="header">
     <div class="header-overlay">
       <!-- Logo à esquerda -->
@@ -31,12 +37,17 @@
     </div>
   </header>
 
+  <!-- SPA -->
   <main id="app" class="app" aria-live="polite"></main>
 
   <footer class="footer">
     © <span id="year"></span> Instituto Sumaúma
   </footer>
 
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- App -->
   <script type="module" src="./src/js/app.js"></script>
 </body>
 </html>
