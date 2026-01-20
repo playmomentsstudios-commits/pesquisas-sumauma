@@ -15,25 +15,37 @@ export function wireDropdown(pesquisas){
   const panel = dd?.querySelector(".dropdown-panel");
   if (!dd || !btn || !panel) return;
 
+  // monta itens
   panel.innerHTML = pesquisas.map(p => `
-    <a class="dropdown-item" href="/${p.slug}" data-link role="menuitem">
-      <div style="flex:1">
-        <strong>${escapeHtml(p.titulo)}</strong>
-        <small>Ano base: ${escapeHtml(p.anoBase || "")}</small>
-      </div>
+    <a class="dropdown-item" href="/${escapeHtml(p.slug)}" data-link role="menuitem">
+      <strong>${escapeHtml(p.titulo)}</strong>
+      <small>Ano base: ${escapeHtml(p.anoBase || "")}</small>
     </a>
   `).join("");
 
-  function close(){ dd.classList.remove("open"); btn.setAttribute("aria-expanded","false"); }
+  // começa FECHADO
+  dd.classList.remove("open");
+  btn.setAttribute("aria-expanded","false");
+
+  function close(){
+    dd.classList.remove("open");
+    btn.setAttribute("aria-expanded","false");
+  }
   function toggle(){
     const open = dd.classList.toggle("open");
     btn.setAttribute("aria-expanded", open ? "true" : "false");
   }
 
-  btn.addEventListener("click", (e) => { e.preventDefault(); toggle(); });
+  btn.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggle();
+  });
+
   document.addEventListener("click", (e) => {
     if (!dd.contains(e.target)) close();
   });
+
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") close();
   });
@@ -46,7 +58,6 @@ export function spaLinkHandler(e, navigate){
   const href = a.getAttribute("href");
   if (!href) return;
 
-  // só trata links internos do SPA
   if (href.startsWith("http")) return;
 
   e.preventDefault();
