@@ -3,18 +3,23 @@ import { escapeHtml } from "../utils.js";
 export function renderMapaPesquisa(p, opts = {}){
   const openRelatorio = !!opts.openRelatorio;
 
-  return `
-    <!-- Faixa abaixo do header: ano base + submenus -->
-    <div class="subbar">
-      <div class="subbar-left">
-        <span class="pill">Ano base: ${escapeHtml(p.anoBase || "")}</span>
-      </div>
+  const slug = escapeHtml(p.slug);
+  const path = (location.pathname || "").replace(/\/+$/,"");
 
+  // qual aba está ativa?
+  const active =
+    path.endsWith(`/${slug}/pesquisa`) ? "pesquisa" :
+    path.endsWith(`/${slug}/ficha-tecnica`) ? "ficha-tecnica" :
+    path.endsWith(`/${slug}/relatorio`) ? "relatorio" :
+    "mapa";
+
+  return `
+    <div class="subbar">
       <div class="subbar-right">
-        <a class="subbtn" href="/${escapeHtml(p.slug)}/mapa" data-link>Mapa</a>
-        <a class="subbtn" href="/${escapeHtml(p.slug)}/pesquisa" data-link>Pesquisa</a>
-        <a class="subbtn" href="/${escapeHtml(p.slug)}/relatorio" data-link>Relatório</a>
-        <a class="subbtn" href="/${escapeHtml(p.slug)}/ficha-tecnica" data-link>Ficha Técnica</a>
+        ${tab(slug, "mapa", "Mapa", active === "mapa")}
+        ${tab(slug, "pesquisa", "Pesquisa", active === "pesquisa")}
+        ${tab(slug, "relatorio", "Relatório", active === "relatorio")}
+        ${tab(slug, "ficha-tecnica", "Ficha Técnica", active === "ficha-tecnica")}
       </div>
     </div>
 
@@ -27,12 +32,8 @@ export function renderMapaPesquisa(p, opts = {}){
 
         <div class="filters">
           <input class="field" type="text" placeholder="Buscar por nome..." />
-          <select class="field">
-            <option>Todos os estados</option>
-          </select>
-          <select class="field">
-            <option>Todas as cidades</option>
-          </select>
+          <select class="field"><option>Todos os estados</option></select>
+          <select class="field"><option>Todas as cidades</option></select>
           <select class="field">
             <option>Todas as categorias</option>
             <option>Prática Cultural</option>
@@ -43,10 +44,6 @@ export function renderMapaPesquisa(p, opts = {}){
         <div class="list">
           <div class="list-item">
             <strong>Exemplo de participante</strong>
-            <small>Território • Cidade/UF • Categoria</small>
-          </div>
-          <div class="list-item">
-            <strong>Outro participante</strong>
             <small>Território • Cidade/UF • Categoria</small>
           </div>
         </div>
@@ -64,6 +61,12 @@ export function renderMapaPesquisa(p, opts = {}){
 
     ${renderRelatorioModal(p, openRelatorio)}
   `;
+}
+
+function tab(slug, sub, label, isActive){
+  const href = `/${slug}/${sub}`;
+  const cls = isActive ? "tab tab-active" : "tab tab-idle";
+  return `<a class="${cls}" href="${href}" data-link>${label}</a>`;
 }
 
 function renderRelatorioModal(p, open){
