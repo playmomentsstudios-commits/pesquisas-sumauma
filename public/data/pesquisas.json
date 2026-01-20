@@ -73,7 +73,30 @@
           "nome": "Felipe da Costa Souza",
           "funcao": "Design e Diagramação",
           "foto": "./public/assets/img/equipe/felipe-da-costa-souza.jpg"
-        }
+        },
+        "pesquisaResumo": {
+  "introducao": {
+    "titulo": "A Pesquisa",
+    "texto": "Esta pesquisa investiga práticas comunicacionais e culturais quilombolas nos meios digitais..."
+  },
+  "citacao": {
+    "texto": "O quilombo representa um instrumento vigoroso no processo de reconhecimento da identidade negra brasileira...",
+    "autor": "Maria Beatriz Nascimento — Historiadora, professora e ativista afro-brasileira"
+  },
+  "topicos": [
+    {
+      "titulo": "Mapeando práticas culturais e comunicacionais nos meios digitais",
+      "texto": "O mapeamento identifica como coletivos quilombolas utilizam ferramentas digitais para fortalecer suas narrativas.",
+      "imagem": "./public/assets/img/pesquisa/img-1.jpg"
+    },
+    {
+      "titulo": "A cultura e a comunicação como ato político e ancestral",
+      "texto": "A comunicação é compreendida como extensão da ancestralidade, da oralidade e da memória coletiva.",
+      "imagem": "./public/assets/img/pesquisa/img-2.jpg"
+    }
+  ]
+}
+
       ]
     }
   }
