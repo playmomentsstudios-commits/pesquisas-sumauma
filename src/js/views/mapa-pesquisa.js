@@ -4,20 +4,17 @@ export function renderMapaPesquisa(p, opts = {}){
   const openRelatorio = !!opts.openRelatorio;
 
   return `
-    <div class="pesquisa-top">
-      <div class="pesquisa-title">
-        <h2>${escapeHtml(p.titulo)}</h2>
-        <div class="pesquisa-sub">
-          <span class="badge">Ano base: ${escapeHtml(p.anoBase || "")}</span>
-        </div>
+    <!-- Faixa abaixo do header: ano base + submenus -->
+    <div class="subbar">
+      <div class="subbar-left">
+        <span class="pill">Ano base: ${escapeHtml(p.anoBase || "")}</span>
       </div>
 
-      <div class="pesquisa-menu">
-        <a class="btn light" href="/" data-link>Início</a>
-        <a class="btn light" href="/${escapeHtml(p.slug)}/mapa" data-link>Mapa</a>
-        <a class="btn light" href="/${escapeHtml(p.slug)}/pesquisa" data-link>Pesquisa</a>
-        <a class="btn light" href="/${escapeHtml(p.slug)}/relatorio" data-link>Relatório</a>
-        <a class="btn light" href="/${escapeHtml(p.slug)}/ficha-tecnica" data-link>Ficha Técnica</a>
+      <div class="subbar-right">
+        <a class="subbtn" href="/${escapeHtml(p.slug)}/mapa" data-link>Mapa</a>
+        <a class="subbtn" href="/${escapeHtml(p.slug)}/pesquisa" data-link>Pesquisa</a>
+        <a class="subbtn" href="/${escapeHtml(p.slug)}/relatorio" data-link>Relatório</a>
+        <a class="subbtn" href="/${escapeHtml(p.slug)}/ficha-tecnica" data-link>Ficha Técnica</a>
       </div>
     </div>
 
