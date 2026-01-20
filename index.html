@@ -5,13 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Pesquisas – Instituto Sumaúma</title>
 
-  <!-- CSS do novo projeto (visual no padrão do site aprovado) -->
+  <!-- CSS -->
   <link rel="stylesheet" href="./src/css/style.css" />
 </head>
 
 <body>
 
-  <!-- HEADER (padrão visual do site anterior) -->
+  <!-- HEADER -->
   <header class="header">
     <div class="header-overlay">
       <div class="header-left">
@@ -24,40 +24,30 @@
       </div>
 
       <nav class="menu">
-        <!-- Logo Instituto Sumaúma (superior esquerdo do header no seu padrão) -->
         <img
           src="./public/assets/logos/sumauma-logo.png"
           class="menu-logo"
           alt="Instituto Sumaúma"
         />
 
-        <!-- Dropdown Pesquisas -->
         <div class="dropdown" id="pesquisasDropdown">
-          <button type="button" aria-haspopup="true" aria-expanded="false">
-            Pesquisas ▾
-          </button>
-          <div class="dropdown-panel" role="menu" aria-label="Pesquisas"></div>
+          <button type="button">Pesquisas ▾</button>
+          <div class="dropdown-panel"></div>
         </div>
 
-        <!-- Institucional -->
-        <a href="https://sumauma.org" target="_blank" rel="noopener noreferrer">
-          Institucional
-        </a>
+        <a href="https://sumauma.org" target="_blank">Institucional</a>
       </nav>
     </div>
   </header>
 
-  <!-- CONTEÚDO SPA -->
-  <main id="app" class="app" aria-live="polite"></main>
+  <!-- CONTEÚDO -->
+  <main id="app" class="app"></main>
 
-  <!-- FOOTER (barra escura simples, padrão clean) -->
+  <!-- FOOTER -->
   <footer class="footer">
-    <div class="footer-inner">
-      © <span id="year"></span> Instituto Sumaúma — <a href="https://sumauma.org" target="_blank" rel="noopener noreferrer" style="color:#fff;">sumauma.org</a>
-    </div>
+    © <span id="year"></span> Instituto Sumaúma
   </footer>
 
-  <!-- APP JS (rotas por slug + render da home/grid) -->
   <script type="module" src="./src/js/app.js"></script>
 </body>
 </html>
