@@ -1,13 +1,80 @@
 [
   {
-    "id": "pesq-001",
+    "id": "pesquisa-001",
     "titulo": "Corpos, Territórios Quilombolas e o Fio Conectado da Ancestralidade",
     "anoBase": "2025",
     "slug": "corpos-territorios-quilombolas-e-o-fio-conectado-da-ancestralidade",
-    "capa": "./public/assets/img/capa-corposterritorios.jpg",
-    "relatorioPdf": "./public/assets/docs/relatorio-corpos-territorios.pdf",
-    "sinopse": "Sinopse do relatório (depois editável no admin)."
-    "mapa": { "csvUrl": "./public/data/mapeamento-corpos-territorios.csv" }
 
+    "capa": "./public/assets/img/capa-corposterritorios.jpg",
+
+    "descricaoCurta": "Pesquisa sobre práticas culturais e comunicacionais quilombolas, territórios e ancestralidade nos meios digitais.",
+
+    "mapa": {
+      "csvUrl": "./public/data/mapeamento-corpos-territorios.csv"
+    },
+
+    "relatorioPdf": "./public/assets/docs/relatorio-corpos-territorios.pdf",
+
+    "sinopse": "A pesquisa Corpos, Territórios Quilombolas e o Fio Conectado da Ancestralidade investiga práticas comunicacionais e culturais desenvolvidas por comunidades quilombolas nos meios digitais, compreendendo a comunicação como extensão da ancestralidade, da oralidade e da luta política por justiça climática, racial e territorial.",
+
+    "fichaTecnica": {
+      "realizacao": {
+        "nome": "Instituto Sumaúma",
+        "logo": "./public/assets/logos/sumauma-logo.png"
+      },
+
+      "financiador": {
+        "nome": "Financiador",
+        "logo": "./public/assets/img/financiador.png"
+      },
+
+      "equipe": [
+        {
+          "nome": "Taís Oliveira",
+          "funcao": "Coordenação Geral",
+          "foto": "./public/assets/img/equipe/tais-oliveira.jpg"
+        },
+        {
+          "nome": "Juliane Sousa",
+          "funcao": "Consultora Convidada",
+          "foto": "./public/assets/img/equipe/juliane-sousa.jpg"
+        },
+        {
+          "nome": "Vanessa Silva",
+          "funcao": "Analista de Pesquisa",
+          "foto": "./public/assets/img/equipe/vanessa-silva.jpg"
+        },
+        {
+          "nome": "Anicely Santos",
+          "funcao": "Analista de Dados",
+          "foto": "./public/assets/img/equipe/anicely-santos.jpg"
+        },
+        {
+          "nome": "Maria Fernanda Ruas",
+          "funcao": "Analista de Comunicação",
+          "foto": "./public/assets/img/equipe/maria-fernanda-ruas.jpg"
+        },
+        {
+          "nome": "Abraão Felipe Oliveira",
+          "funcao": "Assistente de Comunicação",
+          "foto": "./public/assets/img/equipe/abraao-felipe-oliveira.jpg"
+        },
+        {
+          "nome": "Diego Galofero",
+          "funcao": "Assistente Administrativo",
+          "foto": "./public/assets/img/equipe/diego-galofero.jpg"
+        },
+        {
+          "nome": "Hígor Torres",
+          "funcao": "Revisão",
+          "foto": "./public/assets/img/equipe/higor-torres.jpg"
+        },
+        {
+          "nome": "Felipe da Costa Souza",
+          "funcao": "Design e Diagramação",
+          "foto": "./public/assets/img/equipe/felipe-da-costa-souza.jpg"
+        }
+      ]
+    }
   }
 ]
