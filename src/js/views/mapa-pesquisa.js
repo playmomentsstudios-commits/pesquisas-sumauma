@@ -1,4 +1,5 @@
 import { escapeHtml } from "../utils.js";
+import { getBasePath, withBase } from "../basepath.js";
 
 export function renderMapaPesquisa(p, opts = {}){
   const slug = escapeHtml(p.slug);
@@ -7,7 +8,11 @@ export function renderMapaPesquisa(p, opts = {}){
   const pesquisaId = p?.dbId || p?._dbId || "";
   const supabaseEnabled = !!pesquisaId;
 
-  const path = (location.pathname || "").replace(/\/+$/,"");
+  const base = getBasePath();
+  let path = (location.pathname || "").replace(/\/+$/,"");
+  if (base && path.startsWith(base)) {
+    path = path.slice(base.length) || "/";
+  }
   const active =
     path.endsWith(`/${slug}/pesquisa`) ? "pesquisa" :
     path.endsWith(`/${slug}/ficha-tecnica`) ? "ficha-tecnica" :
@@ -16,7 +21,7 @@ export function renderMapaPesquisa(p, opts = {}){
 
   const tab = (sub, label) => {
     const isActive = active === sub;
-    return `<a class="tab ${isActive ? "tab-active" : "tab-idle"}" href="/${slug}/${sub}" data-link>${label}</a>`;
+    return `<a class="tab ${isActive ? "tab-active" : "tab-idle"}" href="${withBase(`/${slug}/${sub}`)}" data-link>${label}</a>`;
   };
 
   const mapId = `map-${slug}`;
@@ -26,6 +31,7 @@ export function renderMapaPesquisa(p, opts = {}){
   const cityId = `city-${slug}`;
   const catId = `cat-${slug}`;
 
+  const closePath = withBase(`/${escapeHtml(p.slug)}/mapa`);
   return `
     <div class="subbar">
       <div class="subbar-right">
@@ -102,7 +108,7 @@ function renderRelatorioModal(p, open){
         <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-top:10px;">
           ${pdf ? `<a class="btn primary" href="${pdf}" target="_blank" rel="noopener noreferrer">Ler</a>` : ""}
           ${pdf ? `<a class="btn light" href="${pdf}" download>Baixar</a>` : ""}
-          <a class="btn light" href="/${escapeHtml(p.slug)}/mapa" data-link>Fechar</a>
+          <a class="btn light" href="${closePath}" data-link>Fechar</a>
         </div>
       </div>
     </div>
@@ -113,7 +119,7 @@ function renderRelatorioModal(p, open){
         if(!modal) return;
 
         function close(){
-          window.history.pushState({}, "", "/${escapeHtml(p.slug)}/mapa");
+          window.history.pushState({}, "", "${closePath}");
           window.dispatchEvent(new PopStateEvent("popstate"));
         }
 

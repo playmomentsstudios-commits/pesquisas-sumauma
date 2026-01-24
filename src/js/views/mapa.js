@@ -1,4 +1,5 @@
 import { escapeHtml } from "../utils.js";
+import { withBase } from "../basepath.js";
 
 export function renderMapa(p){
   // placeholder: depois conecta Leaflet + CSV + filtros etc.
@@ -7,8 +8,8 @@ export function renderMapa(p){
       <h1>Mapa</h1>
       <p><strong>${escapeHtml(p.titulo)}</strong> — Ano base: ${escapeHtml(p.anoBase || "")}</p>
       <div style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap">
-        <a class="btn linklike" href="/${escapeHtml(p.slug)}" data-link>Voltar</a>
-        <a class="btn" href="/${escapeHtml(p.slug)}/relatorio" data-link>Relatório</a>
+        <a class="btn linklike" href="${withBase(`/${escapeHtml(p.slug)}`)}" data-link>Voltar</a>
+        <a class="btn" href="${withBase(`/${escapeHtml(p.slug)}/relatorio`)}" data-link>Relatório</a>
       </div>
     </section>
 

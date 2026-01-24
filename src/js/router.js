@@ -1,4 +1,5 @@
 import { fetchPesquisasPublic, wireDropdown, spaLinkHandler, getSpaRedirect } from "./utils.js";
+import { getBasePath, withBase } from "./basepath.js";
 import { renderHome } from "./views/home.js";
 import { renderMapaPesquisa } from "./views/mapa-pesquisa.js";
 import { renderResumoPesquisa } from "./views/resumo-pesquisa.js";
@@ -6,6 +7,15 @@ import { renderFichaTecnica } from "./views/ficha-tecnica.js";
 
 export async function initRouter(){
   const app = document.getElementById("app");
+  function getCleanPathname(){
+    const base = getBasePath();
+    let p = location.pathname || "/";
+    if (base && p.startsWith(base)) {
+      p = p.slice(base.length);
+    }
+    if (!p.startsWith("/")) p = "/" + p;
+    return p;
+  }
 
   try {
     const redirect = getSpaRedirect();
@@ -30,14 +40,14 @@ export async function initRouter(){
           <h1 style="margin:0 0 10px;color:#0f3d2e;">Página não encontrada</h1>
           <p style="margin:0;color:#555;line-height:1.7;">Esse endereço não corresponde a uma pesquisa cadastrada.</p>
           <div style="margin-top:14px">
-            <a class="btn primary" href="/" data-link>Voltar</a>
+            <a class="btn primary" href="${withBase("/")}" data-link>Voltar</a>
           </div>
         </div>
       `;
     }
 
     function route(){
-      const path = location.pathname.replace(/\/+$/,"") || "/";
+      const path = getCleanPathname().replace(/\/+$/,"") || "/";
 
       if (path === "/"){
         app.innerHTML = renderHome(pesquisas);

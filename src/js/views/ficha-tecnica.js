@@ -1,10 +1,11 @@
 import { escapeHtml } from "../utils.js";
+import { withBase } from "../basepath.js";
 
 function tabs(slug, active){
   const s = escapeHtml(slug);
   const tab = (sub, label) => {
     const isActive = active === sub;
-    return `<a class="tab ${isActive ? "tab-active" : "tab-idle"}" href="/${s}/${sub}" data-link>${label}</a>`;
+    return `<a class="tab ${isActive ? "tab-active" : "tab-idle"}" href="${withBase(`/${s}/${sub}`)}" data-link>${label}</a>`;
   };
   return `
     <div class="subbar">
@@ -24,7 +25,7 @@ export function renderFichaTecnica(p){
   const financiador = ft.financiador || {};
   const equipe = Array.isArray(ft.equipe) ? ft.equipe : [];
 
-  const realizacaoLogo = realizacao.logo || "./public/assets/logos/sumauma-logo.png";
+  const realizacaoLogo = realizacao.logo || withBase("/public/assets/logos/sumauma-logo.png");
   const realizacaoNome = realizacao.nome || "Realização";
 
   const financiadorLogo = financiador.logo || "";
@@ -59,7 +60,7 @@ export function renderFichaTecnica(p){
           equipe.length
             ? equipe.map(person => `
               <div class="ft-person-card">
-                <img src="${escapeHtml(person.foto || "./public/assets/img/equipe/placeholder.jpg")}" alt="${escapeHtml(person.nome || "")}">
+                <img src="${escapeHtml(person.foto || withBase("/public/assets/img/equipe/placeholder.jpg"))}" alt="${escapeHtml(person.nome || "")}">
                 <h3>${escapeHtml(person.nome || "")}</h3>
                 <p>${escapeHtml(person.funcao || "")}</p>
               </div>
