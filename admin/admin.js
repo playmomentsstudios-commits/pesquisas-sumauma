@@ -1,5 +1,3 @@
-import { initSupabase } from "../src/js/supabase-client.js";
-
 const state = {
   supabase: null,
   session: null,
@@ -36,15 +34,24 @@ const els = {
   importCsv: document.getElementById("import-csv")
 };
 
+const diag = document.createElement("div");
+diag.style.marginTop = "10px";
+diag.style.fontSize = "12px";
+diag.style.color = "#95a4c4";
+diag.id = "sbDiag";
+els.loginPanel?.appendChild(diag);
+
 init();
 
 async function init(){
-  state.supabase = await initSupabase();
-  if (!state.supabase) {
-    els.loginError.textContent = "Supabase não configurado. Crie o arquivo src/js/supabase-config.js.";
+  state.supabase = await getSupabaseClient();
+  if (!state.supabase || !window.__SUPABASE_CONFIG_OK__) {
+    els.loginError.textContent = "Supabase não configurado. Crie o arquivo js/supabase-config.js.";
+    setDiag("Supabase não configurado: confira /js/supabase-config.js e caminhos no /admin/index.html");
     els.loginForm.querySelector("button").disabled = true;
     return;
   }
+  setDiag(`Supabase Client OK: ${window.SUPABASE_URL || "configurado"}`);
 
   const { data } = await state.supabase.auth.getSession();
   setSession(data?.session ?? null);
@@ -67,6 +74,28 @@ async function init(){
   els.tabs.forEach((tab) => {
     tab.addEventListener("click", () => setTab(tab.dataset.tab));
   });
+}
+
+function setDiag(msg){
+  const el = document.getElementById("sbDiag");
+  if (el) el.textContent = msg;
+}
+
+async function getSupabaseClient(){
+  const loader = window.__SUPABASE_CONFIG_LOADED__;
+  if (loader && typeof loader.then === "function") {
+    try {
+      await loader;
+    } catch (error) {
+      console.warn("[Supabase] Falha ao carregar supabase-config.js", error);
+    }
+  }
+
+  if (!window.supabaseClient) {
+    console.warn("[Supabase] Client indisponível.");
+  }
+
+  return window.supabaseClient || null;
 }
 
 function createEmptyPesquisa(){
@@ -101,14 +130,25 @@ function setSession(session){
 async function handleLogin(e){
   e.preventDefault();
   els.loginError.textContent = "";
+  if (!state.supabase || !window.__SUPABASE_CONFIG_OK__) {
+    setDiag("Supabase não configurado: confira /js/supabase-config.js e caminhos no /admin/index.html");
+    return;
+  }
   const formData = new FormData(els.loginForm);
   const email = formData.get("email");
   const password = formData.get("password");
 
   const { error } = await state.supabase.auth.signInWithPassword({ email, password });
   if (error) {
-    els.loginError.textContent = error.message;
+    console.error("[Login] erro:", error);
+    const status = error.status ? ` (status ${error.status})` : "";
+    els.loginError.textContent = `${error.message}${status}`;
+    setDiag(`Falha login: ${error.message}`);
+    return;
   }
+  setDiag("Login OK: sessão ativa.");
+  const sess = await state.supabase.auth.getSession();
+  console.log("[Session]", sess);
 }
 
 async function handleLogout(){

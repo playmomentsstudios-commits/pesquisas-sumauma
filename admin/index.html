@@ -246,6 +246,45 @@
       </main>
     </div>
 
+    <script>
+      (function () {
+        const paths = [
+          "../js/supabase-config.js",
+          "/js/supabase-config.js",
+          "../src/js/supabase-config.js"
+        ];
+        window.__SUPABASE_CONFIG_PATHS__ = paths;
+
+        function loadScript(src) {
+          return new Promise((resolve, reject) => {
+            const script = document.createElement("script");
+            script.src = src;
+            script.onload = () => resolve(src);
+            script.onerror = () => reject(new Error(`Falha ao carregar ${src}`));
+            document.head.appendChild(script);
+          });
+        }
+
+        let chain = Promise.reject();
+        paths.forEach((src) => {
+          chain = chain.catch(() => loadScript(src));
+        });
+
+        window.__SUPABASE_CONFIG_LOADED__ = chain
+          .then((src) => {
+            if (src) {
+              console.log("[Supabase] Config carregada:", src);
+            }
+            return src;
+          })
+          .catch((error) => {
+            console.warn("[Supabase] Nenhum supabase-config.js encontrado.", error);
+            return null;
+          });
+      })();
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/supabase-client.js"></script>
     <script type="module" src="./admin.js"></script>
   </body>
 </html>
