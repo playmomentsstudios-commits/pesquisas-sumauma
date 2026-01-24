@@ -7,6 +7,9 @@ const state = {
   editingPonto: null
 };
 
+let currentResearchId = null;
+let researchCache = [];
+
 const els = {
   loginPanel: document.getElementById("login-panel"),
   loginForm: document.getElementById("login-form"),
@@ -14,7 +17,8 @@ const els = {
   adminPanel: document.getElementById("admin-panel"),
   user: document.getElementById("admin-user"),
   logout: document.getElementById("btn-logout"),
-  list: document.getElementById("pesquisas-list"),
+  list: document.getElementById("researchList"),
+  listMsg: document.getElementById("researchListMsg"),
   newBtn: document.getElementById("btn-new"),
   form: document.getElementById("pesquisa-form"),
   formTitle: document.getElementById("form-title"),
@@ -33,6 +37,26 @@ const els = {
   pontoDelete: document.getElementById("ponto-delete"),
   importCsv: document.getElementById("import-csv")
 };
+
+function $(id){
+  return document.getElementById(id);
+}
+
+function setSaveMsg(text, ok = false){
+  const el = $("saveMsg");
+  if (!el) return;
+  el.textContent = text || "";
+  el.style.color = ok ? "#198754" : "#6b7a75";
+}
+
+function normalizeSlug(value){
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/[^\w-]+/g, "")
+    .replace(/-+/g, "-");
+}
 
 const diag = document.createElement("div");
 diag.style.marginTop = "10px";
@@ -62,7 +86,7 @@ async function init(){
 
   els.loginForm.addEventListener("submit", handleLogin);
   els.logout.addEventListener("click", handleLogout);
-  els.newBtn.addEventListener("click", () => openForm(createEmptyPesquisa()));
+  els.newBtn.addEventListener("click", () => clearForm());
   els.form.addEventListener("submit", handleSavePesquisa);
   els.deleteBtn.addEventListener("click", handleDeletePesquisa);
   els.addTopico.addEventListener("click", () => addTopicoItem());
@@ -102,11 +126,15 @@ function createEmptyPesquisa(){
   return {
     slug: "",
     titulo: "",
-    anoBase: "",
-    descricaoCurta: "",
+    ano_base: "",
+    descricao_curta: "",
     sinopse: "",
     status: true,
     ordem: 0,
+    csv_fallback: "",
+    capa_url: "",
+    relatorio_pdf_url: "",
+    leitura_url: "",
     config_json: {
       mapa: {},
       pesquisaResumo: {},
@@ -123,7 +151,7 @@ function setSession(session){
   els.logout.classList.toggle("hidden", !loggedIn);
   els.user.textContent = session?.user?.email || "";
   if (loggedIn) {
-    loadPesquisas();
+    refreshListAndSelect(null);
   }
 }
 
@@ -155,49 +183,103 @@ async function handleLogout(){
   await state.supabase.auth.signOut();
 }
 
-async function loadPesquisas(){
+async function listResearches(){
   const { data, error } = await state.supabase
     .from("pesquisas")
-    .select("*")
-    .order("ordem", { ascending: true });
+    .select("id,slug,titulo,ano_base,ordem,descricao_curta,sinopse,status,csv_fallback,capa_url,relatorio_pdf_url,leitura_url,config_json,updated_at")
+    .order("ordem", { ascending: true })
+    .order("updated_at", { ascending: false });
 
   if (error) {
-    console.error(error);
+    throw error;
+  }
+
+  researchCache = data || [];
+  return researchCache;
+}
+
+function renderResearchList(rows){
+  if (!els.list) return;
+  if (!rows.length) {
+    els.list.innerHTML = "";
+    if (els.listMsg) els.listMsg.textContent = "Nenhuma pesquisa cadastrada ainda.";
     return;
   }
 
-  state.pesquisas = data || [];
-  renderPesquisasList();
-  if (state.pesquisas.length === 0) {
-    openForm(createEmptyPesquisa());
-  }
-}
-
-function renderPesquisasList(){
-  els.list.innerHTML = "";
-  state.pesquisas.forEach((pesquisa) => {
-    const item = document.createElement("div");
-    item.className = "pesquisa-item" + (state.current?.id === pesquisa.id ? " active" : "");
-    item.innerHTML = `
-      <strong>${escapeHtml(pesquisa.titulo || "(Sem título)")}</strong>
-      <div class="muted">/${escapeHtml(pesquisa.slug || "")}</div>
+  if (els.listMsg) els.listMsg.textContent = "";
+  els.list.innerHTML = rows.map((pesquisa) => {
+    const badgeClass = pesquisa.status ? "" : "off";
+    const badgeText = pesquisa.status ? "Publicado" : "Rascunho";
+    const activeClass = currentResearchId === pesquisa.id ? " active" : "";
+    return `
+      <div class="r-item${activeClass}" data-id="${pesquisa.id}">
+        <div class="r-top">
+          <div>
+            <div class="r-title">${escapeHtml(pesquisa.titulo || "(Sem título)")}</div>
+            <div class="r-slug">/${escapeHtml(pesquisa.slug || "")}</div>
+          </div>
+          <div class="r-badge ${badgeClass}">${badgeText}</div>
+        </div>
+        <div class="r-actions">
+          <button class="btn-mini primary" data-act="edit" data-id="${pesquisa.id}">Editar</button>
+          <button class="btn-mini" data-act="dup" data-id="${pesquisa.id}">Duplicar</button>
+          <button class="btn-mini danger" data-act="del" data-id="${pesquisa.id}">Excluir</button>
+        </div>
+      </div>
     `;
-    item.addEventListener("click", () => openForm(pesquisa));
-    els.list.appendChild(item);
-  });
+  }).join("");
 }
 
-function openForm(pesquisa){
-  state.current = pesquisa;
-  state.editingPonto = null;
+function showForm(){
   els.form.classList.remove("hidden");
   els.emptyState.classList.add("hidden");
-  els.formTitle.textContent = pesquisa.id ? "Editar pesquisa" : "Nova pesquisa";
-  els.deleteBtn.classList.toggle("hidden", !pesquisa.id);
+}
 
+function clearForm(){
+  const empty = createEmptyPesquisa();
+  state.current = null;
+  currentResearchId = null;
+  state.editingPonto = null;
+  showForm();
+  els.formTitle.textContent = "Nova pesquisa";
+  els.deleteBtn.classList.add("hidden");
+  fillForm(empty);
+  setTab("conteudo");
+  loadPontos();
+  setSaveMsg("");
+}
+
+function loadResearchToForm(pesquisa){
+  state.current = pesquisa;
+  currentResearchId = pesquisa?.id || null;
+  state.editingPonto = null;
+  showForm();
+  els.formTitle.textContent = pesquisa?.id ? "Editar pesquisa" : "Nova pesquisa";
+  els.deleteBtn.classList.toggle("hidden", !pesquisa?.id);
   fillForm(pesquisa);
   setTab("conteudo");
   loadPontos();
+  setSaveMsg(pesquisa?.id ? `Editando: ${pesquisa.slug || ""}` : "", true);
+}
+
+async function refreshListAndSelect(selectId = null){
+  try {
+    const rows = await listResearches();
+    renderResearchList(rows);
+    if (selectId) {
+      const selected = rows.find((row) => row.id === selectId);
+      if (selected) loadResearchToForm(selected);
+    } else if (currentResearchId) {
+      const selected = rows.find((row) => row.id === currentResearchId);
+      if (selected) loadResearchToForm(selected);
+    } else {
+      els.form.classList.add("hidden");
+      els.emptyState.classList.remove("hidden");
+    }
+  } catch (error) {
+    console.error(error);
+    setSaveMsg(`Erro ao carregar pesquisas: ${error.message || String(error)}`);
+  }
 }
 
 function fillForm(pesquisa){
@@ -208,17 +290,17 @@ function fillForm(pesquisa){
 
   setValue("slug", pesquisa.slug || "");
   setValue("titulo", pesquisa.titulo || "");
-  setValue("anoBase", pesquisa.anoBase || "");
+  setValue("anoBase", pesquisa.ano_base || "");
   setValue("ordem", pesquisa.ordem ?? 0);
-  setValue("descricaoCurta", pesquisa.descricaoCurta || "");
+  setValue("descricaoCurta", pesquisa.descricao_curta || "");
   setValue("sinopse", pesquisa.sinopse || "");
   setValue("status", String(pesquisa.status ?? true));
-  setValue("csvUrl", mapa.csvUrl || "");
+  setValue("csvUrl", pesquisa.csv_fallback || mapa.csvUrl || "");
   setValue("capaUrl", pesquisa.capa_url || cfg.capa || "");
   setValue("relatorioUrl", pesquisa.relatorio_pdf_url || cfg.relatorioPdf || "");
-  setValue("relatorioLeituraUrl", pesquisa.relatorio_leitura_url || cfg.relatorioLeituraUrl || "");
+  setValue("relatorioLeituraUrl", pesquisa.leitura_url || cfg.relatorioLeituraUrl || "");
   setValue("relatorioUrlConfirm", pesquisa.relatorio_pdf_url || cfg.relatorioPdf || "");
-  setValue("relatorioLeituraUrlConfirm", pesquisa.relatorio_leitura_url || cfg.relatorioLeituraUrl || "");
+  setValue("relatorioLeituraUrlConfirm", pesquisa.leitura_url || cfg.relatorioLeituraUrl || "");
 
   els.capaPreview.src = pesquisa.capa_url || cfg.capa || "";
   els.capaPreview.classList.toggle("hidden", !els.capaPreview.src);
@@ -288,91 +370,172 @@ async function handleSavePesquisa(e){
   e.preventDefault();
   if (!state.supabase) return;
 
-  const formData = new FormData(els.form);
-  const slug = String(formData.get("slug") || "").trim();
-  if (!slug) return;
+  try {
+    setSaveMsg("Salvando...");
+    const formData = new FormData(els.form);
+    const slug = normalizeSlug(formData.get("slug"));
+    if (!slug) throw new Error("Slug é obrigatório.");
 
-  const capaUrl = await maybeUploadFile(formData.get("capaFile"), `pesquisas/${slug}/capa`)
-    || String(formData.get("capaUrl") || "").trim();
+    const titulo = String(formData.get("titulo") || "").trim();
+    if (!titulo) throw new Error("Título é obrigatório.");
 
-  const relatorioUrl = await maybeUploadFile(formData.get("relatorioFile"), `pesquisas/${slug}/relatorio`)
-    || String(formData.get("relatorioUrl") || "").trim();
+    setValue("slug", slug);
 
-  const realizacaoLogo = await maybeUploadFile(formData.get("realizacaoLogoFile"), `pesquisas/${slug}/logos/realizacao`)
-    || String(formData.get("realizacaoLogoUrl") || "").trim();
+    const capaUrl = await maybeUploadFile(formData.get("capaFile"), `pesquisas/${slug}/capa`)
+      || String(formData.get("capaUrl") || "").trim();
 
-  const financiadorLogo = await maybeUploadFile(formData.get("financiadorLogoFile"), `pesquisas/${slug}/logos/financiador`)
-    || String(formData.get("financiadorLogoUrl") || "").trim();
+    const relatorioUrl = await maybeUploadFile(formData.get("relatorioFile"), `pesquisas/${slug}/relatorio`)
+      || String(formData.get("relatorioUrl") || "").trim();
 
-  const topicos = await collectTopicos(slug);
-  const equipe = await collectEquipe(slug);
+    const realizacaoLogo = await maybeUploadFile(formData.get("realizacaoLogoFile"), `pesquisas/${slug}/logos/realizacao`)
+      || String(formData.get("realizacaoLogoUrl") || "").trim();
 
-  const configJson = {
-    mapa: {
-      csvUrl: String(formData.get("csvUrl") || "").trim()
-    },
-    pesquisaResumo: {
-      introducao: {
-        titulo: String(formData.get("introTitulo") || "").trim(),
-        texto: String(formData.get("introTexto") || "").trim()
+    const financiadorLogo = await maybeUploadFile(formData.get("financiadorLogoFile"), `pesquisas/${slug}/logos/financiador`)
+      || String(formData.get("financiadorLogoUrl") || "").trim();
+
+    const topicos = await collectTopicos(slug);
+    const equipe = await collectEquipe(slug);
+    const csvFallback = String(formData.get("csvUrl") || "").trim();
+    const leituraUrl = String(formData.get("relatorioLeituraUrl") || "").trim();
+
+    setValue("capaUrl", capaUrl);
+    setValue("relatorioUrl", relatorioUrl);
+    setValue("relatorioUrlConfirm", relatorioUrl);
+    setValue("relatorioLeituraUrlConfirm", leituraUrl);
+
+    const configJson = {
+      mapa: {
+        csvUrl: csvFallback
       },
-      citacao: {
-        texto: String(formData.get("citacaoTexto") || "").trim(),
-        autor: String(formData.get("citacaoAutor") || "").trim()
+      pesquisaResumo: {
+        introducao: {
+          titulo: String(formData.get("introTitulo") || "").trim(),
+          texto: String(formData.get("introTexto") || "").trim()
+        },
+        citacao: {
+          texto: String(formData.get("citacaoTexto") || "").trim(),
+          autor: String(formData.get("citacaoAutor") || "").trim()
+        },
+        topicos
       },
-      topicos
-    },
-    fichaTecnica: {
-      realizacao: {
-        nome: String(formData.get("realizacaoNome") || "").trim(),
-        logo: realizacaoLogo
-      },
-      financiador: {
-        nome: String(formData.get("financiadorNome") || "").trim(),
-        logo: financiadorLogo
-      },
-      equipe
+      fichaTecnica: {
+        realizacao: {
+          nome: String(formData.get("realizacaoNome") || "").trim(),
+          logo: realizacaoLogo
+        },
+        financiador: {
+          nome: String(formData.get("financiadorNome") || "").trim(),
+          logo: financiadorLogo
+        },
+        equipe
+      }
+    };
+
+    const payload = {
+      slug,
+      titulo,
+      ano_base: String(formData.get("anoBase") || "").trim() || null,
+      ordem: Number(formData.get("ordem") || 0),
+      descricao_curta: String(formData.get("descricaoCurta") || "").trim() || null,
+      sinopse: String(formData.get("sinopse") || "").trim() || null,
+      status: String(formData.get("status") || "true") === "true",
+      csv_fallback: csvFallback || null,
+      capa_url: capaUrl || null,
+      relatorio_pdf_url: relatorioUrl || null,
+      leitura_url: leituraUrl || null,
+      config_json: configJson
+    };
+
+    if (!currentResearchId) {
+      const newId = await createResearch(payload);
+      await refreshListAndSelect(newId);
+      setSaveMsg("Pesquisa criada ✅", true);
+    } else {
+      await updateResearch(currentResearchId, payload);
+      await refreshListAndSelect(currentResearchId);
+      setSaveMsg("Pesquisa atualizada ✅", true);
     }
-  };
-
-  const payload = {
-    id: state.current?.id,
-    slug,
-    titulo: String(formData.get("titulo") || "").trim(),
-    anoBase: String(formData.get("anoBase") || "").trim(),
-    ordem: Number(formData.get("ordem") || 0),
-    descricaoCurta: String(formData.get("descricaoCurta") || "").trim(),
-    sinopse: String(formData.get("sinopse") || "").trim(),
-    status: String(formData.get("status") || "true") === "true",
-    capa_url: capaUrl,
-    relatorio_pdf_url: relatorioUrl,
-    relatorio_leitura_url: String(formData.get("relatorioLeituraUrl") || "").trim(),
-    config_json: configJson
-  };
-
-  const { data, error } = await state.supabase.from("pesquisas").upsert(payload).select("*").single();
-  if (error) {
+  } catch (error) {
     console.error(error);
-    return;
+    setSaveMsg(`Erro ao salvar: ${error.message || String(error)}`);
   }
-
-  state.current = data;
-  await loadPesquisas();
-  openForm(data);
 }
 
 async function handleDeletePesquisa(){
-  if (!state.current?.id) return;
+  if (!currentResearchId) return;
   if (!confirm("Excluir esta pesquisa?")) return;
-  const { error } = await state.supabase.from("pesquisas").delete().eq("id", state.current.id);
-  if (error) {
+  try {
+    setSaveMsg("Excluindo...");
+    await deleteResearch(currentResearchId);
+    currentResearchId = null;
+    state.current = null;
+    await refreshListAndSelect(null);
+    setSaveMsg("Excluída ✅", true);
+  } catch (error) {
     console.error(error);
-    return;
+    setSaveMsg(`Erro ao excluir: ${error.message || String(error)}`);
   }
-  state.current = null;
-  await loadPesquisas();
-  els.form.classList.add("hidden");
-  els.emptyState.classList.remove("hidden");
+}
+
+async function createResearch(payload){
+  const { data, error } = await state.supabase
+    .from("pesquisas")
+    .insert(payload)
+    .select("id")
+    .single();
+  if (error) throw error;
+  return data.id;
+}
+
+async function updateResearch(id, payload){
+  const { error } = await state.supabase
+    .from("pesquisas")
+    .update(payload)
+    .eq("id", id);
+  if (error) throw error;
+}
+
+async function deleteResearch(id){
+  const { error } = await state.supabase
+    .from("pesquisas")
+    .delete()
+    .eq("id", id);
+  if (error) throw error;
+}
+
+async function duplicateResearch(id){
+  const src = researchCache.find((row) => row.id === id);
+  if (!src) throw new Error("Pesquisa não encontrada no cache.");
+
+  const newSlugBase = `${src.slug || "pesquisa"}-copia`;
+  const newSlug = normalizeSlug(prompt("Novo slug da cópia:", newSlugBase) || "");
+  if (!newSlug) throw new Error("Slug da cópia é obrigatório.");
+  if (researchCache.some((row) => row.slug === newSlug)) {
+    throw new Error("Slug já existe.");
+  }
+
+  const payload = {
+    slug: newSlug,
+    titulo: `${src.titulo || ""} (Cópia)`.trim(),
+    ano_base: src.ano_base || null,
+    ordem: (src.ordem ?? 0) + 1,
+    descricao_curta: src.descricao_curta || null,
+    sinopse: src.sinopse || null,
+    status: false,
+    csv_fallback: src.csv_fallback || null,
+    capa_url: src.capa_url || null,
+    relatorio_pdf_url: src.relatorio_pdf_url || null,
+    leitura_url: src.leitura_url || null,
+    config_json: src.config_json || null
+  };
+
+  const { data, error } = await state.supabase
+    .from("pesquisas")
+    .insert(payload)
+    .select("id")
+    .single();
+  if (error) throw error;
+  return data.id;
 }
 
 function setTab(tab){
@@ -654,6 +817,44 @@ function escapeHtml(str){
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
 }
+
+document.addEventListener("click", async (event) => {
+  const btn = event.target?.closest("[data-act]");
+  if (!btn) return;
+  const action = btn.getAttribute("data-act");
+  const id = btn.getAttribute("data-id");
+  if (!action || !id) return;
+
+  try {
+    if (action === "edit") {
+      const selected = researchCache.find((row) => row.id === id);
+      if (selected) loadResearchToForm(selected);
+    }
+
+    if (action === "dup") {
+      if (!confirm("Duplicar esta pesquisa?")) return;
+      setSaveMsg("Duplicando...");
+      const newId = await duplicateResearch(id);
+      await refreshListAndSelect(newId);
+      setSaveMsg("Duplicada ✅", true);
+    }
+
+    if (action === "del") {
+      if (!confirm("Excluir esta pesquisa? Isso não pode ser desfeito.")) return;
+      setSaveMsg("Excluindo...");
+      await deleteResearch(id);
+      if (currentResearchId === id) {
+        currentResearchId = null;
+        state.current = null;
+      }
+      await refreshListAndSelect(null);
+      setSaveMsg("Excluída ✅", true);
+    }
+  } catch (error) {
+    console.error(error);
+    setSaveMsg(`Erro: ${error.message || String(error)}`);
+  }
+});
 
 window.addEventListener("input", (event) => {
   if (event.target?.name === "capaUrl") {
