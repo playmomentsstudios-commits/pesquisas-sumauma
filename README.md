@@ -17,10 +17,16 @@ Se você tiver qualquer servidor simples (ex.: VSCode Live Server), abra o `inde
 > O site público continua funcionando com `public/data/pesquisas.json` e CSVs se o Supabase não estiver configurado.
 
 ## Deploy
-### Vercel/Netlify (recomendado)
-Configure rewrite para `index.html` (SPA).
-- Netlify: `_redirects` com `/* /index.html 200`
-- Vercel: `vercel.json` com rewrite para `/`
+### Netlify (recomendado)
+1. **New site from Git** e selecione este repositório.
+2. Use as configurações do `netlify.toml` (publish `.` e comando vazio).
+3. Faça o deploy e teste as rotas:
+   - `/`
+   - `/:slug` (ex.: `/corpos-territorios`)
+   - `/:slug/mapa`
+   - `/admin/`
+
+> O arquivo `_redirects` garante o fallback de SPA para `index.html`.
 
 ### GitHub Pages
 - Ative Pages para a branch `main` / root.
