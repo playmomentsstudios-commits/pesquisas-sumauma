@@ -1,4 +1,4 @@
-import { fetchPesquisasPublic, wireDropdown, spaLinkHandler, getSpaRedirect } from "./utils.js";
+import { loadPesquisas, getPesquisaBySlug, wireDropdown, spaLinkHandler, getSpaRedirect } from "./utils.js";
 import { stripBase, withBase } from "./basepath.js";
 import { renderHome } from "./views/home.js";
 import { renderMapaPesquisa } from "./views/mapa-pesquisa.js";
@@ -13,7 +13,7 @@ export async function initRouter(){
       history.replaceState({}, "", redirect);
     }
 
-    const pesquisas = await fetchPesquisasPublic();
+    const pesquisas = await loadPesquisas(false);
     wireDropdown(pesquisas);
 
     document.addEventListener("click", (e) => spaLinkHandler(e, navigate));
@@ -36,12 +36,12 @@ export async function initRouter(){
       `;
     }
 
-    function route(){
+    async function route(){
       const raw = location.pathname.replace(/\/+$/,"") || "/";
       const path = stripBase(raw).replace(/\/+$/,"") || "/";
 
       if (path === "/"){
-        app.innerHTML = renderHome(pesquisas);
+        app.innerHTML = await renderHome();
         return;
       }
 
@@ -49,7 +49,7 @@ export async function initRouter(){
       const slug = parts[0];
       const sub = parts[1] || "";
 
-      const item = pesquisas.find(p => p.slug === slug);
+      const item = await getPesquisaBySlug(slug);
       if (!item){
         notFound();
         return;
@@ -86,7 +86,7 @@ export async function initRouter(){
           Não foi possível carregar os dados das pesquisas.
         </p>
         <p style="margin-top:10px;color:#666;font-size:13px;line-height:1.6;">
-          Verifique se existe o arquivo <b>public/data/pesquisas.json</b> e se o caminho está correto.
+          Verifique se existe o arquivo <b>data/pesquisas.json</b> (ou <b>public/data/pesquisas.json</b>) e se o caminho está correto.
         </p>
       </div>
     `;
