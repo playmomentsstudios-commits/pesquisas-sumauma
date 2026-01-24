@@ -15,9 +15,9 @@ export function renderHome(pesquisas){
             <h3 class="card-title">${escapeHtml(p.titulo)}</h3>
 
             <div class="card-actions">
-              <a class="btn primary" href="${withBase(`/${escapeHtml(p.slug)}`)}" data-link>Ver</a>
-              <a class="btn light" href="${withBase(`/${escapeHtml(p.slug)}/relatorio`)}" data-link>Relatório</a>
-              <a class="btn light" href="${withBase(`/${escapeHtml(p.slug)}/mapa`)}" data-link>Mapa</a>
+              <a class="btn primary" href="${escapeHtml(withBase("/" + p.slug))}" data-link>Ver</a>
+              <a class="btn light" href="${escapeHtml(withBase("/" + p.slug + "/relatorio"))}" data-link>Relatório</a>
+              <a class="btn light" href="${escapeHtml(withBase("/" + p.slug + "/mapa"))}" data-link>Mapa</a>
             </div>
           </div>
         </article>
