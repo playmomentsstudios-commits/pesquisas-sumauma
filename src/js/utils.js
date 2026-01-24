@@ -1,4 +1,4 @@
-import { getBasePath, withBase } from "./basepath.js";
+import { withBase } from "./basepath.js";
 
 export function setYear(){
   const el = document.getElementById("year");
@@ -6,8 +6,6 @@ export function setYear(){
 }
 
 export async function fetchPesquisasPublic(){
-  console.log("[HOME] basePath=", getBasePath());
-  console.log("[HOME] location.pathname=", location.pathname);
   const supabase = window?.supabaseClient || null;
   if (supabase) {
     try {
@@ -130,12 +128,15 @@ export function wireDropdown(pesquisas){
   const panel = dd?.querySelector(".dropdown-panel");
   if (!dd || !btn || !panel) return;
 
-  panel.innerHTML = pesquisas.map(p => `
-    <a class="dropdown-item" href="${withBase(`/${escapeHtml(p.slug)}`)}" data-link role="menuitem">
-      <strong>${escapeHtml(p.titulo)}</strong>
-      <small>Ano base: ${escapeHtml(p.anoBase || "")}</small>
-    </a>
-  `).join("");
+  panel.innerHTML = pesquisas.map(p => {
+    const slug = escapeHtml(p.slug);
+    return `
+      <a class="dropdown-item" href="${withBase("/" + slug)}" data-link role="menuitem">
+        <strong>${escapeHtml(p.titulo)}</strong>
+        <small>Ano base: ${escapeHtml(p.anoBase || "")}</small>
+      </a>
+    `;
+  }).join("");
 
   dd.classList.remove("open");
   btn.setAttribute("aria-expanded","false");

@@ -1,5 +1,5 @@
 import { fetchPesquisasPublic, wireDropdown, spaLinkHandler, getSpaRedirect } from "./utils.js";
-import { getBasePath, withBase } from "./basepath.js";
+import { stripBase, withBase } from "./basepath.js";
 import { renderHome } from "./views/home.js";
 import { renderMapaPesquisa } from "./views/mapa-pesquisa.js";
 import { renderResumoPesquisa } from "./views/resumo-pesquisa.js";
@@ -7,16 +7,6 @@ import { renderFichaTecnica } from "./views/ficha-tecnica.js";
 
 export async function initRouter(){
   const app = document.getElementById("app");
-  function getCleanPathname(){
-    const base = getBasePath();
-    let p = location.pathname || "/";
-    if (base && p.startsWith(base)) {
-      p = p.slice(base.length);
-    }
-    if (!p.startsWith("/")) p = "/" + p;
-    return p;
-  }
-
   try {
     const redirect = getSpaRedirect();
     if (redirect && redirect !== location.pathname) {
@@ -47,7 +37,8 @@ export async function initRouter(){
     }
 
     function route(){
-      const path = getCleanPathname().replace(/\/+$/,"") || "/";
+      const raw = location.pathname.replace(/\/+$/,"") || "/";
+      const path = stripBase(raw).replace(/\/+$/,"") || "/";
 
       if (path === "/"){
         app.innerHTML = renderHome(pesquisas);
