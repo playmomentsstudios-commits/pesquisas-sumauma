@@ -20,6 +20,7 @@ const els = {
   list: document.getElementById("researchList"),
   listMsg: document.getElementById("researchListMsg"),
   newBtn: document.getElementById("btn-new"),
+  seedBtn: document.getElementById("btnSeedTests"),
   form: document.getElementById("pesquisa-form"),
   formTitle: document.getElementById("form-title"),
   deleteBtn: document.getElementById("btn-delete"),
@@ -47,6 +48,27 @@ function setSaveMsg(text, ok = false){
   if (!el) return;
   el.textContent = text || "";
   el.style.color = ok ? "#198754" : "#6b7a75";
+}
+
+function formatSupabaseError(error){
+  if (!error) return "Erro desconhecido.";
+  const parts = [];
+  const message = error.message || String(error);
+  if (message) parts.push(message);
+  if (error.details) parts.push(`Detalhes: ${error.details}`);
+  if (error.hint) parts.push(`Dica: ${error.hint}`);
+  if (error.code) parts.push(`Código: ${error.code}`);
+  if (error.status) parts.push(`Status: ${error.status}`);
+
+  let msg = parts.join(" ");
+  const lower = msg.toLowerCase();
+  if (error.code === "42501" || error.status === 401 || error.status === 403 || lower.includes("permission") || lower.includes("rls")) {
+    msg += " Possível bloqueio de RLS/permissão. Verifique as policies da tabela public.pesquisas.";
+  }
+  if (lower.includes("column") || lower.includes("schema cache") || lower.includes("unknown column")) {
+    msg += " Verifique se as colunas esperadas existem (slug, titulo, ano_base, ordem, status, config_json).";
+  }
+  return msg;
 }
 
 function normalizeSlug(value){
@@ -87,6 +109,7 @@ async function init(){
   els.loginForm.addEventListener("submit", handleLogin);
   els.logout.addEventListener("click", handleLogout);
   els.newBtn.addEventListener("click", () => clearForm());
+  els.seedBtn?.addEventListener("click", handleSeedTests);
   els.form.addEventListener("submit", handleSavePesquisa);
   els.deleteBtn.addEventListener("click", handleDeletePesquisa);
   els.addTopico.addEventListener("click", () => addTopicoItem());
@@ -141,6 +164,92 @@ function createEmptyPesquisa(){
       fichaTecnica: {}
     }
   };
+}
+
+function buildSeedRows(){
+  const resumoBase = (citacaoTexto) => ({
+    introducao: {
+      titulo: "Introdução",
+      texto: "Conteúdo de teste para validar a página da pesquisa."
+    },
+    citacao: {
+      texto: citacaoTexto,
+      autor: "— Teste"
+    },
+    topicos: Array.from({ length: 10 }, (_, i) => ({
+      titulo: `Tópico ${i + 1}`,
+      texto: `Texto do tópico ${i + 1} (teste).`,
+      imagemKey: `pesquisa.img.${i + 1}`
+    }))
+  });
+
+  const fichaBase = (funcao3) => ({
+    realizacao: { nome: "Instituto Sumaúma", logoKey: "ficha.realizacao.logo" },
+    financiador: { nome: "Financiador (Teste)", logoKey: "ficha.financiador.logo" },
+    equipe: [
+      { nome: "Pessoa 1", funcao: "Coordenação", fotoKey: "ficha.equipe.1" },
+      { nome: "Pessoa 2", funcao: "Pesquisa", fotoKey: "ficha.equipe.2" },
+      { nome: "Pessoa 3", funcao: funcao3, fotoKey: "ficha.equipe.3" }
+    ]
+  });
+
+  return [
+    {
+      slug: "seguimento-negro",
+      titulo: "Seguimento Negro",
+      ano_base: "2025",
+      ordem: 1,
+      descricao_curta: "Pesquisa teste sobre articulações e dinâmicas do seguimento negro no território.",
+      sinopse: "Relatório (teste) — seed para validar o portal multi-pesquisas.",
+      status: true,
+      csv_fallback: "/public/data/mapeamento-seguimento-negro.csv",
+      capa_url: "https://placehold.co/1200x400/png?text=Seguimento+Negro+-+Capa",
+      relatorio_pdf_url: "https://example.com/relatorio-seguimento-negro.pdf",
+      leitura_url: null,
+      config_json: {
+        pesquisaResumo: resumoBase("A ancestralidade é caminho e presença."),
+        fichaTecnica: fichaBase("Design")
+      }
+    },
+    {
+      slug: "territorios-quilombolas",
+      titulo: "Territórios Quilombolas",
+      ano_base: "2025",
+      ordem: 2,
+      descricao_curta: "Pesquisa teste sobre territórios quilombolas e conexões culturais e comunicacionais.",
+      sinopse: "Relatório (teste) — seed para validar o portal multi-pesquisas.",
+      status: true,
+      csv_fallback: "/public/data/mapeamento-territorios-quilombolas.csv",
+      capa_url: "https://placehold.co/1200x400/png?text=Territorios+Quilombolas+-+Capa",
+      relatorio_pdf_url: "https://example.com/relatorio-territorios-quilombolas.pdf",
+      leitura_url: null,
+      config_json: {
+        pesquisaResumo: resumoBase("Território é memória viva e futuro em construção."),
+        fichaTecnica: fichaBase("Comunicação")
+      }
+    }
+  ];
+}
+
+async function handleSeedTests(){
+  if (!state.supabase) return;
+  if (!state.session) {
+    setSaveMsg("Faça login para criar pesquisas teste.");
+    return;
+  }
+  try {
+    setSaveMsg("Criando pesquisas teste...");
+    const rows = buildSeedRows();
+    const { error } = await state.supabase
+      .from("pesquisas")
+      .upsert(rows, { onConflict: "slug" });
+    if (error) throw error;
+    await refreshListAndSelect(null);
+    setSaveMsg("Pesquisas teste criadas ✅", true);
+  } catch (error) {
+    console.error(error);
+    setSaveMsg(`Erro seed: ${formatSupabaseError(error)}`);
+  }
 }
 
 function setSession(session){
@@ -278,7 +387,7 @@ async function refreshListAndSelect(selectId = null){
     }
   } catch (error) {
     console.error(error);
-    setSaveMsg(`Erro ao carregar pesquisas: ${error.message || String(error)}`);
+    setSaveMsg(`Erro ao carregar pesquisas: ${formatSupabaseError(error)}`);
   }
 }
 
@@ -457,7 +566,7 @@ async function handleSavePesquisa(e){
     }
   } catch (error) {
     console.error(error);
-    setSaveMsg(`Erro ao salvar: ${error.message || String(error)}`);
+    setSaveMsg(`Erro ao salvar: ${formatSupabaseError(error)}`);
   }
 }
 
@@ -473,7 +582,7 @@ async function handleDeletePesquisa(){
     setSaveMsg("Excluída ✅", true);
   } catch (error) {
     console.error(error);
-    setSaveMsg(`Erro ao excluir: ${error.message || String(error)}`);
+    setSaveMsg(`Erro ao excluir: ${formatSupabaseError(error)}`);
   }
 }
 
@@ -852,7 +961,7 @@ document.addEventListener("click", async (event) => {
     }
   } catch (error) {
     console.error(error);
-    setSaveMsg(`Erro: ${error.message || String(error)}`);
+    setSaveMsg(`Erro: ${formatSupabaseError(error)}`);
   }
 });
 
