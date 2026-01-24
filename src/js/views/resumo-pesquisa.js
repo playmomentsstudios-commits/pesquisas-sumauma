@@ -1,10 +1,11 @@
 import { escapeHtml } from "../utils.js";
+import { withBase } from "../basepath.js";
 
 function tabs(slug, active){
   const s = escapeHtml(slug);
   const tab = (sub, label) => {
     const isActive = active === sub;
-    return `<a class="tab ${isActive ? "tab-active" : "tab-idle"}" href="/${s}/${sub}" data-link>${label}</a>`;
+    return `<a class="tab ${isActive ? "tab-active" : "tab-idle"}" href="${withBase(`/${s}/${sub}`)}" data-link>${label}</a>`;
   };
   return `
     <div class="subbar">

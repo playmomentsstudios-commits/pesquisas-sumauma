@@ -1,9 +1,13 @@
+import { getBasePath, withBase } from "./basepath.js";
+
 export function setYear(){
   const el = document.getElementById("year");
   if (el) el.textContent = new Date().getFullYear();
 }
 
 export async function fetchPesquisasPublic(){
+  console.log("[HOME] basePath=", getBasePath());
+  console.log("[HOME] location.pathname=", location.pathname);
   const supabase = window?.supabaseClient || null;
   if (supabase) {
     try {
@@ -22,21 +26,22 @@ export async function fetchPesquisasPublic(){
     console.warn("[HOME] Fallback JSON local (motivo: Supabase client ausente)");
   }
 
-  const res = await fetch("/data/pesquisas.json", { cache: "no-store" })
-    .catch(() => fetch("/public/data/pesquisas.json", { cache: "no-store" }))
-    .catch(() => fetch("/data/pesquisas.json"));
+  const res = await fetch(withBase("/data/pesquisas.json"), { cache: "no-store" })
+    .catch(() => fetch(withBase("/public/data/pesquisas.json"), { cache: "no-store" }))
+    .catch(() => fetch(withBase("/data/pesquisas.json")));
   if (!res || !res.ok) {
     console.error("[HOME] Nem Supabase nem JSON local disponível");
     return [];
   }
-  return await res.json();
+  const data = await res.json();
+  return Array.isArray(data) ? data.map(normalizePesquisaPaths) : data;
 }
 
 function mapPesquisaFromDb(row){
   const cfg = row?.config_json || {};
   const mapa = {
     ...(cfg.mapa || {}),
-    csvUrl: row.csv_fallback || cfg?.mapa?.csvUrl || ""
+    csvUrl: fixMaybeLocalUrl(row.csv_fallback || cfg?.mapa?.csvUrl || "")
   };
   const fichaTecnica = cfg.fichaTecnica || {};
   const pesquisaResumo = cfg.pesquisaResumo || {};
@@ -51,15 +56,72 @@ function mapPesquisaFromDb(row){
     ordem: row.ordem ?? 0,
     status: !!row.status,
     slug: row.slug,
-    capa: row.capa_url || cfg.capa || "",
+    capa: fixMaybeLocalUrl(row.capa_url || cfg.capa || ""),
     descricaoCurta: row.descricao_curta || "",
     sinopse: row.sinopse || "",
-    relatorioPdf: row.relatorio_pdf_url || cfg.relatorioPdf || "",
-    leituraUrl: row.leitura_url || "",
+    relatorioPdf: fixMaybeLocalUrl(row.relatorio_pdf_url || cfg.relatorioPdf || ""),
+    leituraUrl: fixMaybeLocalUrl(row.leitura_url || ""),
     mapa,
-    fichaTecnica,
-    pesquisaResumo
+    fichaTecnica: normalizeFichaTecnica(fichaTecnica),
+    pesquisaResumo: normalizePesquisaResumo(pesquisaResumo)
   };
+}
+
+function normalizePesquisaPaths(p){
+  if (!p || typeof p !== "object") return p;
+  const mapa = p.mapa || {};
+  return {
+    ...p,
+    capa: fixMaybeLocalUrl(p.capa || ""),
+    relatorioPdf: fixMaybeLocalUrl(p.relatorioPdf || ""),
+    leituraUrl: fixMaybeLocalUrl(p.leituraUrl || ""),
+    mapa: {
+      ...mapa,
+      csvUrl: fixMaybeLocalUrl(mapa.csvUrl || "")
+    },
+    fichaTecnica: normalizeFichaTecnica(p.fichaTecnica || {}),
+    pesquisaResumo: normalizePesquisaResumo(p.pesquisaResumo || {})
+  };
+}
+
+function normalizeFichaTecnica(ft){
+  const realizacao = ft.realizacao || {};
+  const financiador = ft.financiador || {};
+  const equipe = Array.isArray(ft.equipe) ? ft.equipe : [];
+  return {
+    ...ft,
+    realizacao: {
+      ...realizacao,
+      logo: fixMaybeLocalUrl(realizacao.logo || "")
+    },
+    financiador: {
+      ...financiador,
+      logo: fixMaybeLocalUrl(financiador.logo || "")
+    },
+    equipe: equipe.map((person) => ({
+      ...person,
+      foto: fixMaybeLocalUrl(person?.foto || "")
+    }))
+  };
+}
+
+function normalizePesquisaResumo(resumo){
+  const topicos = Array.isArray(resumo?.topicos) ? resumo.topicos : [];
+  return {
+    ...resumo,
+    topicos: topicos.map((t) => ({
+      ...t,
+      imagem: fixMaybeLocalUrl(t?.imagem || "")
+    }))
+  };
+}
+
+function fixMaybeLocalUrl(u){
+  if (!u) return u;
+  if (/^https?:\/\//i.test(u)) return u;
+  const cleaned = String(u).replace(/^[./]+/, "");
+  const normalized = cleaned.startsWith("/") ? cleaned : `/${cleaned}`;
+  return withBase(normalized);
 }
 
 export function wireDropdown(pesquisas){
@@ -69,7 +131,7 @@ export function wireDropdown(pesquisas){
   if (!dd || !btn || !panel) return;
 
   panel.innerHTML = pesquisas.map(p => `
-    <a class="dropdown-item" href="/${escapeHtml(p.slug)}" data-link role="menuitem">
+    <a class="dropdown-item" href="${withBase(`/${escapeHtml(p.slug)}`)}" data-link role="menuitem">
       <strong>${escapeHtml(p.titulo)}</strong>
       <small>Ano base: ${escapeHtml(p.anoBase || "")}</small>
     </a>

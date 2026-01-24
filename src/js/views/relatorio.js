@@ -1,4 +1,5 @@
 import { escapeHtml } from "../utils.js";
+import { withBase } from "../basepath.js";
 
 export function renderRelatorio(p){
   const pdf = p.relatorioPdf || "";
@@ -7,8 +8,8 @@ export function renderRelatorio(p){
       <h1>Relatório</h1>
       <p><strong>${escapeHtml(p.titulo)}</strong> — Ano base: ${escapeHtml(p.anoBase || "")}</p>
       <div style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap">
-        <a class="btn linklike" href="/${escapeHtml(p.slug)}" data-link>Voltar</a>
-        <a class="btn" href="/${escapeHtml(p.slug)}/mapa" data-link>Ir para Mapa</a>
+        <a class="btn linklike" href="${withBase(`/${escapeHtml(p.slug)}`)}" data-link>Voltar</a>
+        <a class="btn" href="${withBase(`/${escapeHtml(p.slug)}/mapa`)}" data-link>Ir para Mapa</a>
         ${pdf ? `<a class="btn primary" href="${escapeHtml(pdf)}" target="_blank" rel="noopener noreferrer">Abrir PDF</a>` : ""}
       </div>
     </section>

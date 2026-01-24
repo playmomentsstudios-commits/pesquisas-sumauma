@@ -1,4 +1,5 @@
 import { escapeHtml } from "../utils.js";
+import { withBase } from "../basepath.js";
 
 export function renderPesquisa(p){
   return `
@@ -18,9 +19,9 @@ export function renderPesquisa(p){
         <p>${escapeHtml(p.resumo || "")}</p>
 
         <div class="card-actions" style="margin-top:6px">
-          <a class="btn" href="/${escapeHtml(p.slug)}/relatorio" data-link>Abrir Relatório</a>
-          <a class="btn" href="/${escapeHtml(p.slug)}/mapa" data-link>Ir para Mapa</a>
-          <a class="btn linklike" href="/" data-link>Voltar</a>
+          <a class="btn" href="${withBase(`/${escapeHtml(p.slug)}/relatorio`)}" data-link>Abrir Relatório</a>
+          <a class="btn" href="${withBase(`/${escapeHtml(p.slug)}/mapa`)}" data-link>Ir para Mapa</a>
+          <a class="btn linklike" href="${withBase("/")}" data-link>Voltar</a>
         </div>
 
         <div style="margin-top:10px; color: rgba(255,255,255,.65); font-size:13px; line-height:1.5">
