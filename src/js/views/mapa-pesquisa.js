@@ -4,6 +4,8 @@ export function renderMapaPesquisa(p, opts = {}){
   const slug = escapeHtml(p.slug);
   const csvUrl = escapeHtml(p?.mapa?.csvUrl || "");
   const openRelatorio = !!opts.openRelatorio;
+  const pesquisaId = p?.dbId || p?._dbId || "";
+  const supabaseEnabled = !!pesquisaId;
 
   const path = (location.pathname || "").replace(/\/+$/,"");
   const active =
@@ -64,6 +66,8 @@ export function renderMapaPesquisa(p, opts = {}){
       (function(){
         const opts = {
           csvUrl: "${csvUrl}",
+          pesquisaId: "${escapeHtml(pesquisaId)}",
+          supabaseEnabled: ${supabaseEnabled ? "true" : "false"},
           mapId: "${mapId}",
           listId: "${listId}",
           searchId: "${searchId}",

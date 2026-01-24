@@ -1,5 +1,7 @@
 // src/js/map.js
 // Leaflet + CSV + Filtros + Lista + Zoom automático
+import { initSupabase } from "./supabase-client.js";
+
 (function () {
   const STATE = {
     map: null,
@@ -12,7 +14,7 @@
   // Exposto globalmente para ser chamado pela view do mapa
   window.SumaumaMap = {
     init: async function (opts) {
-      // opts: { csvUrl, mapId, listId, searchId, stateId, cityId, catId }
+      // opts: { csvUrl?, pesquisaId?, supabaseEnabled?, mapId, listId, searchId, stateId, cityId, catId }
       await waitForLeaflet();
 
       // Se reiniciar em outra rota, remove mapa anterior
@@ -36,8 +38,8 @@
 
       STATE.layer = L.layerGroup().addTo(STATE.map);
 
-      // carrega CSV
-      const rows = await fetchCsv(opts.csvUrl);
+      // carrega dados (Supabase ou CSV)
+      const rows = await fetchRows(opts);
       STATE.all = normalizeRows(rows);
       STATE.filtered = [...STATE.all];
 
@@ -157,6 +159,41 @@
   }
 
   // ---------- CSV ----------
+  async function fetchRows(opts) {
+    if (opts?.supabaseEnabled && opts?.pesquisaId) {
+      const supabase = await initSupabase();
+      if (supabase) {
+        const { data, error } = await supabase
+          .from("pontos")
+          .select("*")
+          .eq("pesquisa_id", opts.pesquisaId)
+          .eq("ativo", true);
+        if (!error && data) {
+          return data.map((row) => ({
+            Nome: row.nome,
+            Categoria: row.categoria,
+            Cidade: row.cidade,
+            UF: row.uf,
+            Latitude: row.lat,
+            Longitude: row.lng,
+            Descricao: row.descricao,
+            Site: row.site,
+            Instagram: row.instagram,
+            Facebook: row.facebook,
+            WhatsApp: row.whatsapp,
+            Email: row.email
+          }));
+        }
+      }
+    }
+
+    if (opts?.csvUrl) {
+      return await fetchCsv(opts.csvUrl);
+    }
+
+    return [];
+  }
+
   async function fetchCsv(url) {
     const res = await fetch(url, { cache: "no-store" });
     if (!res.ok) return [];
