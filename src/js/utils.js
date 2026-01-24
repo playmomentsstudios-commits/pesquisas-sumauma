@@ -3,10 +3,50 @@ export function setYear(){
   if (el) el.textContent = new Date().getFullYear();
 }
 
+import { initSupabase } from "./supabase-client.js";
+
 export async function fetchPesquisas(){
+  const supabase = await initSupabase();
+  if (supabase) {
+    try {
+      const { data, error } = await supabase
+        .from("pesquisas")
+        .select("*")
+        .eq("status", true)
+        .order("ordem", { ascending: true });
+      if (error) throw error;
+      return (data || []).map(mapPesquisaFromDb);
+    } catch (err) {
+      console.warn("Falha ao carregar pesquisas do Supabase, usando JSON local.", err);
+    }
+  }
+
   const res = await fetch("./public/data/pesquisas.json", { cache: "no-store" });
   if (!res.ok) throw new Error("Falha ao carregar pesquisas.json");
   return await res.json();
+}
+
+function mapPesquisaFromDb(row){
+  const cfg = row?.config_json || {};
+  const mapa = cfg.mapa || {};
+  const fichaTecnica = cfg.fichaTecnica || {};
+  const pesquisaResumo = cfg.pesquisaResumo || {};
+
+  return {
+    dbId: row.id,
+    _dbId: row.id,
+    id: row.slug || row.id,
+    titulo: row.titulo,
+    anoBase: row.anoBase,
+    slug: row.slug,
+    capa: row.capa_url || cfg.capa || "",
+    descricaoCurta: row.descricaoCurta || "",
+    sinopse: row.sinopse || "",
+    relatorioPdf: row.relatorio_pdf_url || cfg.relatorioPdf || "",
+    mapa,
+    fichaTecnica,
+    pesquisaResumo
+  };
 }
 
 export function wireDropdown(pesquisas){
