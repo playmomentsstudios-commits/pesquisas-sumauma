@@ -1,7 +1,8 @@
-import { escapeHtml } from "../utils.js";
+import { escapeHtml, loadPesquisas } from "../utils.js";
 import { withBase } from "../basepath.js";
 
-export function renderHome(pesquisas){
+export async function renderHome(){
+  const pesquisas = await loadPesquisas(false);
   return `
     <section class="grid" aria-label="Lista de pesquisas">
       ${pesquisas.map(p => `

@@ -5,41 +5,80 @@ export function setYear(){
   if (el) el.textContent = new Date().getFullYear();
 }
 
-export async function fetchPesquisasPublic(){
-  const supabase = window?.supabaseClient || null;
-  if (supabase) {
-    try {
-      console.log("[HOME] Supabase OK, carregando pesquisas do DB");
-      const { data, error } = await supabase
+function isHttp(u){
+  return /^https?:\/\//i.test(u || "");
+}
+
+function normalizeLocalDataPath(p){
+  if (!p) return p;
+  if (isHttp(p)) return p;
+
+  let s = String(p);
+  s = s.replace(/^\/?public\/data\//, "/data/");
+  if (!s.startsWith("/")) s = "/" + s;
+  return s;
+}
+
+export async function loadPesquisas(force = false){
+  if (!force && Array.isArray(window.__PESQUISAS__) && window.__PESQUISAS__.length) {
+    return window.__PESQUISAS__;
+  }
+
+  try {
+    const client = window?.supabaseClient || null;
+    if (client) {
+      console.log("[DATA] tentando Supabase…");
+      const { data, error } = await client
         .from("pesquisas")
-        .select("id,slug,titulo,ano_base,ordem,status,capa_url,descricao_curta,sinopse,relatorio_pdf_url,leitura_url,csv_fallback,config_json")
+        .select("id,slug,titulo,ano_base,ordem,status,descricao_curta,sinopse,capa_url,relatorio_pdf_url,leitura_url,csv_fallback,config_json")
         .eq("status", true)
         .order("ordem", { ascending: true });
       if (error) throw error;
-      return (data || []).map(mapPesquisaFromDb);
-    } catch (err) {
-      console.warn("[HOME] Fallback JSON local (motivo: Supabase)", err?.message || err);
+      const list = (data || []).map(mapPesquisaFromDb);
+      window.__PESQUISAS__ = list;
+      console.log("[DATA] Supabase OK:", list.length);
+      return list;
     }
-  } else {
-    console.warn("[HOME] Fallback JSON local (motivo: Supabase client ausente)");
+  } catch (err) {
+    console.warn("[DATA] Supabase falhou, indo pro JSON:", err?.message || err);
   }
 
-  const res = await fetch(withBase("/data/pesquisas.json"), { cache: "no-store" })
-    .catch(() => fetch(withBase("/public/data/pesquisas.json"), { cache: "no-store" }))
-    .catch(() => fetch(withBase("/data/pesquisas.json")));
-  if (!res || !res.ok) {
-    console.error("[HOME] Nem Supabase nem JSON local disponível");
-    return [];
+  const candidates = [
+    withBase("/data/pesquisas.json"),
+    withBase("/public/data/pesquisas.json")
+  ];
+
+  let lastErr = null;
+  for (const url of candidates) {
+    try {
+      console.log("[DATA] tentando JSON:", url);
+      const res = await fetch(url, { cache: "no-store" });
+      if (!res.ok) throw new Error(`HTTP ${res.status} em ${url}`);
+      const json = await res.json();
+      const list = Array.isArray(json) ? json.map(normalizePesquisaPaths) : [];
+      window.__PESQUISAS__ = list;
+      console.log("[DATA] JSON OK:", list.length);
+      return list;
+    } catch (err) {
+      lastErr = err;
+    }
   }
-  const data = await res.json();
-  return Array.isArray(data) ? data.map(normalizePesquisaPaths) : data;
+
+  console.error("[DATA] Nem Supabase nem JSON funcionaram:", lastErr);
+  window.__PESQUISAS__ = [];
+  return [];
+}
+
+export async function getPesquisaBySlug(slug){
+  const list = await loadPesquisas(false);
+  return list.find(p => p.slug === slug) || null;
 }
 
 function mapPesquisaFromDb(row){
   const cfg = row?.config_json || {};
   const mapa = {
     ...(cfg.mapa || {}),
-    csvUrl: fixMaybeLocalUrl(row.csv_fallback || cfg?.mapa?.csvUrl || "")
+    csvUrl: fixMaybeLocalDataUrl(row.csv_fallback || cfg?.mapa?.csvUrl || "")
   };
   const fichaTecnica = cfg.fichaTecnica || {};
   const pesquisaResumo = cfg.pesquisaResumo || {};
@@ -75,7 +114,7 @@ function normalizePesquisaPaths(p){
     leituraUrl: fixMaybeLocalUrl(p.leituraUrl || ""),
     mapa: {
       ...mapa,
-      csvUrl: fixMaybeLocalUrl(mapa.csvUrl || "")
+      csvUrl: fixMaybeLocalDataUrl(mapa.csvUrl || "")
     },
     fichaTecnica: normalizeFichaTecnica(p.fichaTecnica || {}),
     pesquisaResumo: normalizePesquisaResumo(p.pesquisaResumo || {})
@@ -116,9 +155,16 @@ function normalizePesquisaResumo(resumo){
 
 function fixMaybeLocalUrl(u){
   if (!u) return u;
-  if (/^https?:\/\//i.test(u)) return u;
+  if (isHttp(u)) return u;
   const cleaned = String(u).replace(/^[./]+/, "");
   const normalized = cleaned.startsWith("/") ? cleaned : `/${cleaned}`;
+  return withBase(normalized);
+}
+
+function fixMaybeLocalDataUrl(u){
+  if (!u) return u;
+  if (isHttp(u)) return u;
+  const normalized = normalizeLocalDataPath(u);
   return withBase(normalized);
 }
 
