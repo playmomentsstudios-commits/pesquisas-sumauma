@@ -1,6 +1,5 @@
 // src/js/map.js
 // Leaflet + CSV + Filtros + Lista + Zoom automático
-import { initSupabase } from "./supabase-client.js";
 
 (function () {
   const STATE = {
@@ -161,7 +160,7 @@ import { initSupabase } from "./supabase-client.js";
   // ---------- CSV ----------
   async function fetchRows(opts) {
     if (opts?.supabaseEnabled && opts?.pesquisaId) {
-      const supabase = await initSupabase();
+      const supabase = window?.supabaseClient || null;
       if (supabase) {
         const { data, error } = await supabase
           .from("pontos")

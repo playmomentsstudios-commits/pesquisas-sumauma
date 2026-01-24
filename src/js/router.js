@@ -1,4 +1,4 @@
-import { fetchPesquisas, wireDropdown, spaLinkHandler, getSpaRedirect } from "./utils.js";
+import { fetchPesquisasPublic, wireDropdown, spaLinkHandler, getSpaRedirect } from "./utils.js";
 import { renderHome } from "./views/home.js";
 import { renderMapaPesquisa } from "./views/mapa-pesquisa.js";
 import { renderResumoPesquisa } from "./views/resumo-pesquisa.js";
@@ -13,7 +13,7 @@ export async function initRouter(){
       history.replaceState({}, "", redirect);
     }
 
-    const pesquisas = await fetchPesquisas();
+    const pesquisas = await fetchPesquisasPublic();
     wireDropdown(pesquisas);
 
     document.addEventListener("click", (e) => spaLinkHandler(e, navigate));
