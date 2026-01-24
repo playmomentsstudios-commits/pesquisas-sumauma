@@ -1,6 +1,11 @@
 [build]
-  command = ""
+  command = "node tools/gen-supabase-config.mjs"
   publish = "."
+
+[[redirects]]
+  from = "/admin/*"
+  to = "/admin/index.html"
+  status = 200
 
 [[redirects]]
   from = "/*"
