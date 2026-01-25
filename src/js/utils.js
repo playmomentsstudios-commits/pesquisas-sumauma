@@ -13,8 +13,9 @@ function normalizeLocalDataPath(p){
   if (!p) return p;
   if (isHttp(p)) return p;
 
-  let s = String(p);
-  s = s.replace(/^\/?public\/data\//, "/data/");
+  let s = String(p).trim();
+  s = s.replace(/^[./]+/, "");
+  s = s.replace(/^public\/data\//, "/data/");
   if (!s.startsWith("/")) s = "/" + s;
   return s;
 }
