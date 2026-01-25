@@ -1,7 +1,7 @@
 import { escapeHtml, loadPesquisas } from "../utils.js";
 import { withBase } from "../basepath.js";
 
-export async function renderHome(){
+async function renderHome(){
   const pesquisas = await loadPesquisas(false);
   return `
     <section class="grid" aria-label="Lista de pesquisas">
@@ -26,3 +26,6 @@ export async function renderHome(){
     </section>
   `;
 }
+
+export default renderHome;
+export { renderHome };

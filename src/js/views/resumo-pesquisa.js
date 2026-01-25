@@ -19,7 +19,7 @@ function tabs(slug, active){
   `;
 }
 
-export function renderResumoPesquisa(p){
+async function renderResumoPesquisa(p){
   const resumo = p.pesquisaResumo || {};
   const intro = resumo.introducao || {};
   const quote = resumo.citacao || {};
@@ -69,3 +69,6 @@ function fullImg(src){
   const s = escapeHtml(src);
   return `<div class="suma-full-image" style="background-image:url('${s}')"></div>`;
 }
+
+export default renderResumoPesquisa;
+export { renderResumoPesquisa };

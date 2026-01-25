@@ -19,7 +19,7 @@ function tabs(slug, active){
   `;
 }
 
-export function renderFichaTecnica(p){
+async function renderFichaTecnica(p){
   const ft = p.fichaTecnica || {};
   const realizacao = ft.realizacao || {};
   const financiador = ft.financiador || {};
@@ -50,6 +50,11 @@ export function renderFichaTecnica(p){
           }
         </div>
       </div>
+      ${
+        !realizacao.logo && !financiador.logo
+          ? `<p style="margin-top:12px; color:#666;">Ficha técnica ainda não disponível.</p>`
+          : ""
+      }
     </section>
 
     <section class="ft-section">
@@ -71,3 +76,6 @@ export function renderFichaTecnica(p){
     </section>
   `;
 }
+
+export default renderFichaTecnica;
+export { renderFichaTecnica };
