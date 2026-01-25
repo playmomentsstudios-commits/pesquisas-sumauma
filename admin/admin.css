@@ -153,6 +153,23 @@ body {
   margin-top: 8px;
 }
 
+.admin-msg {
+  margin-top: 10px;
+  font-size: 13px;
+}
+
+.admin-msg.ok {
+  color: #198754;
+}
+
+.admin-msg.err {
+  color: #dc3545;
+}
+
+.admin-msg.muted {
+  color: #6c757d;
+}
+
 .card {
   background: #fff;
   border-radius: 16px;
