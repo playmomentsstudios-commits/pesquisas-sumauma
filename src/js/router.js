@@ -1,9 +1,14 @@
-import { loadPesquisas, getPesquisaBySlug, wireDropdown, spaLinkHandler, getSpaRedirect } from "./utils.js";
-import { stripBase, withBase } from "./basepath.js";
+import { loadPesquisas, getPesquisaBySlug, wireDropdown, spaLinkHandler, getSpaRedirect, escapeHtml } from "./utils.js";
+import { getBasePath, stripBase, withBase } from "./basepath.js";
 import { renderHome } from "./views/home.js";
 import { renderMapaPesquisa } from "./views/mapa-pesquisa.js";
 import { renderResumoPesquisa } from "./views/resumo-pesquisa.js";
 import { renderFichaTecnica } from "./views/ficha-tecnica.js";
+
+const DEBUG_ROUTER = true;
+function dlog(...args){
+  if (DEBUG_ROUTER) console.log("[ROUTER]", ...args);
+}
 
 export async function initRouter(){
   const app = document.getElementById("app");
@@ -13,9 +18,6 @@ export async function initRouter(){
       history.replaceState({}, "", redirect);
     }
 
-    const pesquisas = await loadPesquisas(false);
-    wireDropdown(pesquisas);
-
     document.addEventListener("click", (e) => spaLinkHandler(e, navigate));
     window.addEventListener("popstate", () => route());
 
@@ -24,11 +26,14 @@ export async function initRouter(){
       route();
     }
 
-    function notFound(){
+    function notFound(slug, slugs = []){
+      const safeSlug = escapeHtml(slug || "");
+      const slugsList = slugs.length ? slugs.map(s => escapeHtml(s)).join(", ") : "nenhum";
       app.innerHTML = `
         <div class="hero">
           <h1 style="margin:0 0 10px;color:#0f3d2e;">Página não encontrada</h1>
-          <p style="margin:0;color:#555;line-height:1.7;">Esse endereço não corresponde a uma pesquisa cadastrada.</p>
+          <p style="margin:0;color:#555;line-height:1.7;">Slug não encontrado: <strong>${safeSlug}</strong>.</p>
+          <p style="margin:6px 0 0;color:#555;line-height:1.7;">Slugs carregados: ${slugsList}</p>
           <div style="margin-top:14px">
             <a class="btn primary" href="${withBase("/")}" data-link>Voltar</a>
           </div>
@@ -37,42 +42,57 @@ export async function initRouter(){
     }
 
     async function route(){
-      const raw = location.pathname.replace(/\/+$/,"") || "/";
+      const raw = location.pathname;
+      const base = getBasePath();
       const path = stripBase(raw).replace(/\/+$/,"") || "/";
+      dlog("raw=", raw, "base=", base, "clean=", path);
+
+      const pesquisas = await loadPesquisas(false);
+      wireDropdown(pesquisas);
 
       if (path === "/"){
+        dlog("view=home");
         app.innerHTML = await renderHome();
         return;
       }
 
-      const parts = path.slice(1).split("/");
+      const parts = path.split("/").filter(Boolean);
+      dlog("parts=", parts);
       const slug = parts[0];
       const sub = parts[1] || "";
+      dlog("slug=", slug, "sub=", sub);
 
       const item = await getPesquisaBySlug(slug);
       if (!item){
-        notFound();
+        dlog("pesquisa encontrada?", false);
+        notFound(slug, pesquisas.map(p => p.slug));
         return;
       }
+      dlog("pesquisa encontrada?", true);
 
       if (sub === "" || sub === "mapa"){
+        dlog("view=mapa");
         app.innerHTML = renderMapaPesquisa(item);
         return;
       }
       if (sub === "pesquisa"){
+        dlog("view=pesquisa");
         app.innerHTML = renderResumoPesquisa(item);
         return;
       }
       if (sub === "ficha-tecnica"){
+        dlog("view=ficha-tecnica");
         app.innerHTML = renderFichaTecnica(item);
         return;
       }
       if (sub === "relatorio"){
+        dlog("view=relatorio");
         app.innerHTML = renderMapaPesquisa(item, { openRelatorio: true });
         return;
       }
 
-      notFound();
+      dlog("view=notFound");
+      notFound(slug, pesquisas.map(p => p.slug));
     }
 
     route();

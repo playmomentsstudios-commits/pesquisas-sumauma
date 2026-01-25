@@ -13,11 +13,10 @@ export function getBasePath(){
 
 export function stripBase(pathname){
   const base = getBasePath();
-  if (base && pathname.startsWith(base)){
-    const p = pathname.slice(base.length);
-    return p.startsWith("/") ? p : "/" + p;
-  }
-  return pathname || "/";
+  let p = pathname || "/";
+  if (base && p.startsWith(base)) p = p.slice(base.length);
+  if (!p.startsWith("/")) p = "/" + p;
+  return p;
 }
 
 export function withBase(path){

@@ -1,4 +1,4 @@
-import { withBase } from "./basepath.js";
+import { getBasePath, withBase } from "./basepath.js";
 
 export function setYear(){
   const el = document.getElementById("year");
@@ -21,7 +21,10 @@ function normalizeLocalDataPath(p){
 }
 
 export async function loadPesquisas(force = false){
+  console.log("[DATA] basePath=", getBasePath());
+
   if (!force && Array.isArray(window.__PESQUISAS__) && window.__PESQUISAS__.length) {
+    logLoaded(window.__PESQUISAS__);
     return window.__PESQUISAS__;
   }
 
@@ -38,6 +41,7 @@ export async function loadPesquisas(force = false){
       const list = (data || []).map(mapPesquisaFromDb);
       window.__PESQUISAS__ = list;
       console.log("[DATA] Supabase OK:", list.length);
+      logLoaded(list);
       return list;
     }
   } catch (err) {
@@ -59,6 +63,7 @@ export async function loadPesquisas(force = false){
       const list = Array.isArray(json) ? json.map(normalizePesquisaPaths) : [];
       window.__PESQUISAS__ = list;
       console.log("[DATA] JSON OK:", list.length);
+      logLoaded(list);
       return list;
     } catch (err) {
       lastErr = err;
@@ -67,6 +72,7 @@ export async function loadPesquisas(force = false){
 
   console.error("[DATA] Nem Supabase nem JSON funcionaram:", lastErr);
   window.__PESQUISAS__ = [];
+  logLoaded([]);
   return [];
 }
 
@@ -169,6 +175,10 @@ function fixMaybeLocalDataUrl(u){
   return withBase(normalized);
 }
 
+function logLoaded(list){
+  console.log("[DATA] carregadas=", list.length, "slugs=", list.map(x => x.slug));
+}
+
 export function wireDropdown(pesquisas){
   const dd = document.getElementById("pesquisasDropdown");
   const btn = dd?.querySelector("button");
@@ -221,6 +231,7 @@ export function spaLinkHandler(e, navigate){
 
   if (href.startsWith("http")) return;
 
+  console.log("[NAV] click href=", href);
   e.preventDefault();
   navigate(href);
 }
