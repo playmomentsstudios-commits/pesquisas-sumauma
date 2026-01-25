@@ -1,9 +1,10 @@
 import { loadPesquisas, getPesquisaBySlug, wireDropdown, spaLinkHandler, getSpaRedirect, escapeHtml } from "./utils.js";
 import { getBasePath, stripBase, withBase } from "./basepath.js";
-import { renderHome } from "./views/home.js";
-import { renderMapaPesquisa } from "./views/mapa-pesquisa.js";
-import { renderResumoPesquisa } from "./views/resumo-pesquisa.js";
-import { renderFichaTecnica } from "./views/ficha-tecnica.js";
+import renderHome from "./views/home.js";
+import renderMapaPesquisa from "./views/mapa-pesquisa.js";
+import renderPesquisa from "./views/pesquisa.js";
+import renderRelatorio from "./views/relatorio.js";
+import renderFichaTecnica from "./views/ficha-tecnica.js";
 
 const DEBUG_ROUTER = true;
 function dlog(...args){
@@ -59,8 +60,7 @@ export async function initRouter(){
       const parts = path.split("/").filter(Boolean);
       dlog("parts=", parts);
       const slug = parts[0];
-      const sub = parts[1] || "";
-      dlog("slug=", slug, "sub=", sub);
+      const sub = parts[1] || "pesquisa";
 
       const item = await getPesquisaBySlug(slug);
       if (!item){
@@ -70,24 +70,30 @@ export async function initRouter(){
       }
       dlog("pesquisa encontrada?", true);
 
-      if (sub === "" || sub === "mapa"){
-        dlog("view=mapa");
-        app.innerHTML = renderMapaPesquisa(item);
+      const viewNameMap = {
+        pesquisa: "pesquisa",
+        mapa: "mapa",
+        "ficha-tecnica": "ficha-tecnica",
+        relatorio: "relatorio"
+      };
+
+      const viewName = viewNameMap[sub] || "notFound";
+      console.log("[ROUTER] slug=", slug, "sub=", sub, "view=", viewName);
+
+      if (sub === "pesquisa"){
+        app.innerHTML = await renderPesquisa(item);
         return;
       }
-      if (sub === "pesquisa"){
-        dlog("view=pesquisa");
-        app.innerHTML = renderResumoPesquisa(item);
+      if (sub === "mapa"){
+        app.innerHTML = await renderMapaPesquisa(item);
         return;
       }
       if (sub === "ficha-tecnica"){
-        dlog("view=ficha-tecnica");
-        app.innerHTML = renderFichaTecnica(item);
+        app.innerHTML = await renderFichaTecnica(item);
         return;
       }
       if (sub === "relatorio"){
-        dlog("view=relatorio");
-        app.innerHTML = renderMapaPesquisa(item, { openRelatorio: true });
+        app.innerHTML = await renderRelatorio(item);
         return;
       }
 

@@ -1,10 +1,9 @@
 import { escapeHtml } from "../utils.js";
 import { getBasePath, withBase } from "../basepath.js";
 
-export function renderMapaPesquisa(p, opts = {}){
+async function renderMapaPesquisa(p){
   const slug = escapeHtml(p.slug);
   const csvUrl = escapeHtml(p?.mapa?.csvUrl || "");
-  const openRelatorio = !!opts.openRelatorio;
   const pesquisaId = p?.dbId || p?._dbId || "";
   const supabaseEnabled = !!pesquisaId;
 
@@ -31,7 +30,6 @@ export function renderMapaPesquisa(p, opts = {}){
   const cityId = `city-${slug}`;
   const catId = `cat-${slug}`;
 
-  const closePath = withBase(`/${escapeHtml(p.slug)}/mapa`);
   return `
     <div class="subbar">
       <div class="subbar-right">
@@ -57,7 +55,7 @@ export function renderMapaPesquisa(p, opts = {}){
         </div>
 
         <div id="${listId}" class="list">
-          <div class="empty">Carregando dados…</div>
+          <div class="empty">${csvUrl || supabaseEnabled ? "Carregando dados…" : "Sem dados de mapa cadastrados."}</div>
         </div>
       </aside>
 
@@ -65,8 +63,6 @@ export function renderMapaPesquisa(p, opts = {}){
         <div id="${mapId}" class="leaflet-map"></div>
       </section>
     </div>
-
-    ${renderRelatorioModal(p, openRelatorio)}
 
     <script>
       (function(){
@@ -82,6 +78,9 @@ export function renderMapaPesquisa(p, opts = {}){
           catId: "${catId}"
         };
         setTimeout(function(){
+          if (!opts.csvUrl && !opts.supabaseEnabled) {
+            return;
+          }
           if (window.SumaumaMap && window.SumaumaMap.init) {
             window.SumaumaMap.init(opts);
           }
@@ -91,48 +90,5 @@ export function renderMapaPesquisa(p, opts = {}){
   `;
 }
 
-function renderRelatorioModal(p, open){
-  const cls = open ? "modal show" : "modal";
-  const pdf = p.relatorioPdf ? escapeHtml(p.relatorioPdf) : "";
-
-  return `
-    <div class="${cls}" id="relatorioModal" aria-hidden="${open ? "false" : "true"}">
-      <div class="modal-content">
-        <span class="close" data-close-modal="1">×</span>
-
-        <h3 style="margin:0 0 10px; color:#0f3d2e;">Relatório</h3>
-        <p style="margin:0 0 12px; color:#555; line-height:1.6;">
-          ${escapeHtml(p.sinopse || "Sinopse do relatório (editável no admin).")}
-        </p>
-
-        <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-top:10px;">
-          ${pdf ? `<a class="btn primary" href="${pdf}" target="_blank" rel="noopener noreferrer">Ler</a>` : ""}
-          ${pdf ? `<a class="btn light" href="${pdf}" download>Baixar</a>` : ""}
-          <a class="btn light" href="${closePath}" data-link>Fechar</a>
-        </div>
-      </div>
-    </div>
-
-    <script>
-      (function(){
-        const modal = document.getElementById("relatorioModal");
-        if(!modal) return;
-
-        function close(){
-          window.history.pushState({}, "", "${closePath}");
-          window.dispatchEvent(new PopStateEvent("popstate"));
-        }
-
-        modal.addEventListener("click", (e)=>{
-          if(e.target === modal) close();
-          const btn = e.target.closest("[data-close-modal]");
-          if(btn) close();
-        });
-
-        document.addEventDeepKeyDown = document.addEventListener("keydown", (e)=>{
-          if(e.key === "Escape" && modal.classList.contains("show")) close();
-        });
-      })();
-    </script>
-  `;
-}
+export default renderMapaPesquisa;
+export { renderMapaPesquisa };

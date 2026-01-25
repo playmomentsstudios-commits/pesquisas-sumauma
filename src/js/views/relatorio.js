@@ -1,24 +1,51 @@
 import { escapeHtml } from "../utils.js";
 import { withBase } from "../basepath.js";
 
-export function renderRelatorio(p){
-  const pdf = p.relatorioPdf || "";
+function tabs(slug){
+  const s = escapeHtml(slug);
+  const tab = (sub, label) => {
+    const isActive = sub === "relatorio";
+    return `<a class="tab ${isActive ? "tab-active" : "tab-idle"}" href="${withBase(`/${s}/${sub}`)}" data-link>${label}</a>`;
+  };
   return `
-    <section class="hero">
-      <h1>Relatório</h1>
-      <p><strong>${escapeHtml(p.titulo)}</strong> — Ano base: ${escapeHtml(p.anoBase || "")}</p>
-      <div style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap">
-        <a class="btn linklike" href="${withBase(`/${escapeHtml(p.slug)}`)}" data-link>Voltar</a>
-        <a class="btn" href="${withBase(`/${escapeHtml(p.slug)}/mapa`)}" data-link>Ir para Mapa</a>
-        ${pdf ? `<a class="btn primary" href="${escapeHtml(pdf)}" target="_blank" rel="noopener noreferrer">Abrir PDF</a>` : ""}
+    <div class="subbar">
+      <div class="subbar-right">
+        ${tab("mapa","Mapa")}
+        ${tab("pesquisa","Pesquisa")}
+        ${tab("relatorio","Relatório")}
+        ${tab("ficha-tecnica","Ficha Técnica")}
       </div>
-    </section>
+    </div>
+  `;
+}
 
-    <section class="page" style="margin-top:16px">
+async function renderRelatorio(p){
+  const pdf = p.relatorioPdf || "";
+  const leitura = p.leituraUrl || "";
+  return `
+    ${tabs(p.slug)}
+
+    <section class="page">
       <div class="page-head">
-        <h2>Visualização</h2>
-        <p>Se o PDF estiver configurado, ele abre em nova aba. Aqui também podemos embutir um viewer depois.</p>
+        <h2>Relatório</h2>
+        <p><strong>${escapeHtml(p.titulo || "")}</strong> — Ano base: ${escapeHtml(p.anoBase || "")}</p>
+        <p>${escapeHtml(p.sinopse || "Relatório ainda não disponível.")}</p>
+
+        <div style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap">
+          ${pdf ? `<a class="btn primary" href="${escapeHtml(pdf)}" target="_blank" rel="noopener noreferrer">Download PDF</a>` : ""}
+          ${leitura ? `<a class="btn" href="${escapeHtml(leitura)}" target="_blank" rel="noopener noreferrer">Abrir leitura</a>` : ""}
+          <a class="btn light" href="${withBase(`/${escapeHtml(p.slug)}/mapa`)}" data-link>Mapa</a>
+        </div>
+
+        ${
+          pdf || leitura
+            ? ""
+            : `<p style="margin-top:12px; color:#666;">Relatório ainda não disponível.</p>`
+        }
       </div>
     </section>
   `;
 }
+
+export default renderRelatorio;
+export { renderRelatorio };
