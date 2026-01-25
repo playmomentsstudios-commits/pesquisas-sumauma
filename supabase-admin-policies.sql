@@ -6,8 +6,8 @@ on public.pesquisas for select
 to anon, authenticated
 using (true);
 
-drop policy if exists "pesquisas_write_auth" on public.pesquisas;
-create policy "pesquisas_write_auth"
+drop policy if exists "pesquisas_insert_auth" on public.pesquisas;
+create policy "pesquisas_insert_auth"
 on public.pesquisas for insert
 to authenticated
 with check (true);

@@ -21,6 +21,7 @@ const els = {
   listMsg: document.getElementById("researchListMsg"),
   newBtn: document.getElementById("btn-new"),
   seedBtn: document.getElementById("btnSeedTests"),
+  diagBtn: document.getElementById("btnDiag"),
   writeTestBtn: document.getElementById("btnWriteTest"),
   form: document.getElementById("pesquisa-form"),
   formTitle: document.getElementById("form-title"),
@@ -118,6 +119,7 @@ async function init(){
   els.logout.addEventListener("click", handleLogout);
   els.newBtn.addEventListener("click", () => clearForm());
   els.seedBtn?.addEventListener("click", handleSeedTests);
+  els.diagBtn?.addEventListener("click", runDiag);
   els.writeTestBtn?.addEventListener("click", handleWriteTest);
   els.form.addEventListener("submit", handleSavePesquisa);
   els.deleteBtn.addEventListener("click", handleDeletePesquisa);
@@ -135,6 +137,30 @@ async function init(){
 function setDiag(msg){
   const el = document.getElementById("sbDiag");
   if (el) el.textContent = msg;
+}
+
+function setDiagStatus(text){
+  const el = document.getElementById("diagStatus");
+  if (el) el.textContent = text || "";
+}
+
+function setDiagOut(obj){
+  const el = document.getElementById("diagOut");
+  if (!el) return;
+  el.textContent = typeof obj === "string" ? obj : JSON.stringify(obj, null, 2);
+}
+
+function errToObj(error){
+  if (!error) return { error: "unknown" };
+  if (typeof error === "string") return { message: error };
+  return {
+    message: error.message,
+    details: error.details,
+    hint: error.hint,
+    code: error.code,
+    status: error.status,
+    name: error.name
+  };
 }
 
 async function getSupabaseClient(){
@@ -392,10 +418,10 @@ async function refreshListAndSelect(selectId = null){
     const rows = await listResearches();
     renderResearchList(rows);
     if (selectId) {
-      const selected = rows.find((row) => row.id === selectId);
+      const selected = rows.find((row) => String(row.id) === String(selectId));
       if (selected) loadResearchToForm(selected);
     } else if (currentResearchId) {
-      const selected = rows.find((row) => row.id === currentResearchId);
+      const selected = rows.find((row) => String(row.id) === String(currentResearchId));
       if (selected) loadResearchToForm(selected);
     } else {
       els.form.classList.add("hidden");
@@ -498,27 +524,48 @@ async function handleSavePesquisa(e){
   if (!state.supabase) return;
 
   try {
+    const isNew = !currentResearchId;
     setSaveMsg("Salvando...");
     adminMsg("Salvando...", "muted");
-    const payload = await readForm();
-
-    if (!currentResearchId) {
-      const newId = await createResearch(payload);
-      await refreshListAndSelect(newId);
-      setSaveMsg("Pesquisa criada ✅", true);
-      adminMsg("Criada ✅", "ok");
-    } else {
-      await updateResearch(currentResearchId, payload);
-      await refreshListAndSelect(currentResearchId);
-      setSaveMsg("Pesquisa atualizada ✅", true);
-      adminMsg("Atualizada ✅", "ok");
-    }
+    await saveResearch();
+    setSaveMsg(isNew ? "Pesquisa criada ✅" : "Pesquisa atualizada ✅", true);
+    adminMsg(isNew ? "Criada ✅" : "Atualizada ✅", "ok");
   } catch (error) {
     console.error(error);
     const msg = `Erro ao salvar: ${formatSupabaseError(error)}`;
     setSaveMsg(msg);
     adminMsg(msg, "err");
   }
+}
+
+async function saveResearch(){
+  const client = window.supabaseClient;
+  if (!client) throw new Error("Supabase client ausente.");
+
+  const payload = await readFormToPayload();
+  setDiagStatus("Salvando...");
+  setDiagOut({ action: "save", id: currentResearchId, payload });
+
+  if (!currentResearchId) {
+    const res = await client.from("pesquisas").insert(payload).select("id").single();
+    if (res.error) {
+      setDiagStatus("ERRO ao criar");
+      setDiagOut({ action: "insert", error: errToObj(res.error) });
+      throw res.error;
+    }
+    currentResearchId = res.data.id;
+    setDiagStatus("Criada ✅");
+  } else {
+    const res = await client.from("pesquisas").update(payload).eq("id", currentResearchId);
+    if (res.error) {
+      setDiagStatus("ERRO ao atualizar");
+      setDiagOut({ action: "update", id: currentResearchId, error: errToObj(res.error) });
+      throw res.error;
+    }
+    setDiagStatus("Atualizada ✅");
+  }
+
+  await refreshListAndSelect(currentResearchId);
 }
 
 async function handleDeletePesquisa(){
@@ -568,7 +615,7 @@ async function deleteResearch(id){
 }
 
 async function duplicateResearch(id){
-  const src = researchCache.find((row) => row.id === id);
+  const src = researchCache.find((row) => String(row.id) === String(id));
   if (!src) throw new Error("Pesquisa não encontrada no cache.");
 
   const newSlugBase = `${src.slug || "pesquisa"}-copia`;
@@ -604,14 +651,45 @@ async function duplicateResearch(id){
 
 async function handleWriteTest(){
   try {
-    await writeTest();
+    await runWriteTest();
   } catch (error) {
     console.error(error);
-    adminMsg(`Falha no teste: ${error.message || String(error)}`, "err");
+    const msg = `Falha no teste: ${error.message || String(error)}`;
+    adminMsg(msg, "err");
+    setDiagStatus("FALHOU no teste");
+    setDiagOut({ error: errToObj(error) });
   }
 }
 
-async function writeTest(){
+async function runDiag(){
+  const client = window.supabaseClient;
+  if (!client) {
+    setDiagStatus("Supabase client ausente");
+    setDiagOut("Sem supabaseClient. Verifique supabase-config.js e supabase-client.js");
+    return;
+  }
+
+  setDiagStatus("Rodando diagnóstico...");
+  const sess = await client.auth.getSession();
+  const user = await client.auth.getUser();
+
+  const sel = await client
+    .from("pesquisas")
+    .select("id,slug,titulo,status,ordem,ano_base,updated_at")
+    .order("ordem", { ascending: true })
+    .limit(5);
+
+  setDiagStatus("OK (sessão e select executados)");
+  setDiagOut({
+    session: sess.data?.session
+      ? { hasSession: true, user_id: sess.data.session.user?.id, email: sess.data.session.user?.email }
+      : { hasSession: false },
+    user: user.data?.user ? { id: user.data.user.id, email: user.data.user.email } : null,
+    select: sel.error ? { ok: false, error: errToObj(sel.error) } : { ok: true, rows: sel.data }
+  });
+}
+
+async function runWriteTest(){
   const client = window.supabaseClient;
   if (!client) throw new Error("Supabase client ausente.");
 
@@ -624,18 +702,36 @@ async function writeTest(){
     status: false
   };
 
+  setDiagStatus("Testando INSERT...");
+  setDiagOut({ step: "insert", payload });
   adminMsg("Testando INSERT...", "muted");
   const ins = await client.from("pesquisas").insert(payload).select("id").single();
-  if (ins.error) throw ins.error;
+  if (ins.error) {
+    setDiagStatus("FALHOU no INSERT");
+    setDiagOut({ step: "insert", error: errToObj(ins.error) });
+    return;
+  }
 
+  setDiagStatus("INSERT OK. Testando UPDATE...");
   adminMsg("INSERT OK. Testando UPDATE...", "muted");
   const upd = await client.from("pesquisas").update({ titulo: "Teste Admin (upd)" }).eq("id", ins.data.id);
-  if (upd.error) throw upd.error;
+  if (upd.error) {
+    setDiagStatus("FALHOU no UPDATE");
+    setDiagOut({ step: "update", inserted: ins.data, error: errToObj(upd.error) });
+    return;
+  }
 
+  setDiagStatus("UPDATE OK. Limpando (DELETE)...");
   adminMsg("UPDATE OK. Testando DELETE...", "muted");
   const del = await client.from("pesquisas").delete().eq("id", ins.data.id);
-  if (del.error) throw del.error;
+  if (del.error) {
+    setDiagStatus("FALHOU no DELETE (não é grave)");
+    setDiagOut({ step: "delete", inserted: ins.data, error: errToObj(del.error) });
+    return;
+  }
 
+  setDiagStatus("CRUD OK ✅");
+  setDiagOut({ ok: true, inserted: ins.data });
   adminMsg("CRUD OK ✅ (RLS e colunas estão corretas)", "ok");
 }
 
@@ -919,7 +1015,7 @@ function escapeHtml(str){
     .replaceAll("'", "&#039;");
 }
 
-async function readForm(){
+async function readFormToPayload(){
   const formData = new FormData(els.form);
   const slug = normalizeSlug(formData.get("slug"));
   if (!slug) throw new Error("Slug obrigatório");
@@ -1014,7 +1110,7 @@ document.addEventListener("click", async (event) => {
 
   try {
     if (action === "edit") {
-      const selected = researchCache.find((row) => row.id === id);
+      const selected = researchCache.find((row) => String(row.id) === String(id));
       if (selected) loadResearchToForm(selected);
     }
 
@@ -1033,7 +1129,7 @@ document.addEventListener("click", async (event) => {
       setSaveMsg("Excluindo...");
       adminMsg("Excluindo...", "muted");
       await deleteResearch(id);
-      if (currentResearchId === id) {
+      if (String(currentResearchId) === String(id)) {
         currentResearchId = null;
         state.current = null;
       }

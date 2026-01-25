@@ -42,7 +42,6 @@
             <div class="sidebar-head">
               <button id="btn-new" class="btn primary" type="button">Nova pesquisa</button>
               <button id="btnSeedTests" class="btn-mini" type="button">Criar pesquisas teste</button>
-              <button id="btnWriteTest" class="btn-mini" type="button">Teste de escrita</button>
               <div class="side-title">Pesquisas cadastradas</div>
             </div>
             <div id="researchList" class="research-list"></div>
@@ -241,6 +240,21 @@
                 </div>
               </div>
             </form>
+
+            <div
+              id="debugPanel"
+              style="margin-top:14px;padding:12px;border:1px solid rgba(0,0,0,.1);border-radius:12px;background:#fff;"
+            >
+              <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                <button id="btnDiag" class="btn-mini">Diagnóstico</button>
+                <button id="btnWriteTest" class="btn-mini">Teste INSERT/UPDATE</button>
+                <span id="diagStatus" style="font-size:12px;color:#6b7a75;"></span>
+              </div>
+              <pre
+                id="diagOut"
+                style="margin-top:10px;white-space:pre-wrap;word-break:break-word;font-size:12px;color:#0b2a1f;"
+              ></pre>
+            </div>
 
             <div id="empty-state" class="card">
               <h2>Selecione uma pesquisa</h2>
