@@ -21,6 +21,7 @@ const els = {
   listMsg: document.getElementById("researchListMsg"),
   newBtn: document.getElementById("btn-new"),
   seedBtn: document.getElementById("btnSeedTests"),
+  writeTestBtn: document.getElementById("btnWriteTest"),
   form: document.getElementById("pesquisa-form"),
   formTitle: document.getElementById("form-title"),
   deleteBtn: document.getElementById("btn-delete"),
@@ -48,6 +49,13 @@ function setSaveMsg(text, ok = false){
   if (!el) return;
   el.textContent = text || "";
   el.style.color = ok ? "#198754" : "#6b7a75";
+}
+
+function adminMsg(text, type = "muted"){
+  const el = document.getElementById("adminMsg");
+  if (!el) return;
+  el.className = `admin-msg ${type}`;
+  el.textContent = text || "";
 }
 
 function formatSupabaseError(error){
@@ -110,6 +118,7 @@ async function init(){
   els.logout.addEventListener("click", handleLogout);
   els.newBtn.addEventListener("click", () => clearForm());
   els.seedBtn?.addEventListener("click", handleSeedTests);
+  els.writeTestBtn?.addEventListener("click", handleWriteTest);
   els.form.addEventListener("submit", handleSavePesquisa);
   els.deleteBtn.addEventListener("click", handleDeletePesquisa);
   els.addTopico.addEventListener("click", () => addTopicoItem());
@@ -235,10 +244,12 @@ async function handleSeedTests(){
   if (!state.supabase) return;
   if (!state.session) {
     setSaveMsg("Faça login para criar pesquisas teste.");
+    adminMsg("Faça login para criar pesquisas teste.", "err");
     return;
   }
   try {
     setSaveMsg("Criando pesquisas teste...");
+    adminMsg("Criando pesquisas teste...", "muted");
     const rows = buildSeedRows();
     const { error } = await state.supabase
       .from("pesquisas")
@@ -246,9 +257,12 @@ async function handleSeedTests(){
     if (error) throw error;
     await refreshListAndSelect(null);
     setSaveMsg("Pesquisas teste criadas ✅", true);
+    adminMsg("Pesquisas teste criadas ✅", "ok");
   } catch (error) {
     console.error(error);
-    setSaveMsg(`Erro seed: ${formatSupabaseError(error)}`);
+    const msg = `Erro seed: ${formatSupabaseError(error)}`;
+    setSaveMsg(msg);
+    adminMsg(msg, "err");
   }
 }
 
@@ -356,6 +370,7 @@ function clearForm(){
   setTab("conteudo");
   loadPontos();
   setSaveMsg("");
+  adminMsg("");
 }
 
 function loadResearchToForm(pesquisa){
@@ -369,6 +384,7 @@ function loadResearchToForm(pesquisa){
   setTab("conteudo");
   loadPontos();
   setSaveMsg(pesquisa?.id ? `Editando: ${pesquisa.slug || ""}` : "", true);
+  adminMsg(pesquisa?.id ? `Editando: ${pesquisa.slug || ""}` : "", "muted");
 }
 
 async function refreshListAndSelect(selectId = null){
@@ -387,7 +403,9 @@ async function refreshListAndSelect(selectId = null){
     }
   } catch (error) {
     console.error(error);
-    setSaveMsg(`Erro ao carregar pesquisas: ${formatSupabaseError(error)}`);
+    const msg = `Erro ao carregar pesquisas: ${formatSupabaseError(error)}`;
+    setSaveMsg(msg);
+    adminMsg(msg, "err");
   }
 }
 
@@ -481,92 +499,25 @@ async function handleSavePesquisa(e){
 
   try {
     setSaveMsg("Salvando...");
-    const formData = new FormData(els.form);
-    const slug = normalizeSlug(formData.get("slug"));
-    if (!slug) throw new Error("Slug é obrigatório.");
-
-    const titulo = String(formData.get("titulo") || "").trim();
-    if (!titulo) throw new Error("Título é obrigatório.");
-
-    setValue("slug", slug);
-
-    const capaUrl = await maybeUploadFile(formData.get("capaFile"), `pesquisas/${slug}/capa`)
-      || String(formData.get("capaUrl") || "").trim();
-
-    const relatorioUrl = await maybeUploadFile(formData.get("relatorioFile"), `pesquisas/${slug}/relatorio`)
-      || String(formData.get("relatorioUrl") || "").trim();
-
-    const realizacaoLogo = await maybeUploadFile(formData.get("realizacaoLogoFile"), `pesquisas/${slug}/logos/realizacao`)
-      || String(formData.get("realizacaoLogoUrl") || "").trim();
-
-    const financiadorLogo = await maybeUploadFile(formData.get("financiadorLogoFile"), `pesquisas/${slug}/logos/financiador`)
-      || String(formData.get("financiadorLogoUrl") || "").trim();
-
-    const topicos = await collectTopicos(slug);
-    const equipe = await collectEquipe(slug);
-    const csvFallback = String(formData.get("csvUrl") || "").trim();
-    const leituraUrl = String(formData.get("relatorioLeituraUrl") || "").trim();
-
-    setValue("capaUrl", capaUrl);
-    setValue("relatorioUrl", relatorioUrl);
-    setValue("relatorioUrlConfirm", relatorioUrl);
-    setValue("relatorioLeituraUrlConfirm", leituraUrl);
-
-    const configJson = {
-      mapa: {
-        csvUrl: csvFallback
-      },
-      pesquisaResumo: {
-        introducao: {
-          titulo: String(formData.get("introTitulo") || "").trim(),
-          texto: String(formData.get("introTexto") || "").trim()
-        },
-        citacao: {
-          texto: String(formData.get("citacaoTexto") || "").trim(),
-          autor: String(formData.get("citacaoAutor") || "").trim()
-        },
-        topicos
-      },
-      fichaTecnica: {
-        realizacao: {
-          nome: String(formData.get("realizacaoNome") || "").trim(),
-          logo: realizacaoLogo
-        },
-        financiador: {
-          nome: String(formData.get("financiadorNome") || "").trim(),
-          logo: financiadorLogo
-        },
-        equipe
-      }
-    };
-
-    const payload = {
-      slug,
-      titulo,
-      ano_base: String(formData.get("anoBase") || "").trim() || null,
-      ordem: Number(formData.get("ordem") || 0),
-      descricao_curta: String(formData.get("descricaoCurta") || "").trim() || null,
-      sinopse: String(formData.get("sinopse") || "").trim() || null,
-      status: String(formData.get("status") || "true") === "true",
-      csv_fallback: csvFallback || null,
-      capa_url: capaUrl || null,
-      relatorio_pdf_url: relatorioUrl || null,
-      leitura_url: leituraUrl || null,
-      config_json: configJson
-    };
+    adminMsg("Salvando...", "muted");
+    const payload = await readForm();
 
     if (!currentResearchId) {
       const newId = await createResearch(payload);
       await refreshListAndSelect(newId);
       setSaveMsg("Pesquisa criada ✅", true);
+      adminMsg("Criada ✅", "ok");
     } else {
       await updateResearch(currentResearchId, payload);
       await refreshListAndSelect(currentResearchId);
       setSaveMsg("Pesquisa atualizada ✅", true);
+      adminMsg("Atualizada ✅", "ok");
     }
   } catch (error) {
     console.error(error);
-    setSaveMsg(`Erro ao salvar: ${formatSupabaseError(error)}`);
+    const msg = `Erro ao salvar: ${formatSupabaseError(error)}`;
+    setSaveMsg(msg);
+    adminMsg(msg, "err");
   }
 }
 
@@ -575,14 +526,18 @@ async function handleDeletePesquisa(){
   if (!confirm("Excluir esta pesquisa?")) return;
   try {
     setSaveMsg("Excluindo...");
+    adminMsg("Excluindo...", "muted");
     await deleteResearch(currentResearchId);
     currentResearchId = null;
     state.current = null;
     await refreshListAndSelect(null);
     setSaveMsg("Excluída ✅", true);
+    adminMsg("Excluída ✅", "ok");
   } catch (error) {
     console.error(error);
-    setSaveMsg(`Erro ao excluir: ${formatSupabaseError(error)}`);
+    const msg = `Erro ao excluir: ${formatSupabaseError(error)}`;
+    setSaveMsg(msg);
+    adminMsg(msg, "err");
   }
 }
 
@@ -645,6 +600,43 @@ async function duplicateResearch(id){
     .single();
   if (error) throw error;
   return data.id;
+}
+
+async function handleWriteTest(){
+  try {
+    await writeTest();
+  } catch (error) {
+    console.error(error);
+    adminMsg(`Falha no teste: ${error.message || String(error)}`, "err");
+  }
+}
+
+async function writeTest(){
+  const client = window.supabaseClient;
+  if (!client) throw new Error("Supabase client ausente.");
+
+  const slug = `teste-admin-${Date.now()}`;
+  const payload = {
+    slug,
+    titulo: "Teste Admin",
+    ano_base: "2025",
+    ordem: 999,
+    status: false
+  };
+
+  adminMsg("Testando INSERT...", "muted");
+  const ins = await client.from("pesquisas").insert(payload).select("id").single();
+  if (ins.error) throw ins.error;
+
+  adminMsg("INSERT OK. Testando UPDATE...", "muted");
+  const upd = await client.from("pesquisas").update({ titulo: "Teste Admin (upd)" }).eq("id", ins.data.id);
+  if (upd.error) throw upd.error;
+
+  adminMsg("UPDATE OK. Testando DELETE...", "muted");
+  const del = await client.from("pesquisas").delete().eq("id", ins.data.id);
+  if (del.error) throw del.error;
+
+  adminMsg("CRUD OK ✅ (RLS e colunas estão corretas)", "ok");
 }
 
 function setTab(tab){
@@ -927,6 +919,92 @@ function escapeHtml(str){
     .replaceAll("'", "&#039;");
 }
 
+async function readForm(){
+  const formData = new FormData(els.form);
+  const slug = normalizeSlug(formData.get("slug"));
+  if (!slug) throw new Error("Slug obrigatório");
+
+  const titulo = String(formData.get("titulo") || "").trim();
+  if (!titulo) throw new Error("Título obrigatório");
+
+  setValue("slug", slug);
+
+  const capaUrl = await maybeUploadFile(formData.get("capaFile"), `pesquisas/${slug}/capa`)
+    || String(formData.get("capaUrl") || "").trim();
+
+  const relatorioUrl = await maybeUploadFile(formData.get("relatorioFile"), `pesquisas/${slug}/relatorio`)
+    || String(formData.get("relatorioUrl") || "").trim();
+
+  const realizacaoLogo = await maybeUploadFile(formData.get("realizacaoLogoFile"), `pesquisas/${slug}/logos/realizacao`)
+    || String(formData.get("realizacaoLogoUrl") || "").trim();
+
+  const financiadorLogo = await maybeUploadFile(formData.get("financiadorLogoFile"), `pesquisas/${slug}/logos/financiador`)
+    || String(formData.get("financiadorLogoUrl") || "").trim();
+
+  const csvFallback = String(formData.get("csvUrl") || "").trim();
+  const leituraUrl = String(formData.get("relatorioLeituraUrl") || "").trim();
+  const topicos = await collectTopicos(slug);
+  const equipe = await collectEquipe(slug);
+  const configJson = buildConfigJsonFromTabs({
+    formData,
+    csvFallback,
+    topicos,
+    equipe,
+    realizacaoLogo,
+    financiadorLogo
+  });
+
+  setValue("capaUrl", capaUrl);
+  setValue("relatorioUrl", relatorioUrl);
+  setValue("relatorioUrlConfirm", relatorioUrl);
+  setValue("relatorioLeituraUrlConfirm", leituraUrl);
+
+  return {
+    slug,
+    titulo,
+    ano_base: String(formData.get("anoBase") || "").trim() || null,
+    ordem: Number(formData.get("ordem") || 0),
+    descricao_curta: String(formData.get("descricaoCurta") || "").trim() || null,
+    sinopse: String(formData.get("sinopse") || "").trim() || null,
+    status: String(formData.get("status") || "true") === "true",
+    csv_fallback: csvFallback || null,
+    capa_url: capaUrl || null,
+    relatorio_pdf_url: relatorioUrl || null,
+    leitura_url: leituraUrl || null,
+    config_json: configJson
+  };
+}
+
+function buildConfigJsonFromTabs({ formData, csvFallback, topicos, equipe, realizacaoLogo, financiadorLogo }){
+  return {
+    mapa: {
+      csvUrl: csvFallback
+    },
+    pesquisaResumo: {
+      introducao: {
+        titulo: String(formData.get("introTitulo") || "").trim(),
+        texto: String(formData.get("introTexto") || "").trim()
+      },
+      citacao: {
+        texto: String(formData.get("citacaoTexto") || "").trim(),
+        autor: String(formData.get("citacaoAutor") || "").trim()
+      },
+      topicos
+    },
+    fichaTecnica: {
+      realizacao: {
+        nome: String(formData.get("realizacaoNome") || "").trim(),
+        logo: realizacaoLogo
+      },
+      financiador: {
+        nome: String(formData.get("financiadorNome") || "").trim(),
+        logo: financiadorLogo
+      },
+      equipe
+    }
+  };
+}
+
 document.addEventListener("click", async (event) => {
   const btn = event.target?.closest("[data-act]");
   if (!btn) return;
@@ -943,14 +1021,17 @@ document.addEventListener("click", async (event) => {
     if (action === "dup") {
       if (!confirm("Duplicar esta pesquisa?")) return;
       setSaveMsg("Duplicando...");
+      adminMsg("Duplicando...", "muted");
       const newId = await duplicateResearch(id);
       await refreshListAndSelect(newId);
       setSaveMsg("Duplicada ✅", true);
+      adminMsg("Duplicada ✅", "ok");
     }
 
     if (action === "del") {
       if (!confirm("Excluir esta pesquisa? Isso não pode ser desfeito.")) return;
       setSaveMsg("Excluindo...");
+      adminMsg("Excluindo...", "muted");
       await deleteResearch(id);
       if (currentResearchId === id) {
         currentResearchId = null;
@@ -958,10 +1039,13 @@ document.addEventListener("click", async (event) => {
       }
       await refreshListAndSelect(null);
       setSaveMsg("Excluída ✅", true);
+      adminMsg("Excluída ✅", "ok");
     }
   } catch (error) {
     console.error(error);
-    setSaveMsg(`Erro: ${formatSupabaseError(error)}`);
+    const msg = `Erro: ${formatSupabaseError(error)}`;
+    setSaveMsg(msg);
+    adminMsg(msg, "err");
   }
 });
 
