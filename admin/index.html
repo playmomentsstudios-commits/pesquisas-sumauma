@@ -99,23 +99,22 @@
                     <option value="false">Rascunho</option>
                   </select>
                 </label>
-                <label>
-                  CSV (fallback do mapa)
-                  <input type="text" name="csvUrl" placeholder="./public/data/arquivo.csv" />
-                </label>
               </div>
+              <input type="hidden" name="csvUrl" />
+              <input type="hidden" name="capaUrl" />
+              <input type="hidden" name="relatorioUrl" />
+              <input type="hidden" name="realizacaoLogoUrl" />
+              <input type="hidden" name="financiadorLogoUrl" />
 
               <div class="upload-row">
                 <div>
                   <label>Capa</label>
                   <input type="file" name="capaFile" accept="image/*" />
-                  <input type="text" name="capaUrl" placeholder="URL da capa" />
                   <img id="capa-preview" class="preview" alt="Prévia da capa" />
                 </div>
                 <div>
                   <label>Relatório PDF</label>
                   <input type="file" name="relatorioFile" accept="application/pdf" />
-                  <input type="text" name="relatorioUrl" placeholder="URL do PDF" />
                   <label>
                     URL de leitura (opcional)
                     <input type="text" name="relatorioLeituraUrl" placeholder="https://..." />
@@ -170,7 +169,6 @@
                   <label>
                     Logo realização
                     <input type="file" name="realizacaoLogoFile" accept="image/*" />
-                    <input type="text" name="realizacaoLogoUrl" placeholder="URL do logo" />
                   </label>
                   <label>
                     Financiador (nome)
@@ -179,7 +177,6 @@
                   <label>
                     Logo financiador
                     <input type="file" name="financiadorLogoFile" accept="image/*" />
-                    <input type="text" name="financiadorLogoUrl" placeholder="URL do logo" />
                   </label>
                 </div>
 
