@@ -160,6 +160,75 @@ body {
   border-color: #dc3545;
 }
 
+/* ===== Aba Pesquisa (Editorial) ===== */
+.ed-admin-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.ed-admin-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.ed-admin-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.ed-preview-iframe {
+  width: 100%;
+  height: 560px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 12px;
+  background: #fff;
+}
+
+.bloco-item {
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  padding: 10px;
+  margin-bottom: 10px;
+  background: #fff;
+}
+
+.bloco-row {
+  display: grid;
+  grid-template-columns: 180px 1fr 120px;
+  gap: 10px;
+  align-items: end;
+}
+
+.bloco-row label {
+  margin: 0;
+}
+
+.bloco-fields {
+  margin-top: 10px;
+  display: grid;
+  gap: 10px;
+}
+
+@media (max-width: 980px) {
+  .ed-admin-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ed-preview-iframe {
+    height: 520px;
+  }
+
+  .bloco-row {
+    grid-template-columns: 1fr;
+  }
+}
+
 .small.muted {
   color: #6b7a75;
   font-size: 12px;
