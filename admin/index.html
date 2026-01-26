@@ -124,6 +124,7 @@
 
               <div class="tabs">
                 <button class="tab active" type="button" data-tab="conteudo">Conteúdo</button>
+                <button class="tab" type="button" data-tab="pesquisa-editorial">Pesquisa (Editorial)</button>
                 <button class="tab" type="button" data-tab="ficha">Ficha técnica</button>
                 <button class="tab" type="button" data-tab="relatorio">Relatório</button>
                 <button class="tab" type="button" data-tab="pontos">Pontos do mapa</button>
@@ -156,6 +157,42 @@
                     <button id="add-topico" class="btn light" type="button">Adicionar tópico</button>
                   </div>
                   <div id="topicos-list" class="repeater-list"></div>
+                </div>
+              </div>
+
+              <div class="tab-panel hidden" data-tab-panel="pesquisa-editorial">
+                <div class="ed-admin-head">
+                  <div>
+                    <h3>Pesquisa (Editorial + Modular)</h3>
+                    <p class="muted">
+                      Monte a página final usando blocos (texto, citação, imagem, tópico…).
+                      Se nenhum bloco existir, o site usa o modo simples (fallback).
+                    </p>
+                  </div>
+
+                  <div class="ed-admin-actions">
+                    <button id="btn-ed-from-resumo" class="btn light" type="button">Gerar a partir do Resumo</button>
+                    <button id="btn-ed-add-bloco" class="btn primary" type="button">Adicionar bloco</button>
+                    <button id="btn-ed-preview" class="btn light" type="button">Atualizar prévia</button>
+                  </div>
+                </div>
+
+                <div class="ed-admin-grid">
+                  <div class="card" style="padding:12px;">
+                    <h4 style="margin:0 0 10px;">Blocos da página</h4>
+                    <div id="blocos-list" class="repeater-list"></div>
+                    <div class="muted" style="margin-top:10px;font-size:12px;">
+                      Dica: use “Imagem” entre seções para o ritmo editorial (full-bleed).
+                    </div>
+                  </div>
+
+                  <div class="card" style="padding:12px;">
+                    <h4 style="margin:0 0 10px;">Prévia (igual a página final)</h4>
+                    <div class="muted" style="font-size:12px;margin-bottom:8px;">
+                      A prévia usa o renderer real do site (/src/js/views/pesquisa.js).
+                    </div>
+                    <iframe id="pesquisa-preview-frame" class="ed-preview-iframe"></iframe>
+                  </div>
                 </div>
               </div>
 

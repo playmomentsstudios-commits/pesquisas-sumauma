@@ -38,7 +38,12 @@ const els = {
   pontoForm: document.getElementById("ponto-form"),
   pontoFormTitle: document.getElementById("ponto-form-title"),
   pontoDelete: document.getElementById("ponto-delete"),
-  importCsv: document.getElementById("import-csv")
+  importCsv: document.getElementById("import-csv"),
+  blocosList: document.getElementById("blocos-list"),
+  addBlocoBtn: document.getElementById("btn-ed-add-bloco"),
+  previewBtn: document.getElementById("btn-ed-preview"),
+  fromResumoBtn: document.getElementById("btn-ed-from-resumo"),
+  previewFrame: document.getElementById("pesquisa-preview-frame")
 };
 
 function $(id){
@@ -189,6 +194,13 @@ async function init(){
   els.pontoForm.addEventListener("submit", handleSavePonto);
   els.pontoDelete.addEventListener("click", handleDeletePonto);
   els.importCsv.addEventListener("change", handleImportCsv);
+  els.addBlocoBtn?.addEventListener("click", () => addBlocoItem());
+  els.previewBtn?.addEventListener("click", () => updatePesquisaPreview());
+  els.fromResumoBtn?.addEventListener("click", () => generateBlocosFromResumo());
+
+  els.form?.addEventListener("input", debounce(() => {
+    if (getActiveTab() === "pesquisa-editorial") updatePesquisaPreview();
+  }, 450));
 
   els.tabs.forEach((tab) => {
     tab.addEventListener("click", () => setTab(tab.dataset.tab));
@@ -424,6 +436,7 @@ function fillForm(pesquisa){
   const cfg = pesquisa.config_json || {};
   const ficha = cfg.fichaTecnica || {};
   const resumo = cfg.pesquisaResumo || {};
+  const conteudo = cfg.pesquisaConteudo || {};
   const mapa = cfg.mapa || {};
 
   setValue("slug", pesquisa.slug || "");
@@ -455,6 +468,8 @@ function fillForm(pesquisa){
 
   renderTopicos(resumo.topicos || []);
   renderEquipe(ficha.equipe || []);
+  renderBlocos(conteudo.blocos || []);
+  if (getActiveTab() === "pesquisa-editorial") updatePesquisaPreview();
 }
 
 function setValue(name, value){
@@ -1192,6 +1207,283 @@ function escapeHtml(str){
     .replaceAll("'", "&#039;");
 }
 
+function debounce(fn, ms){
+  let t = null;
+  return (...args) => {
+    clearTimeout(t);
+    t = setTimeout(() => fn(...args), ms);
+  };
+}
+
+function getActiveTab(){
+  const active = document.querySelector(".tabs .tab.active");
+  return active?.dataset?.tab || "";
+}
+
+function renderBlocos(blocos){
+  if (!els.blocosList) return;
+  els.blocosList.innerHTML = "";
+  (Array.isArray(blocos) ? blocos : []).forEach((bloco) => addBlocoItem(bloco));
+}
+
+function addBlocoItem(b = {}){
+  if (!els.blocosList) return;
+
+  const wrapper = document.createElement("div");
+  wrapper.className = "bloco-item";
+  wrapper.dataset.bloco = "1";
+
+  const type = String(b.type || "texto").toLowerCase();
+
+  wrapper.innerHTML = `
+    <div class="bloco-row">
+      <label>Tipo
+        <select name="blocoTipo">
+          <option value="texto" ${type === "texto" ? "selected" : ""}>Texto</option>
+          <option value="citacao" ${type === "citacao" ? "selected" : ""}>Citação</option>
+          <option value="imagem" ${type === "imagem" ? "selected" : ""}>Imagem</option>
+          <option value="topico" ${type === "topico" ? "selected" : ""}>Tópico</option>
+          <option value="separador" ${type === "separador" ? "selected" : ""}>Separador</option>
+        </select>
+      </label>
+
+      <label>Título/Label (opcional)
+        <input type="text" name="blocoTitulo" value="${escapeHtml(b.titulo || b.label || "")}" placeholder="Ex: Considerações finais" />
+      </label>
+
+      <button class="btn light" type="button" data-remove="1">Remover</button>
+    </div>
+
+    <div class="bloco-fields" data-fields></div>
+  `;
+
+  const fields = wrapper.querySelector("[data-fields]");
+  const tipoSel = wrapper.querySelector('[name="blocoTipo"]');
+  const removeBtn = wrapper.querySelector("[data-remove]");
+
+  function renderFields(){
+    const t = String(tipoSel.value || "texto");
+
+    if (t === "texto") {
+      fields.innerHTML = `
+        <label>Texto
+          <textarea name="blocoTexto" rows="4" placeholder="Parágrafos separados por linha em branco">${escapeHtml(b.texto || "")}</textarea>
+        </label>
+      `;
+      return;
+    }
+
+    if (t === "citacao") {
+      fields.innerHTML = `
+        <label>Texto da citação
+          <textarea name="blocoTexto" rows="3">${escapeHtml(b.texto || "")}</textarea>
+        </label>
+        <label>Autor
+          <input type="text" name="blocoAutor" value="${escapeHtml(b.autor || "")}" />
+        </label>
+      `;
+      return;
+    }
+
+    if (t === "imagem") {
+      fields.innerHTML = `
+        <label>URL da imagem (ou bucket/path)
+          <input type="text" name="blocoSrc" value="${escapeHtml(b.src || b.url || "")}" placeholder="site-assets/images/pesquisa/img-1.jpg ou https://..." />
+        </label>
+        <label>Alt (acessibilidade)
+          <input type="text" name="blocoAlt" value="${escapeHtml(b.alt || "")}" />
+        </label>
+        <label>Legenda (opcional)
+          <input type="text" name="blocoLegenda" value="${escapeHtml(b.legenda || "")}" />
+        </label>
+      `;
+      return;
+    }
+
+    if (t === "topico") {
+      fields.innerHTML = `
+        <label>Título do tópico
+          <input type="text" name="blocoTopicoTitulo" value="${escapeHtml(b.titulo || "")}" />
+        </label>
+        <label>Resumo do tópico
+          <textarea name="blocoResumo" rows="3">${escapeHtml(b.resumo || "")}</textarea>
+        </label>
+        <label>Imagem (opcional) — URL ou bucket/path
+          <input type="text" name="blocoImagem" value="${escapeHtml(b.imagem || "")}" placeholder="site-assets/images/pesquisa/img-2.jpg ou https://..." />
+        </label>
+      `;
+      return;
+    }
+
+    if (t === "separador") {
+      fields.innerHTML = `
+        <label>Label do separador
+          <input type="text" name="blocoLabel" value="${escapeHtml(b.label || b.titulo || "")}" placeholder="Ex: Referências" />
+        </label>
+      `;
+      return;
+    }
+
+    fields.innerHTML = `<div class="muted" style="font-size:12px;">Tipo desconhecido.</div>`;
+  }
+
+  renderFields();
+
+  tipoSel.addEventListener("change", () => {
+    b = { type: tipoSel.value };
+    renderFields();
+    if (getActiveTab() === "pesquisa-editorial") updatePesquisaPreview();
+  });
+
+  wrapper.addEventListener("input", () => {
+    if (getActiveTab() === "pesquisa-editorial") updatePesquisaPreview();
+  });
+
+  removeBtn.addEventListener("click", () => {
+    wrapper.remove();
+    if (getActiveTab() === "pesquisa-editorial") updatePesquisaPreview();
+  });
+
+  els.blocosList.appendChild(wrapper);
+}
+
+function collectBlocosFromUI(){
+  if (!els.blocosList) return [];
+  const items = Array.from(els.blocosList.querySelectorAll('[data-bloco="1"]'));
+
+  return items.map((el) => {
+    const type = String(el.querySelector('[name="blocoTipo"]')?.value || "texto");
+    const titulo = String(el.querySelector('[name="blocoTitulo"]')?.value || "").trim();
+
+    if (type === "texto") {
+      const texto = String(el.querySelector('[name="blocoTexto"]')?.value || "").trim();
+      return { type, texto };
+    }
+
+    if (type === "citacao") {
+      const texto = String(el.querySelector('[name="blocoTexto"]')?.value || "").trim();
+      const autor = String(el.querySelector('[name="blocoAutor"]')?.value || "").trim();
+      return { type, texto, autor };
+    }
+
+    if (type === "imagem") {
+      const src = String(el.querySelector('[name="blocoSrc"]')?.value || "").trim();
+      const alt = String(el.querySelector('[name="blocoAlt"]')?.value || "").trim();
+      const legenda = String(el.querySelector('[name="blocoLegenda"]')?.value || "").trim();
+      return { type, src, alt, legenda };
+    }
+
+    if (type === "topico") {
+      const t = String(el.querySelector('[name="blocoTopicoTitulo"]')?.value || titulo || "").trim();
+      const resumo = String(el.querySelector('[name="blocoResumo"]')?.value || "").trim();
+      const imagem = String(el.querySelector('[name="blocoImagem"]')?.value || "").trim();
+      return { type, titulo: t, resumo, imagem };
+    }
+
+    if (type === "separador") {
+      const label = String(el.querySelector('[name="blocoLabel"]')?.value || titulo || "").trim();
+      return { type, label };
+    }
+
+    return { type };
+  }).filter(Boolean);
+}
+
+function generateBlocosFromResumo(){
+  if (!els.form || !els.topicosList) return;
+  const introTitulo = String(els.form.querySelector('[name="introTitulo"]')?.value || "").trim();
+  const introTexto = String(els.form.querySelector('[name="introTexto"]')?.value || "").trim();
+  const citTexto = String(els.form.querySelector('[name="citacaoTexto"]')?.value || "").trim();
+  const citAutor = String(els.form.querySelector('[name="citacaoAutor"]')?.value || "").trim();
+
+  const topicoEls = Array.from(els.topicosList.querySelectorAll('[data-topic="1"]'));
+  const topicos = topicoEls.map((t) => ({
+    titulo: String(t.querySelector('[name="topicoTitulo"]')?.value || "").trim(),
+    texto: String(t.querySelector('[name="topicoTexto"]')?.value || "").trim(),
+    imagem: String(t.querySelector('[name="topicoImagemUrl"]')?.value || "").trim()
+  })).filter((x) => x.titulo || x.texto || x.imagem);
+
+  const blocos = [];
+
+  if (introTexto) {
+    if (introTitulo) blocos.push({ type: "separador", label: introTitulo });
+    blocos.push({ type: "texto", texto: introTexto });
+  }
+
+  if (citTexto) {
+    blocos.push({ type: "citacao", texto: citTexto, autor: citAutor });
+  }
+
+  topicos.forEach((tp) => {
+    if (tp.imagem) blocos.push({ type: "imagem", src: tp.imagem, alt: tp.titulo || "Imagem", legenda: "" });
+    blocos.push({ type: "topico", titulo: tp.titulo, resumo: tp.texto, imagem: "" });
+  });
+
+  if (!blocos.length) {
+    showAlert("err", "Nada para gerar: preencha introdução/citação/tópicos no Resumo primeiro.");
+    return;
+  }
+
+  renderBlocos(blocos);
+  showAlert("ok", "Blocos gerados a partir do Resumo ✅");
+  updatePesquisaPreview();
+}
+
+async function updatePesquisaPreview(){
+  try {
+    if (!els.previewFrame || !els.form) return;
+
+    const formData = new FormData(els.form);
+    const slug = normalizeSlug(formData.get("slug"));
+    const titulo = String(formData.get("titulo") || "").trim();
+
+    const capaUrl = String(formData.get("capaUrl") || "").trim();
+    const descricaoCurta = String(formData.get("descricaoCurta") || "").trim();
+    const sinopse = String(formData.get("sinopse") || "").trim();
+    const anoBase = String(formData.get("anoBase") || "").trim();
+
+    const blocos = collectBlocosFromUI();
+
+    const p = {
+      slug,
+      titulo,
+      anoBase,
+      descricaoCurta,
+      sinopse,
+      capa: capaUrl,
+      pesquisaConteudo: { blocos },
+      pesquisaResumo: {}
+    };
+
+    const mod = await import("../src/js/views/pesquisa.js");
+    const html = await mod.default(p);
+
+    const doc = `
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <link rel="stylesheet" href="../src/css/style.css"/>
+  <style>
+    body{ margin:0; background:#fff; }
+    .app{ padding: 10px 10px 30px; }
+    .header{ display:none; }
+    .footer{ display:none; }
+  </style>
+</head>
+<body>
+  <main class="app">${html}</main>
+</body>
+</html>`;
+
+    els.previewFrame.srcdoc = doc;
+  } catch (err) {
+    console.error("[Preview] erro:", err);
+    showAlert("err", `Prévia falhou: ${friendlyError(err)}`);
+  }
+}
+
 function isNewResearch(){
   return !(window.currentResearchId || currentResearchId);
 }
@@ -1234,13 +1526,15 @@ async function readFormToPayload(){
   const leituraUrl = relatorioUrl;
   const topicos = await collectTopicos(slug);
   const equipe = await collectEquipe(slug);
+  const blocos = collectBlocosFromUI();
   const configJson = buildConfigJsonFromTabs({
     formData,
     csvFallback,
     topicos,
     equipe,
     realizacaoLogo,
-    financiadorLogo
+    financiadorLogo,
+    blocos
   });
 
   setValue("capaUrl", capaUrl);
@@ -1265,10 +1559,13 @@ async function readFormToPayload(){
   };
 }
 
-function buildConfigJsonFromTabs({ formData, csvFallback, topicos, equipe, realizacaoLogo, financiadorLogo }){
+function buildConfigJsonFromTabs({ formData, csvFallback, topicos, equipe, realizacaoLogo, financiadorLogo, blocos }){
   return {
     mapa: {
       csvUrl: csvFallback
+    },
+    pesquisaConteudo: {
+      blocos: Array.isArray(blocos) ? blocos : []
     },
     pesquisaResumo: {
       introducao: {
