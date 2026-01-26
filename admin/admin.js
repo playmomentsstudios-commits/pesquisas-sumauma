@@ -32,7 +32,8 @@ const els = {
   equipeList: document.getElementById("equipe-list"),
   addEquipe: document.getElementById("add-equipe"),
   capaPreview: document.getElementById("capa-preview"),
-  tabs: document.querySelectorAll("#pesquisa-form .tabs .tab"),
+  tabsRoot: document.getElementById("editor-tabs"),
+  tabs: document.querySelectorAll("#editor-tabs .tab"),
   tabPanels: document.querySelectorAll("#pesquisa-form [data-tab-panel]"),
   pontosList: document.getElementById("pontos-list"),
   pontoForm: document.getElementById("ponto-form"),
@@ -45,6 +46,17 @@ const els = {
   fromResumoBtn: document.getElementById("btn-ed-from-resumo"),
   previewFrame: document.getElementById("pesquisa-preview-frame")
 };
+
+const quickSyncFields = new Set([
+  "introTitulo",
+  "introTexto",
+  "citacaoTexto",
+  "citacaoAutor",
+  "realizacaoNome",
+  "financiadorNome",
+  "realizacaoLogoUrl",
+  "financiadorLogoUrl"
+]);
 
 function $(id){
   return document.getElementById(id);
@@ -169,7 +181,7 @@ async function init(){
   if (!state.supabase || !window.__SUPABASE_CONFIG_OK__) {
     els.loginError.textContent = "Supabase não configurado. Crie o arquivo js/supabase-config.js.";
     setDiag("Supabase não configurado: confira /js/supabase-config.js e caminhos no /admin/index.html");
-    els.loginForm.querySelector("button").disabled = true;
+    els.loginForm?.querySelector("button")?.setAttribute("disabled", "disabled");
     return;
   }
   setDiag(`Supabase Client OK: ${window.SUPABASE_URL || "configurado"}`);
@@ -181,29 +193,42 @@ async function init(){
     setSession(session);
   });
 
-  els.loginForm.addEventListener("submit", handleLogin);
-  els.logout.addEventListener("click", handleLogout);
-  els.newBtn.addEventListener("click", () => clearForm());
+  els.loginForm?.addEventListener("submit", handleLogin);
+  els.logout?.addEventListener("click", handleLogout);
+  els.newBtn?.addEventListener("click", () => clearForm());
   els.diagBtn?.addEventListener("click", runDiag);
   els.writeTestBtn?.addEventListener("click", handleWriteTest);
-  els.form.addEventListener("submit", handleSavePesquisa);
+  els.form?.addEventListener("submit", handleSavePesquisa);
   els.saveBtn?.addEventListener("click", handleSavePesquisa);
-  els.deleteBtn.addEventListener("click", handleDeletePesquisa);
-  els.addTopico.addEventListener("click", () => addTopicoItem());
-  els.addEquipe.addEventListener("click", () => addEquipeItem());
-  els.pontoForm.addEventListener("submit", handleSavePonto);
-  els.pontoDelete.addEventListener("click", handleDeletePonto);
-  els.importCsv.addEventListener("change", handleImportCsv);
+  els.deleteBtn?.addEventListener("click", handleDeletePesquisa);
+  els.addTopico?.addEventListener("click", () => addTopicoItem());
+  els.addEquipe?.addEventListener("click", () => addEquipeItem());
+  els.pontoForm?.addEventListener("submit", handleSavePonto);
+  els.pontoDelete?.addEventListener("click", handleDeletePonto);
+  els.importCsv?.addEventListener("change", handleImportCsv);
   els.addBlocoBtn?.addEventListener("click", () => addBlocoItem());
   els.previewBtn?.addEventListener("click", () => updatePesquisaPreview());
   els.fromResumoBtn?.addEventListener("click", () => generateBlocosFromResumo());
+
+  els.form?.addEventListener("input", (event) => {
+    const target = event.target;
+    const name = target?.name;
+    if (!name || !quickSyncFields.has(name)) return;
+    const nodes = els.form?.querySelectorAll(`[name="${name}"]`) || [];
+    nodes.forEach((node) => {
+      if (node !== target) node.value = target.value;
+    });
+  });
 
   els.form?.addEventListener("input", debounce(() => {
     if (getActiveTab() === "pesquisa-editorial") updatePesquisaPreview();
   }, 450));
 
-  els.tabs.forEach((tab) => {
-    tab.addEventListener("click", () => setTab(tab.dataset.tab));
+  els.tabsRoot?.addEventListener("click", (e) => {
+    const btn = e.target.closest("button[data-tab]");
+    if (!btn) return;
+    e.preventDefault();
+    setTab(btn.dataset.tab);
   });
 }
 
@@ -439,6 +464,11 @@ function fillForm(pesquisa){
   els.capaPreview.src = pesquisa.capa_url || cfg.capa || "";
   els.capaPreview.classList.toggle("hidden", !els.capaPreview.src);
 
+  const openPesquisaBtn = document.getElementById("btnOpenPesquisa");
+  if (openPesquisaBtn) openPesquisaBtn.href = publicUrlFor(pesquisa.slug, "pesquisa");
+  const openFichaBtn = document.getElementById("btnOpenFicha");
+  if (openFichaBtn) openFichaBtn.href = publicUrlFor(pesquisa.slug, "ficha-tecnica");
+
   setValue("introTitulo", resumo.introducao?.titulo || "");
   setValue("introTexto", resumo.introducao?.texto || "");
   setValue("citacaoTexto", resumo.citacao?.texto || "");
@@ -456,8 +486,10 @@ function fillForm(pesquisa){
 }
 
 function setValue(name, value){
-  const input = els.form.querySelector(`[name="${name}"]`);
-  if (input) input.value = value ?? "";
+  const nodes = els.form?.querySelectorAll(`[name="${name}"]`) || [];
+  nodes.forEach((node) => {
+    node.value = value ?? "";
+  });
 }
 
 function renderTopicos(topicos){
@@ -830,11 +862,17 @@ async function runWriteTest(){
 }
 
 function setTab(tab){
-  els.tabs.forEach((btn) => btn.classList.toggle("active", btn.dataset.tab === tab));
-  els.tabPanels.forEach((panel) => panel.classList.toggle("hidden", panel.dataset.tabPanel !== tab));
+  const tabs = els.tabsRoot?.querySelectorAll(".tab") || [];
+  const panels = els.form?.querySelectorAll("[data-tab-panel]") || [];
+  tabs.forEach((btn) => btn.classList.toggle("active", btn.dataset.tab === tab));
+  panels.forEach((panel) => panel.classList.toggle("hidden", panel.dataset.tabPanel !== tab));
 
   if (tab === "pontos") {
     loadPontos().catch(console.error);
+  }
+
+  if (tab === "ficha") {
+    // reservar para lógica de renderização atrasada, se necessário
   }
 }
 
@@ -1203,8 +1241,13 @@ function debounce(fn, ms){
 }
 
 function getActiveTab(){
-  const active = document.querySelector(".tabs .tab.active");
+  const active = document.querySelector("#editor-tabs .tab.active");
   return active?.dataset?.tab || "";
+}
+
+function publicUrlFor(slug, sub){
+  const s = String(slug || "").trim();
+  return `../${s}/${sub}`;
 }
 
 function renderBlocos(blocos){
