@@ -44,4 +44,17 @@
   } else {
     init();
   }
+
+  window.getSupabaseClient = async function getSupabaseClient(){
+    const loader = window.__SUPABASE_CONFIG_LOADED__;
+    if (loader && typeof loader.then === "function") {
+      try { await loader; } catch (e) {}
+    }
+
+    for (let i = 0; i < 60; i++) {
+      if (window.supabaseClient) return window.supabaseClient;
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    }
+    return window.supabaseClient || null;
+  };
 })();
