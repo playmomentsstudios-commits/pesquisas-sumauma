@@ -33,7 +33,7 @@ const els = {
   addEquipe: document.getElementById("add-equipe"),
   capaPreview: document.getElementById("capa-preview"),
   tabsRoot: document.getElementById("editor-tabs"),
-  tabs: document.querySelectorAll("#editor-tabs .tab"),
+  tabs: document.querySelectorAll("#pesquisa-form .tabs .tab"),
   tabPanels: document.querySelectorAll("#pesquisa-form [data-tab-panel]"),
   pontosList: document.getElementById("pontos-list"),
   pontoForm: document.getElementById("ponto-form"),
@@ -292,7 +292,10 @@ function createEmptyPesquisa(){
     config_json: {
       mapa: {},
       pesquisaResumo: {},
-      fichaTecnica: {}
+      fichaTecnica: {
+        coordenacao: "",
+        parceirosApoiadores: ""
+      }
     }
   };
 }
@@ -398,7 +401,7 @@ function clearForm(){
   els.formTitle.textContent = "Nova pesquisa";
   els.deleteBtn.classList.add("hidden");
   fillForm(empty);
-  setTab("conteudo");
+  setTab("config", { persist: false });
   loadPontos();
   setSaveMsg("");
   adminMsg("");
@@ -412,7 +415,7 @@ function loadResearchToForm(pesquisa){
   els.formTitle.textContent = pesquisa?.id ? "Editar pesquisa" : "Nova pesquisa";
   els.deleteBtn.classList.toggle("hidden", !pesquisa?.id);
   fillForm(pesquisa);
-  setTab("conteudo");
+  setTab("config", { persist: false });
   loadPontos();
   setSaveMsg(pesquisa?.id ? `Editando: ${pesquisa.slug || ""}` : "", true);
   adminMsg(pesquisa?.id ? `Editando: ${pesquisa.slug || ""}` : "", "muted");
@@ -478,6 +481,8 @@ function fillForm(pesquisa){
   setValue("realizacaoLogoUrl", ficha.realizacao?.logo || "");
   setValue("financiadorNome", ficha.financiador?.nome || "");
   setValue("financiadorLogoUrl", ficha.financiador?.logo || "");
+  setValue("coordenacao", ficha.coordenacao || "");
+  setValue("parceirosApoiadores", ficha.parceirosApoiadores || "");
 
   renderTopicos(resumo.topicos || []);
   renderEquipe(ficha.equipe || []);
@@ -861,19 +866,38 @@ async function runWriteTest(){
   adminMsg("CRUD OK ✅ (RLS e colunas estão corretas)", "ok");
 }
 
-function setTab(tab){
-  const tabs = els.tabsRoot?.querySelectorAll(".tab") || [];
-  const panels = els.form?.querySelectorAll("[data-tab-panel]") || [];
-  tabs.forEach((btn) => btn.classList.toggle("active", btn.dataset.tab === tab));
-  panels.forEach((panel) => panel.classList.toggle("hidden", panel.dataset.tabPanel !== tab));
+function getTabStorageKey(){
+  const id = window.currentResearchId || currentResearchId || "new";
+  return `adminTab:${id}`;
+}
 
-  if (tab === "pontos") {
+function setTab(tab, options = {}){
+  const { persist = true } = options;
+  const tabs = document.querySelectorAll("#pesquisa-form .tabs .tab");
+  const panels = document.querySelectorAll("#pesquisa-form [data-tab-panel]");
+
+  tabs.forEach((btn) => btn.classList.remove("active"));
+  panels.forEach((panel) => panel.classList.add("hidden"));
+
+  const activeTab = Array.from(tabs).find((btn) => btn.dataset.tab === tab);
+  const activePanel = Array.from(panels).find((panel) => panel.dataset.tabPanel === tab);
+
+  if (activeTab) activeTab.classList.add("active");
+  if (activePanel) activePanel.classList.remove("hidden");
+
+  if (persist && tab) {
+    localStorage.setItem(getTabStorageKey(), tab);
+  }
+
+  if (tab === "mapa") {
     loadPontos().catch(console.error);
   }
+}
 
-  if (tab === "ficha") {
-    // reservar para lógica de renderização atrasada, se necessário
-  }
+function restoreLastTab(defaultTab = "config"){
+  const stored = localStorage.getItem(getTabStorageKey());
+  const hasTab = stored && document.querySelector(`#pesquisa-form .tabs .tab[data-tab="${stored}"]`);
+  setTab(hasTab ? stored : defaultTab);
 }
 
 async function loadPontos(){
@@ -1241,7 +1265,7 @@ function debounce(fn, ms){
 }
 
 function getActiveTab(){
-  const active = document.querySelector("#editor-tabs .tab.active");
+  const active = document.querySelector("#pesquisa-form .tabs .tab.active");
   return active?.dataset?.tab || "";
 }
 
@@ -1617,6 +1641,8 @@ function buildConfigJsonFromTabs({ formData, csvFallback, topicos, equipe, reali
         nome: String(formData.get("financiadorNome") || "").trim(),
         logo: financiadorLogo
       },
+      coordenacao: String(formData.get("coordenacao") || "").trim(),
+      parceirosApoiadores: String(formData.get("parceirosApoiadores") || "").trim(),
       equipe
     }
   };
@@ -1635,6 +1661,7 @@ document.addEventListener("click", async (event) => {
       if (selected) {
         setCurrentResearchId(selected.id);
         loadResearchToForm(selected);
+        restoreLastTab("config");
       }
     }
 
