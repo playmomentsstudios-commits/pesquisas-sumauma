@@ -30,23 +30,17 @@ async function renderPesquisa(p){
       <div class="page-head">
         <div class="kicker">
           <span class="badge">Ano base: ${escapeHtml(p.anoBase || "")}</span>
-          <span class="badge">Resumo</span>
         </div>
 
         <h2>${escapeHtml(p.titulo || "Pesquisa")}</h2>
         <p>${escapeHtml(descricao || "Conteúdo ainda não cadastrado.")}</p>
 
-        <div class="card-actions" style="margin-top:10px">
-          <a class="btn" href="${withBase(`/${escapeHtml(p.slug)}/mapa`)}" data-link>Mapa</a>
-          <a class="btn" href="${withBase(`/${escapeHtml(p.slug)}/relatorio`)}" data-link>Relatório</a>
-          <a class="btn" href="${withBase(`/${escapeHtml(p.slug)}/ficha-tecnica`)}" data-link>Ficha técnica</a>
-        </div>
       </div>
     </section>
 
     <section class="page" style="margin-top:16px">
       <div class="page-head">
-        <h3>Resumo da pesquisa</h3>
+        <h3>Tópicos da pesquisa</h3>
         ${
           topicos.length
             ? `<ul>${topicos.map(t => `<li>${escapeHtml(t.titulo || t.texto || "")}</li>`).join("")}</ul>`

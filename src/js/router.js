@@ -60,7 +60,7 @@ export async function initRouter(){
       const parts = path.split("/").filter(Boolean);
       dlog("parts=", parts);
       const slug = parts[0];
-      const sub = parts[1] || "pesquisa";
+      const sub = parts[1] || "mapa";
 
       const item = await getPesquisaBySlug(slug);
       if (!item){
