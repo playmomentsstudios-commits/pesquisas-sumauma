@@ -52,6 +52,16 @@ function setSaveMsg(text, ok = false){
   el.style.color = ok ? "#198754" : "#6b7a75";
 }
 
+function setMapaUpdateStatus(text, type = "muted"){
+  const el = document.getElementById("mapa-update-status");
+  if (!el) return;
+  el.textContent = text || "";
+  el.style.color =
+    type === "ok" ? "#198754" :
+    type === "err" ? "#b42318" :
+    "#6b7a75";
+}
+
 function showAlert(type, msg){
   const el = document.getElementById("saveAlert");
   if (!el) return;
@@ -933,14 +943,15 @@ async function handleImportCsv(event){
   const file = event.target.files?.[0];
   if (!file) return;
 
-  if (!state.current?.id) {
-    showAlert("err", "Salve a pesquisa antes de importar o CSV.");
-    adminMsg("Salve a pesquisa antes de importar o CSV.", "err");
-    event.target.value = "";
-    return;
-  }
-
   try {
+    if (!state.current?.id) {
+      setMapaUpdateStatus("Salve e carregue uma pesquisa antes de importar o CSV.", "err");
+      showAlert("err", "Salve e carregue uma pesquisa antes de importar o CSV.");
+      event.target.value = "";
+      return;
+    }
+
+    setMapaUpdateStatus("Lendo CSV…", "muted");
     setSaveMsg("Lendo CSV...");
     adminMsg("Lendo CSV...", "muted");
     hideAlert();
@@ -970,18 +981,25 @@ async function handleImportCsv(event){
     setCsvPreview(`Linhas no arquivo: ${total}. Válidas (com nome): ${validos}.`, payload);
 
     if (!payload.length) {
+      setMapaUpdateStatus("CSV sem linhas válidas (precisa ter coluna Nome/nome).", "err");
       showAlert("err", "CSV sem linhas válidas (precisa ter coluna Nome/nome).");
       adminMsg("CSV sem linhas válidas.", "err");
       event.target.value = "";
       return;
     }
 
+    setMapaUpdateStatus("Importando pontos…", "muted");
     const slug = state.current?.slug || normalizeSlug(els.form.querySelector("[name=slug]")?.value || "");
     if (slug) {
-      const csvUrl = await maybeUploadFile(file, `pesquisas/${slug}/mapa`);
-      if (csvUrl) {
-        setValue("csvUrl", csvUrl);
-        await persistCsvUrlOnResearch(csvUrl);
+      try {
+        const csvUrl = await maybeUploadFile(file, `pesquisas/${slug}/mapa`);
+        if (csvUrl) {
+          setValue("csvUrl", csvUrl);
+          await persistCsvUrlOnResearch(csvUrl);
+        }
+      } catch (error) {
+        console.warn("Falha ao enviar CSV para Storage:", error);
+        setMapaUpdateStatus(`CSV importado, mas falhou enviar para Storage: ${friendlyError(error)}`, "err");
       }
     }
 
@@ -994,6 +1012,7 @@ async function handleImportCsv(event){
       .eq("pesquisa_id", state.current.id);
     if (deleteError) {
       console.error(deleteError);
+      setMapaUpdateStatus(`Falha ao limpar pontos antigos: ${friendlyError(deleteError)}`, "err");
       showAlert("err", `Falha ao limpar pontos antigos: ${friendlyError(deleteError)}`);
       setSaveDebug({ step: "delete pontos", error: deleteError });
       return;
@@ -1002,17 +1021,20 @@ async function handleImportCsv(event){
     const { error: insertError } = await state.supabase.from("pontos").insert(payload);
     if (insertError) {
       console.error(insertError);
+      setMapaUpdateStatus(`Erro ao importar pontos: ${friendlyError(insertError)}`, "err");
       showAlert("err", `Erro ao importar pontos: ${friendlyError(insertError)}`);
       setSaveDebug({ step: "insert pontos", count: payload.length, error: insertError });
       return;
     }
 
     await loadPontos();
+    setMapaUpdateStatus("Mapa atualizado ✅ (pontos importados e lista atualizada)", "ok");
     setSaveMsg("CSV importado ✅", true);
     adminMsg("CSV importado ✅", "ok");
     showAlert("ok", "CSV importado e pontos atualizados ✅");
   } catch (error) {
     console.error(error);
+    setMapaUpdateStatus(`Erro: ${friendlyError(error)}`, "err");
     showAlert("err", `Erro: ${friendlyError(error)}`);
     setSaveDebug(error?.message || String(error));
   } finally {
