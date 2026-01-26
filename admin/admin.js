@@ -26,6 +26,7 @@ const els = {
   form: document.getElementById("pesquisa-form"),
   formTitle: document.getElementById("form-title"),
   deleteBtn: document.getElementById("btn-delete"),
+  saveBtn: document.getElementById("btnSalvar"),
   emptyState: document.getElementById("empty-state"),
   topicosList: document.getElementById("topicos-list"),
   addTopico: document.getElementById("add-topico"),
@@ -50,6 +51,12 @@ function setSaveMsg(text, ok = false){
   if (!el) return;
   el.textContent = text || "";
   el.style.color = ok ? "#198754" : "#6b7a75";
+}
+
+function setSaveDebug(obj){
+  const el = document.getElementById("saveDebug");
+  if (!el) return;
+  el.textContent = typeof obj === "string" ? obj : JSON.stringify(obj, null, 2);
 }
 
 function adminMsg(text, type = "muted"){
@@ -122,6 +129,7 @@ async function init(){
   els.diagBtn?.addEventListener("click", runDiag);
   els.writeTestBtn?.addEventListener("click", handleWriteTest);
   els.form.addEventListener("submit", handleSavePesquisa);
+  els.saveBtn?.addEventListener("click", handleSavePesquisa);
   els.deleteBtn.addEventListener("click", handleDeletePesquisa);
   els.addTopico.addEventListener("click", () => addTopicoItem());
   els.addEquipe.addEventListener("click", () => addEquipeItem());
@@ -148,6 +156,11 @@ function setDiagOut(obj){
   const el = document.getElementById("diagOut");
   if (!el) return;
   el.textContent = typeof obj === "string" ? obj : JSON.stringify(obj, null, 2);
+}
+
+function setCurrentResearchId(id){
+  currentResearchId = id || null;
+  window.currentResearchId = currentResearchId;
 }
 
 function errToObj(error){
@@ -397,7 +410,7 @@ function showForm(){
 function clearForm(){
   const empty = createEmptyPesquisa();
   state.current = null;
-  currentResearchId = null;
+  setCurrentResearchId(null);
   state.editingPonto = null;
   showForm();
   els.formTitle.textContent = "Nova pesquisa";
@@ -411,7 +424,7 @@ function clearForm(){
 
 function loadResearchToForm(pesquisa){
   state.current = pesquisa;
-  currentResearchId = pesquisa?.id || null;
+  setCurrentResearchId(pesquisa?.id || null);
   state.editingPonto = null;
   showForm();
   els.formTitle.textContent = pesquisa?.id ? "Editar pesquisa" : "Nova pesquisa";
@@ -531,53 +544,68 @@ function addEquipeItem(membro = {}){
 
 async function handleSavePesquisa(e){
   e.preventDefault();
-  if (!state.supabase) return;
-
-  try {
-    const isNew = !currentResearchId;
-    setSaveMsg("Salvando...");
-    adminMsg("Salvando...", "muted");
-    await saveResearch();
-    setSaveMsg(isNew ? "Pesquisa criada ✅" : "Pesquisa atualizada ✅", true);
-    adminMsg(isNew ? "Criada ✅" : "Atualizada ✅", "ok");
-  } catch (error) {
-    console.error(error);
-    const msg = `Erro ao salvar: ${formatSupabaseError(error)}`;
-    setSaveMsg(msg);
-    adminMsg(msg, "err");
-    setDiagStatus("ERRO ao salvar");
-    setDiagOut({ action: "save", error: errToObj(error), hint: getRlsHint(error) });
-  }
+  await savePesquisa();
 }
 
-async function saveResearch(){
+async function savePesquisa(){
   const client = window.supabaseClient;
-  if (!client) throw new Error("Supabase client ausente.");
-
-  const payload = await readFormToPayload();
-  setDiagStatus("Salvando...");
-  setDiagOut({ action: "save", id: currentResearchId, payload });
-
-  if (!currentResearchId) {
-    const res = await client.from("pesquisas").insert(payload).select("id").single();
-    if (res.error) {
-      setDiagStatus("ERRO ao criar");
-      setDiagOut({ action: "insert", error: errToObj(res.error), hint: getRlsHint(res.error) });
-      throw res.error;
-    }
-    currentResearchId = res.data.id;
-    setDiagStatus("Criada ✅");
-  } else {
-    const res = await client.from("pesquisas").update(payload).eq("id", currentResearchId);
-    if (res.error) {
-      setDiagStatus("ERRO ao atualizar");
-      setDiagOut({ action: "update", id: currentResearchId, error: errToObj(res.error), hint: getRlsHint(res.error) });
-      throw res.error;
-    }
-    setDiagStatus("Atualizada ✅");
+  if (!client) {
+    setSaveDebug("Sem supabaseClient");
+    return;
   }
 
-  await refreshListAndSelect(currentResearchId);
+  let payload;
+  try {
+    payload = await readFormToPayload();
+  } catch (error) {
+    setSaveDebug(error?.message || String(error));
+    return;
+  }
+
+  if (!payload.slug) {
+    setSaveDebug("Slug obrigatório");
+    return;
+  }
+  if (!payload.titulo) {
+    setSaveDebug("Título obrigatório");
+    return;
+  }
+
+  const currentId = window.currentResearchId || currentResearchId;
+  const isNew = !currentId;
+  setSaveMsg("Salvando...");
+  adminMsg("Salvando...", "muted");
+
+  if (isNew) {
+    const res = await client
+      .from("pesquisas")
+      .insert(payload)
+      .select("id,slug,titulo")
+      .single();
+
+    setSaveDebug({ action: "insert", payload, res });
+
+    if (res.error) return;
+    setCurrentResearchId(res.data.id);
+  } else {
+    const res = await client
+      .from("pesquisas")
+      .update(payload)
+      .eq("id", currentId)
+      .select("id,slug,titulo")
+      .single();
+
+    setSaveDebug({ action: "update", id: currentId, payload, res });
+
+    if (res.error) return;
+  }
+
+  setSaveMsg(isNew ? "Pesquisa criada ✅" : "Pesquisa atualizada ✅", true);
+  adminMsg(isNew ? "Criada ✅" : "Atualizada ✅", "ok");
+
+  if (typeof refreshListAndSelect === "function") {
+    await refreshListAndSelect(window.currentResearchId || currentResearchId);
+  }
 }
 
 async function handleDeletePesquisa(){
@@ -587,7 +615,7 @@ async function handleDeletePesquisa(){
     setSaveMsg("Excluindo...");
     adminMsg("Excluindo...", "muted");
     await deleteResearch(currentResearchId);
-    currentResearchId = null;
+    setCurrentResearchId(null);
     state.current = null;
     await refreshListAndSelect(null);
     setSaveMsg("Excluída ✅", true);
@@ -1123,7 +1151,10 @@ document.addEventListener("click", async (event) => {
   try {
     if (action === "edit") {
       const selected = researchCache.find((row) => String(row.id) === String(id));
-      if (selected) loadResearchToForm(selected);
+      if (selected) {
+        setCurrentResearchId(selected.id);
+        loadResearchToForm(selected);
+      }
     }
 
     if (action === "dup") {
@@ -1142,7 +1173,7 @@ document.addEventListener("click", async (event) => {
       adminMsg("Excluindo...", "muted");
       await deleteResearch(id);
       if (String(currentResearchId) === String(id)) {
-        currentResearchId = null;
+        setCurrentResearchId(null);
         state.current = null;
       }
       await refreshListAndSelect(null);
