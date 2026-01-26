@@ -482,16 +482,90 @@ function addEquipeItem(membro = {}){
   const wrapper = document.createElement("div");
   wrapper.className = "repeater-item";
   wrapper.dataset.equipe = "1";
+  const fotoAtual = String(membro.foto || "").trim();
   wrapper.innerHTML = `
     <label>Nome<input type="text" name="equipeNome" value="${escapeHtml(membro.nome || "")}" /></label>
     <label>Função<input type="text" name="equipeFuncao" value="${escapeHtml(membro.funcao || "")}" /></label>
-    <label>Foto<input type="file" name="equipeFotoFile" accept="image/*" />
-      <input type="text" name="equipeFotoUrl" value="${escapeHtml(membro.foto || "")}" placeholder="URL da foto" />
-    </label>
+    <div style="display:grid; gap:8px;">
+      <label>Foto (arquivo)
+        <input type="file" name="equipeFotoFile" accept="image/*" />
+        <input type="hidden" name="equipeFotoUrl" value="${escapeHtml(fotoAtual)}" />
+      </label>
+      ${
+        fotoAtual
+          ? `<img src="${escapeHtml(fotoAtual)}" alt="Foto" style="width:72px;height:72px;object-fit:cover;border-radius:12px;border:1px solid rgba(0,0,0,.12);" />`
+          : `<div class="muted" style="font-size:12px;">(sem foto cadastrada ainda)</div>`
+      }
+    </div>
     <button class="btn light" type="button" data-remove="1">Remover</button>
   `;
   wrapper.querySelector("[data-remove]").addEventListener("click", () => wrapper.remove());
   els.equipeList.appendChild(wrapper);
+}
+
+function setCsvPreview(metaText, rows){
+  const meta = document.getElementById("csv-preview-meta");
+  const list = document.getElementById("csv-preview-list");
+  if (meta) meta.textContent = metaText || "";
+  if (!list) return;
+
+  if (!rows || !rows.length) {
+    list.innerHTML = `<div class="muted" style="font-size:12px;">Nada para mostrar.</div>`;
+    return;
+  }
+
+  const slice = rows.slice(0, 80);
+  list.innerHTML = `
+    <div style="display:grid; gap:8px;">
+      ${slice.map((r, idx) => `
+        <div style="padding:10px;border:1px solid rgba(0,0,0,.08);border-radius:12px;background:#fff;">
+          <div style="display:flex;justify-content:space-between;gap:10px;">
+            <strong>${escapeHtml(r.nome || "(sem nome)")}</strong>
+            <span class="muted" style="font-size:12px;">#${idx + 1}</span>
+          </div>
+          <div class="muted" style="font-size:12px;">
+            ${escapeHtml((r.cidade || "") + (r.uf ? `/${r.uf}` : ""))} • ${escapeHtml(r.categoria || "")}
+          </div>
+          ${
+            r.lat != null && r.lng != null
+              ? `<div class="muted" style="font-size:12px;">${r.lat}, ${r.lng}</div>`
+              : `<div class="muted" style="font-size:12px;">(sem coordenadas)</div>`
+          }
+        </div>
+      `).join("")}
+      ${rows.length > slice.length ? `<div class="muted" style="font-size:12px;">Mostrando ${slice.length} de ${rows.length} linhas.</div>` : ""}
+    </div>
+  `;
+}
+
+async function persistCsvUrlOnResearch(csvUrl){
+  const client = window.supabaseClient;
+  const currentId = window.currentResearchId || currentResearchId;
+  if (!client || !currentId) return;
+
+  const currentCfg = (state.current?.config_json && typeof state.current.config_json === "object")
+    ? state.current.config_json
+    : {};
+
+  const nextCfg = {
+    ...currentCfg,
+    mapa: {
+      ...(currentCfg.mapa || {}),
+      csvUrl
+    }
+  };
+
+  const { error } = await client
+    .from("pesquisas")
+    .update({ csv_fallback: csvUrl, config_json: nextCfg })
+    .eq("id", currentId);
+
+  if (error) throw error;
+
+  if (state.current) {
+    state.current.csv_fallback = csvUrl;
+    state.current.config_json = nextCfg;
+  }
 }
 
 async function handleSavePesquisa(e){
@@ -857,66 +931,93 @@ async function handleDeletePonto(){
 
 async function handleImportCsv(event){
   const file = event.target.files?.[0];
-  if (!file || !state.current?.id) return;
-  setSaveMsg("Importando CSV...");
-  adminMsg("Importando CSV...", "muted");
-  const text = await file.text();
-  const rows = parseCsv(text);
-  const payload = rows.map((r) => ({
-    pesquisa_id: state.current.id,
-    nome: r.nome,
-    cidade: r.cidade,
-    uf: r.uf,
-    categoria: r.categoria,
-    lat: r.lat,
-    lng: r.lng,
-    descricao: r.descricao,
-    site: r.site,
-    instagram: r.instagram,
-    facebook: r.facebook,
-    whatsapp: r.whatsapp,
-    email: r.email,
-    ativo: true
-  })).filter((r) => r.nome);
+  if (!file) return;
 
-  if (!payload.length) {
-    setSaveMsg("CSV sem linhas válidas.", false);
-    adminMsg("CSV sem linhas válidas.", "err");
+  if (!state.current?.id) {
+    showAlert("err", "Salve a pesquisa antes de importar o CSV.");
+    adminMsg("Salve a pesquisa antes de importar o CSV.", "err");
+    event.target.value = "";
     return;
   }
 
-  const slug = state.current?.slug || normalizeSlug(els.form.querySelector("[name=slug]")?.value || "");
-  if (slug) {
-    try {
-      const csvUrl = await maybeUploadFile(file, `pesquisas/${slug}/mapa`);
-      if (csvUrl) setValue("csvUrl", csvUrl);
-    } catch (error) {
-      console.error(error);
-      setSaveMsg("Erro ao enviar CSV.", false);
-      adminMsg(`Erro ao enviar CSV: ${friendlyError(error)}`, "err");
+  try {
+    setSaveMsg("Lendo CSV...");
+    adminMsg("Lendo CSV...", "muted");
+    hideAlert();
+    setSaveDebug(null);
+
+    const text = await file.text();
+    const rows = parseCsv(text);
+    const payload = rows.map((r) => ({
+      pesquisa_id: state.current.id,
+      nome: r.nome,
+      cidade: r.cidade,
+      uf: r.uf,
+      categoria: r.categoria,
+      lat: r.lat,
+      lng: r.lng,
+      descricao: r.descricao,
+      site: r.site,
+      instagram: r.instagram,
+      facebook: r.facebook,
+      whatsapp: r.whatsapp,
+      email: r.email,
+      ativo: true
+    })).filter((r) => r.nome);
+
+    const total = rows.length;
+    const validos = payload.length;
+    setCsvPreview(`Linhas no arquivo: ${total}. Válidas (com nome): ${validos}.`, payload);
+
+    if (!payload.length) {
+      showAlert("err", "CSV sem linhas válidas (precisa ter coluna Nome/nome).");
+      adminMsg("CSV sem linhas válidas.", "err");
+      event.target.value = "";
       return;
     }
-  }
 
-  const { error: deleteError } = await state.supabase
-    .from("pontos")
-    .delete()
-    .eq("pesquisa_id", state.current.id);
-  if (deleteError) {
-    console.error(deleteError);
-  }
+    const slug = state.current?.slug || normalizeSlug(els.form.querySelector("[name=slug]")?.value || "");
+    if (slug) {
+      const csvUrl = await maybeUploadFile(file, `pesquisas/${slug}/mapa`);
+      if (csvUrl) {
+        setValue("csvUrl", csvUrl);
+        await persistCsvUrlOnResearch(csvUrl);
+      }
+    }
 
-  const { error } = await state.supabase.from("pontos").insert(payload);
-  if (error) {
+    setSaveMsg("Importando pontos...");
+    adminMsg("Importando pontos...", "muted");
+
+    const { error: deleteError } = await state.supabase
+      .from("pontos")
+      .delete()
+      .eq("pesquisa_id", state.current.id);
+    if (deleteError) {
+      console.error(deleteError);
+      showAlert("err", `Falha ao limpar pontos antigos: ${friendlyError(deleteError)}`);
+      setSaveDebug({ step: "delete pontos", error: deleteError });
+      return;
+    }
+
+    const { error: insertError } = await state.supabase.from("pontos").insert(payload);
+    if (insertError) {
+      console.error(insertError);
+      showAlert("err", `Erro ao importar pontos: ${friendlyError(insertError)}`);
+      setSaveDebug({ step: "insert pontos", count: payload.length, error: insertError });
+      return;
+    }
+
+    await loadPontos();
+    setSaveMsg("CSV importado ✅", true);
+    adminMsg("CSV importado ✅", "ok");
+    showAlert("ok", "CSV importado e pontos atualizados ✅");
+  } catch (error) {
     console.error(error);
-    setSaveMsg("Erro ao importar CSV.", false);
-    adminMsg("Erro ao importar CSV.", "err");
-    return;
+    showAlert("err", `Erro: ${friendlyError(error)}`);
+    setSaveDebug(error?.message || String(error));
+  } finally {
+    event.target.value = "";
   }
-  await loadPontos();
-  event.target.value = "";
-  setSaveMsg("CSV importado ✅", true);
-  adminMsg("CSV importado ✅", "ok");
 }
 
 async function collectTopicos(slug){
