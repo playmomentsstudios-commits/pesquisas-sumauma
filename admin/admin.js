@@ -858,6 +858,8 @@ async function handleDeletePonto(){
 async function handleImportCsv(event){
   const file = event.target.files?.[0];
   if (!file || !state.current?.id) return;
+  setSaveMsg("Importando CSV...");
+  adminMsg("Importando CSV...", "muted");
   const text = await file.text();
   const rows = parseCsv(text);
   const payload = rows.map((r) => ({
@@ -877,14 +879,37 @@ async function handleImportCsv(event){
     ativo: true
   })).filter((r) => r.nome);
 
-  if (!payload.length) return;
+  if (!payload.length) {
+    setSaveMsg("CSV sem linhas válidas.", false);
+    adminMsg("CSV sem linhas válidas.", "err");
+    return;
+  }
+
+  const slug = state.current?.slug || normalizeSlug(els.form.querySelector("[name=slug]")?.value || "");
+  if (slug) {
+    const csvUrl = await maybeUploadFile(file, `pesquisas/${slug}/mapa`);
+    if (csvUrl) setValue("csvUrl", csvUrl);
+  }
+
+  const { error: deleteError } = await state.supabase
+    .from("pontos")
+    .delete()
+    .eq("pesquisa_id", state.current.id);
+  if (deleteError) {
+    console.error(deleteError);
+  }
+
   const { error } = await state.supabase.from("pontos").insert(payload);
   if (error) {
     console.error(error);
+    setSaveMsg("Erro ao importar CSV.", false);
+    adminMsg("Erro ao importar CSV.", "err");
     return;
   }
   await loadPontos();
   event.target.value = "";
+  setSaveMsg("CSV importado ✅", true);
+  adminMsg("CSV importado ✅", "ok");
 }
 
 async function collectTopicos(slug){

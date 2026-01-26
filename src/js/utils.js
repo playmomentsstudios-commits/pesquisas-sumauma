@@ -5,8 +5,40 @@ export function setYear(){
   if (el) el.textContent = new Date().getFullYear();
 }
 
+const STORAGE_BUCKETS = ["pesquisas", "mapas", "logos", "equipe", "site-assets"];
+
 function isHttp(u){
   return /^https?:\/\//i.test(u || "");
+}
+
+function getSupabaseUrl(){
+  return String(window?.SUPABASE_URL || "").replace(/\/+$/, "");
+}
+
+function publicStorageUrl(bucket, path){
+  const base = getSupabaseUrl();
+  if (!base) return "";
+  const clean = String(path || "").replace(/^\/+/, "");
+  return `${base}/storage/v1/object/public/${bucket}/${clean}`;
+}
+
+function normalizeMaybeStorageUrl(value){
+  if (!value) return null;
+  const v = String(value).trim();
+  if (!v) return null;
+  if (isHttp(v)) return v;
+
+  const storagePrefix = v.replace(/^\//, "");
+  if (storagePrefix.startsWith("storage/v1/object/public/")) {
+    const base = getSupabaseUrl();
+    return base ? `${base}/${storagePrefix}` : null;
+  }
+
+  const match = storagePrefix.match(/^([^/]+)\/(.+)$/);
+  if (!match) return null;
+  const bucket = match[1].toLowerCase();
+  if (!STORAGE_BUCKETS.includes(bucket)) return null;
+  return publicStorageUrl(bucket, match[2]);
 }
 
 function normalizeLocalDataPath(p){
@@ -162,6 +194,8 @@ function normalizePesquisaResumo(resumo){
 
 function fixMaybeLocalUrl(u){
   if (!u) return u;
+  const storageUrl = normalizeMaybeStorageUrl(u);
+  if (storageUrl) return storageUrl;
   if (isHttp(u)) return u;
   const cleaned = String(u).replace(/^[./]+/, "");
   const normalized = cleaned.startsWith("/") ? cleaned : `/${cleaned}`;
