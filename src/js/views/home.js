@@ -8,7 +8,7 @@ async function renderHome(){
       ${pesquisas.map(p => `
         <article class="card">
           <div class="card-cover">
-            <img src="${escapeHtml(p.capa)}" alt="Capa da pesquisa: ${escapeHtml(p.titulo)}" />
+            ${p.capa ? `<img src="${escapeHtml(p.capa)}" alt="Capa da pesquisa: ${escapeHtml(p.titulo)}" onerror="this.style.display='none'" />` : ""}
           </div>
 
           <div class="card-body">
