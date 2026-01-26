@@ -207,15 +207,29 @@
               <div class="tab-panel hidden" data-tab-panel="pontos">
                 <div class="pontos-head">
                   <h3>Pontos do mapa</h3>
-                  <label class="btn light">
-                    Importar CSV
-                    <input id="import-csv" type="file" accept=".csv" hidden />
-                  </label>
                 </div>
-                <div id="csv-preview" class="card" style="margin:12px 0; padding:12px;">
-                  <h4 style="margin:0 0 6px;">Prévia do CSV</h4>
-                  <div id="csv-preview-meta" class="muted" style="font-size:12px;">Nenhum CSV importado ainda.</div>
-                  <div id="csv-preview-list" style="margin-top:10px; max-height:220px; overflow:auto;"></div>
+                <div id="mapa-update-card" class="card" style="margin:12px 0; padding:12px;">
+                  <div style="display:flex; gap:12px; align-items:flex-start; justify-content:space-between; flex-wrap:wrap;">
+                    <div>
+                      <h4 style="margin:0 0 6px;">Atualizar mapa (CSV)</h4>
+                      <div class="muted" style="font-size:12px; line-height:1.4;">
+                        Faça upload do CSV para atualizar os pontos do mapa desta pesquisa.
+                        Após selecionar o arquivo, você verá uma prévia e, em seguida, a lista será atualizada.
+                      </div>
+                      <div id="mapa-update-status" class="muted" style="margin-top:8px; font-size:12px;">Aguardando CSV…</div>
+                    </div>
+
+                    <label class="btn primary" style="cursor:pointer;">
+                      Selecionar CSV
+                      <input id="import-csv" type="file" accept=".csv" hidden />
+                    </label>
+                  </div>
+
+                  <div style="margin-top:12px;">
+                    <div class="muted" style="font-size:12px; margin-bottom:6px;">Prévia do CSV</div>
+                    <div id="csv-preview-meta" class="muted" style="font-size:12px;">Nenhum arquivo carregado.</div>
+                    <div id="csv-preview-list" style="margin-top:10px; max-height:240px; overflow:auto;"></div>
+                  </div>
                 </div>
                 <div class="pontos-grid">
                   <div>
