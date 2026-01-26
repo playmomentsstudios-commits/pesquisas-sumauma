@@ -53,10 +53,55 @@ function setSaveMsg(text, ok = false){
   el.style.color = ok ? "#198754" : "#6b7a75";
 }
 
-function setSaveDebug(obj){
-  const el = document.getElementById("saveDebug");
+function showAlert(type, msg){
+  const el = document.getElementById("saveAlert");
   if (!el) return;
-  el.textContent = typeof obj === "string" ? obj : JSON.stringify(obj, null, 2);
+  el.style.display = "block";
+  el.textContent = msg;
+
+  if (type === "ok") {
+    el.style.background = "rgba(25,135,84,.12)";
+    el.style.border = "1px solid rgba(25,135,84,.35)";
+    el.style.color = "#0f5132";
+  } else if (type === "err") {
+    el.style.background = "rgba(220,53,69,.10)";
+    el.style.border = "1px solid rgba(220,53,69,.35)";
+    el.style.color = "#842029";
+  } else {
+    el.style.background = "rgba(108,117,125,.10)";
+    el.style.border = "1px solid rgba(108,117,125,.25)";
+    el.style.color = "#41464b";
+  }
+}
+
+function hideAlert(){
+  const el = document.getElementById("saveAlert");
+  if (el) el.style.display = "none";
+}
+
+function setSaveDebug(obj){
+  const pre = document.getElementById("saveDebug");
+  const det = document.getElementById("saveDetails");
+  if (pre) {
+    pre.textContent = obj ? (typeof obj === "string" ? obj : JSON.stringify(obj, null, 2)) : "";
+  }
+  if (det) det.style.display = obj ? "block" : "none";
+}
+
+function friendlyError(err){
+  const msg = err?.message || String(err);
+  const lower = msg.toLowerCase();
+
+  if (lower.includes("row-level security")) {
+    return "Sem permissão para salvar (RLS). Verifique as policies do Supabase.";
+  }
+  if (lower.includes("duplicate key") || lower.includes("unique")) {
+    return "Esse slug já existe. Troque o slug e tente novamente.";
+  }
+  if (lower.includes("column") && lower.includes("does not exist")) {
+    return "O painel está enviando um campo que não existe no banco. Precisamos ajustar o payload.";
+  }
+  return msg;
 }
 
 function adminMsg(text, type = "muted"){
@@ -550,7 +595,9 @@ async function handleSavePesquisa(e){
 async function savePesquisa(){
   const client = window.supabaseClient;
   if (!client) {
+    hideAlert();
     setSaveDebug("Sem supabaseClient");
+    showAlert("err", "Erro ao salvar: Supabase não configurado.");
     return;
   }
 
@@ -558,21 +605,30 @@ async function savePesquisa(){
   try {
     payload = await readFormToPayload();
   } catch (error) {
+    hideAlert();
+    showAlert("err", `Erro ao salvar: ${friendlyError(error)}`);
     setSaveDebug(error?.message || String(error));
     return;
   }
 
   if (!payload.slug) {
+    hideAlert();
+    showAlert("err", "Erro ao salvar: Slug obrigatório.");
     setSaveDebug("Slug obrigatório");
     return;
   }
   if (!payload.titulo) {
+    hideAlert();
+    showAlert("err", "Erro ao salvar: Título obrigatório.");
     setSaveDebug("Título obrigatório");
     return;
   }
 
   const currentId = window.currentResearchId || currentResearchId;
   const isNew = !currentId;
+  hideAlert();
+  setSaveDebug(null);
+  showAlert("muted", "Salvando...");
   setSaveMsg("Salvando...");
   adminMsg("Salvando...", "muted");
 
@@ -583,9 +639,11 @@ async function savePesquisa(){
       .select("id,slug,titulo")
       .single();
 
-    setSaveDebug({ action: "insert", payload, res });
-
-    if (res.error) return;
+    if (res.error) {
+      showAlert("err", `Erro ao salvar: ${friendlyError(res.error)}`);
+      setSaveDebug({ action: "insert", payload, error: res.error });
+      return;
+    }
     setCurrentResearchId(res.data.id);
   } else {
     const res = await client
@@ -595,13 +653,20 @@ async function savePesquisa(){
       .select("id,slug,titulo")
       .single();
 
-    setSaveDebug({ action: "update", id: currentId, payload, res });
-
-    if (res.error) return;
+    if (res.error) {
+      showAlert("err", `Erro ao salvar: ${friendlyError(res.error)}`);
+      setSaveDebug({ action: "update", id: currentId, payload, error: res.error });
+      return;
+    }
   }
 
   setSaveMsg(isNew ? "Pesquisa criada ✅" : "Pesquisa atualizada ✅", true);
   adminMsg(isNew ? "Criada ✅" : "Atualizada ✅", "ok");
+  showAlert("ok", isNew ? "Pesquisa cadastrada com sucesso ✅" : "Pesquisa atualizada com sucesso ✅");
+  setSaveDebug(null);
+  setTimeout(() => {
+    hideAlert();
+  }, 4000);
 
   if (typeof refreshListAndSelect === "function") {
     await refreshListAndSelect(window.currentResearchId || currentResearchId);
