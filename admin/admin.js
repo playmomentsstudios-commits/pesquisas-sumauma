@@ -946,12 +946,27 @@ async function collectEquipe(slug){
 
 async function maybeUploadFile(file, basePath){
   if (!(file instanceof File)) return "";
-  const ext = file.name.split(".").pop();
-  const path = `${basePath}.${ext}`;
-  const { error } = await state.supabase.storage.from("site-assets").upload(path, file, { upsert: true });
+
+  const ext = (file.name.split(".").pop() || "bin").toLowerCase();
+  const safeExt = ext.replace(/[^a-z0-9]/g, "");
+  const path = `${basePath}.${safeExt}`;
+
+  const { error } = await state.supabase.storage
+    .from("site-assets")
+    .upload(path, file, { upsert: true });
+
   if (error) {
-    console.error(error);
-    return "";
+    // ERRO VISÍVEL + impede salvar null no banco
+    throw new Error(`Falha ao enviar arquivo (Storage): ${error.message || "sem detalhe"}`);
+  }
+
+  const { data } = state.supabase.storage.from("site-assets").getPublicUrl(path);
+  const publicUrl = data?.publicUrl || "";
+  if (!publicUrl) throw new Error("Falha ao gerar URL pública do arquivo enviado.");
+
+  return publicUrl;
+}
+
   }
   const { data } = state.supabase.storage.from("site-assets").getPublicUrl(path);
   return data.publicUrl;
