@@ -34,11 +34,16 @@ async function renderRelatorio(p){
         <div style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap">
           ${pdf ? `<a class="btn primary" href="${escapeHtml(pdf)}" target="_blank" rel="noopener noreferrer">Download PDF</a>` : ""}
           ${leitura ? `<a class="btn" href="${escapeHtml(leitura)}" target="_blank" rel="noopener noreferrer">Abrir leitura</a>` : ""}
-          <a class="btn light" href="${withBase(`/${escapeHtml(p.slug)}/mapa`)}" data-link>Mapa</a>
         </div>
 
         ${
-          pdf || leitura
+          pdf
+            ? `
+              <div style="margin-top:16px;border-radius:16px;overflow:hidden;border:1px solid #e6e6e6;">
+                <iframe src="${escapeHtml(pdf)}" title="Relatório PDF" style="width:100%;height:80vh;border:0;"></iframe>
+              </div>
+            `
+            : leitura
             ? ""
             : `<p style="margin-top:12px; color:#666;">Relatório ainda não disponível.</p>`
         }

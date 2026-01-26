@@ -20,7 +20,6 @@ const els = {
   list: document.getElementById("researchList"),
   listMsg: document.getElementById("researchListMsg"),
   newBtn: document.getElementById("btn-new"),
-  seedBtn: document.getElementById("btnSeedTests"),
   diagBtn: document.getElementById("btnDiag"),
   writeTestBtn: document.getElementById("btnWriteTest"),
   form: document.getElementById("pesquisa-form"),
@@ -170,7 +169,6 @@ async function init(){
   els.loginForm.addEventListener("submit", handleLogin);
   els.logout.addEventListener("click", handleLogout);
   els.newBtn.addEventListener("click", () => clearForm());
-  els.seedBtn?.addEventListener("click", handleSeedTests);
   els.diagBtn?.addEventListener("click", runDiag);
   els.writeTestBtn?.addEventListener("click", handleWriteTest);
   els.form.addEventListener("submit", handleSavePesquisa);
@@ -267,97 +265,6 @@ function createEmptyPesquisa(){
       fichaTecnica: {}
     }
   };
-}
-
-function buildSeedRows(){
-  const resumoBase = (citacaoTexto) => ({
-    introducao: {
-      titulo: "Introdução",
-      texto: "Conteúdo de teste para validar a página da pesquisa."
-    },
-    citacao: {
-      texto: citacaoTexto,
-      autor: "— Teste"
-    },
-    topicos: Array.from({ length: 10 }, (_, i) => ({
-      titulo: `Tópico ${i + 1}`,
-      texto: `Texto do tópico ${i + 1} (teste).`,
-      imagemKey: `pesquisa.img.${i + 1}`
-    }))
-  });
-
-  const fichaBase = (funcao3) => ({
-    realizacao: { nome: "Instituto Sumaúma", logoKey: "ficha.realizacao.logo" },
-    financiador: { nome: "Financiador (Teste)", logoKey: "ficha.financiador.logo" },
-    equipe: [
-      { nome: "Pessoa 1", funcao: "Coordenação", fotoKey: "ficha.equipe.1" },
-      { nome: "Pessoa 2", funcao: "Pesquisa", fotoKey: "ficha.equipe.2" },
-      { nome: "Pessoa 3", funcao: funcao3, fotoKey: "ficha.equipe.3" }
-    ]
-  });
-
-  return [
-    {
-      slug: "seguimento-negro",
-      titulo: "Seguimento Negro",
-      ano_base: "2025",
-      ordem: 1,
-      descricao_curta: "Pesquisa teste sobre articulações e dinâmicas do seguimento negro no território.",
-      sinopse: "Relatório (teste) — seed para validar o portal multi-pesquisas.",
-      status: true,
-      csv_fallback: "/public/data/mapeamento-seguimento-negro.csv",
-      capa_url: "https://placehold.co/1200x400/png?text=Seguimento+Negro+-+Capa",
-      relatorio_pdf_url: "https://example.com/relatorio-seguimento-negro.pdf",
-      leitura_url: null,
-      config_json: {
-        pesquisaResumo: resumoBase("A ancestralidade é caminho e presença."),
-        fichaTecnica: fichaBase("Design")
-      }
-    },
-    {
-      slug: "territorios-quilombolas",
-      titulo: "Territórios Quilombolas",
-      ano_base: "2025",
-      ordem: 2,
-      descricao_curta: "Pesquisa teste sobre territórios quilombolas e conexões culturais e comunicacionais.",
-      sinopse: "Relatório (teste) — seed para validar o portal multi-pesquisas.",
-      status: true,
-      csv_fallback: "/public/data/mapeamento-territorios-quilombolas.csv",
-      capa_url: "https://placehold.co/1200x400/png?text=Territorios+Quilombolas+-+Capa",
-      relatorio_pdf_url: "https://example.com/relatorio-territorios-quilombolas.pdf",
-      leitura_url: null,
-      config_json: {
-        pesquisaResumo: resumoBase("Território é memória viva e futuro em construção."),
-        fichaTecnica: fichaBase("Comunicação")
-      }
-    }
-  ];
-}
-
-async function handleSeedTests(){
-  if (!state.supabase) return;
-  if (!state.session) {
-    setSaveMsg("Faça login para criar pesquisas teste.");
-    adminMsg("Faça login para criar pesquisas teste.", "err");
-    return;
-  }
-  try {
-    setSaveMsg("Criando pesquisas teste...");
-    adminMsg("Criando pesquisas teste...", "muted");
-    const rows = buildSeedRows();
-    const { error } = await state.supabase
-      .from("pesquisas")
-      .upsert(rows, { onConflict: "slug" });
-    if (error) throw error;
-    await refreshListAndSelect(null);
-    setSaveMsg("Pesquisas teste criadas ✅", true);
-    adminMsg("Pesquisas teste criadas ✅", "ok");
-  } catch (error) {
-    console.error(error);
-    const msg = `Erro seed: ${formatSupabaseError(error)}`;
-    setSaveMsg(msg);
-    adminMsg(msg, "err");
-  }
 }
 
 function setSession(session){
