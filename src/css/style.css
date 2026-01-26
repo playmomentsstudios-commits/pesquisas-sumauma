@@ -369,3 +369,116 @@ img{ display:block; max-width:100%; }
   padding:12px;
   color:#666;
 }
+
+/* ===== Pesquisa: Editorial + Modular ===== */
+.ed-container{
+  max-width:1000px;
+  margin:0 auto;
+  padding:0 30px;
+}
+
+.ed-hero{
+  position:relative;
+  margin-top:10px;
+  border-radius:8px;
+  overflow:hidden;
+  box-shadow:var(--shadow);
+  background:#111;
+}
+.ed-hero-media{
+  height:220px;
+  background-size:cover;
+  background-position:center;
+  filter:saturate(1.02);
+}
+.ed-hero-overlay{
+  position:relative;
+  padding:22px 0 26px;
+  background:rgba(0,0,0,.40);
+}
+.ed-kicker{ margin-bottom:12px; }
+.ed-h1{
+  margin:0;
+  color:#fff;
+  font-size:34px;
+  line-height:1.15;
+}
+.ed-lead .ed-p{ color:#f3f3f3; opacity:.95; }
+.ed-lead .ed-p:last-child{ margin-bottom:0; }
+
+.ed-section{
+  padding:28px 0;
+}
+.ed-h2{
+  margin:0 0 12px;
+  color:var(--green);
+  font-size:26px;
+}
+.ed-p{
+  margin:0 0 12px;
+  line-height:1.8;
+  color:#222;
+  font-size:16px;
+}
+.ed-p:last-child{ margin-bottom:0; }
+
+.ed-quote{
+  background:#fff;
+  margin:18px 0;
+  padding:30px 0;
+  border-radius:8px;
+  box-shadow:var(--shadow);
+}
+.ed-quote blockquote{
+  margin:0;
+  font-size:20px;
+  line-height:1.6;
+  font-style:italic;
+  color:#222;
+}
+.ed-quote footer{
+  margin-top:14px;
+  font-size:14px;
+  font-weight:bold;
+  color:#333;
+}
+
+/* full-bleed (imagem grande entre blocos) */
+.ed-fullbleed{
+  margin:18px 0;
+}
+.ed-fullbleed-inner{
+  width:100vw;
+  height:360px;
+  margin-left:calc(50% - 50vw);
+  background-size:cover;
+  background-position:center;
+}
+.ed-caption{
+  max-width:1000px;
+  margin:8px auto 0;
+  padding:0 30px;
+  color:#666;
+  font-size:13px;
+}
+
+.ed-sep{
+  padding:10px 0;
+}
+.ed-sep span{
+  display:inline-block;
+  padding:6px 10px;
+  border-radius:999px;
+  background:#eee;
+  color:#444;
+  font-size:12px;
+}
+
+/* responsivo */
+@media(max-width:768px){
+  .ed-container{ padding:0 18px; }
+  .ed-h1{ font-size:26px; }
+  .ed-hero-media{ height:190px; }
+  .ed-fullbleed-inner{ height:280px; }
+  .ed-quote blockquote{ font-size:18px; }
+}

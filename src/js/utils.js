@@ -121,6 +121,7 @@ function mapPesquisaFromDb(row){
   };
   const fichaTecnica = cfg.fichaTecnica || {};
   const pesquisaResumo = cfg.pesquisaResumo || {};
+  const pesquisaConteudo = cfg.pesquisaConteudo || cfg.pesquisaNarrativa || {};
 
   return {
     dbId: row.id,
@@ -139,7 +140,8 @@ function mapPesquisaFromDb(row){
     leituraUrl: fixMaybeLocalUrl(row.leitura_url || ""),
     mapa,
     fichaTecnica: normalizeFichaTecnica(fichaTecnica),
-    pesquisaResumo: normalizePesquisaResumo(pesquisaResumo)
+    pesquisaResumo: normalizePesquisaResumo(pesquisaResumo),
+    pesquisaConteudo: normalizePesquisaConteudo(pesquisaConteudo)
   };
 }
 
@@ -156,7 +158,8 @@ function normalizePesquisaPaths(p){
       csvUrl: fixMaybeLocalDataUrl(mapa.csvUrl || "")
     },
     fichaTecnica: normalizeFichaTecnica(p.fichaTecnica || {}),
-    pesquisaResumo: normalizePesquisaResumo(p.pesquisaResumo || {})
+    pesquisaResumo: normalizePesquisaResumo(p.pesquisaResumo || {}),
+    pesquisaConteudo: normalizePesquisaConteudo(p.pesquisaConteudo || p.pesquisaNarrativa || {})
   };
 }
 
@@ -188,6 +191,22 @@ function normalizePesquisaResumo(resumo){
     topicos: topicos.map((t) => ({
       ...t,
       imagem: fixMaybeLocalUrl(t?.imagem || "")
+    }))
+  };
+}
+
+function normalizePesquisaConteudo(pc){
+  const blocos = Array.isArray(pc?.blocos) ? pc.blocos : [];
+  return {
+    ...pc,
+    blocos: blocos.map((b) => ({
+      ...b,
+      src: fixMaybeLocalUrl(b?.src || b?.url || ""),
+      imagem: fixMaybeLocalUrl(b?.imagem || ""),
+      hero: {
+        ...(b?.hero || {}),
+        banner: fixMaybeLocalUrl(b?.hero?.banner || "")
+      }
     }))
   };
 }
