@@ -71,8 +71,8 @@ function formatSupabaseError(error){
 
   let msg = parts.join(" ");
   const lower = msg.toLowerCase();
-  if (error.code === "42501" || error.status === 401 || error.status === 403 || lower.includes("permission") || lower.includes("rls")) {
-    msg += " Possível bloqueio de RLS/permissão. Verifique as policies da tabela public.pesquisas.";
+  if (isRlsError(error, lower)) {
+    msg += " Possível bloqueio de RLS/permissão. Verifique as policies da tabela public.pesquisas (arquivo supabase-admin-policies.sql).";
   }
   if (lower.includes("column") || lower.includes("schema cache") || lower.includes("unknown column")) {
     msg += " Verifique se as colunas esperadas existem (slug, titulo, ano_base, ordem, status, config_json).";
@@ -161,6 +161,16 @@ function errToObj(error){
     status: error.status,
     name: error.name
   };
+}
+
+function isRlsError(error, lowerMsg){
+  const lower = lowerMsg ?? String(error?.message || "").toLowerCase();
+  return error?.code === "42501" || error?.status === 401 || error?.status === 403 || lower.includes("permission") || lower.includes("rls");
+}
+
+function getRlsHint(error){
+  if (!isRlsError(error)) return null;
+  return "Possível bloqueio de RLS. Rode o SQL em supabase-admin-policies.sql para liberar INSERT/UPDATE/DELETE para usuários autenticados.";
 }
 
 async function getSupabaseClient(){
@@ -535,6 +545,8 @@ async function handleSavePesquisa(e){
     const msg = `Erro ao salvar: ${formatSupabaseError(error)}`;
     setSaveMsg(msg);
     adminMsg(msg, "err");
+    setDiagStatus("ERRO ao salvar");
+    setDiagOut({ action: "save", error: errToObj(error), hint: getRlsHint(error) });
   }
 }
 
@@ -550,7 +562,7 @@ async function saveResearch(){
     const res = await client.from("pesquisas").insert(payload).select("id").single();
     if (res.error) {
       setDiagStatus("ERRO ao criar");
-      setDiagOut({ action: "insert", error: errToObj(res.error) });
+      setDiagOut({ action: "insert", error: errToObj(res.error), hint: getRlsHint(res.error) });
       throw res.error;
     }
     currentResearchId = res.data.id;
@@ -559,7 +571,7 @@ async function saveResearch(){
     const res = await client.from("pesquisas").update(payload).eq("id", currentResearchId);
     if (res.error) {
       setDiagStatus("ERRO ao atualizar");
-      setDiagOut({ action: "update", id: currentResearchId, error: errToObj(res.error) });
+      setDiagOut({ action: "update", id: currentResearchId, error: errToObj(res.error), hint: getRlsHint(res.error) });
       throw res.error;
     }
     setDiagStatus("Atualizada ✅");
@@ -708,7 +720,7 @@ async function runWriteTest(){
   const ins = await client.from("pesquisas").insert(payload).select("id").single();
   if (ins.error) {
     setDiagStatus("FALHOU no INSERT");
-    setDiagOut({ step: "insert", error: errToObj(ins.error) });
+    setDiagOut({ step: "insert", error: errToObj(ins.error), hint: getRlsHint(ins.error) });
     return;
   }
 
@@ -717,7 +729,7 @@ async function runWriteTest(){
   const upd = await client.from("pesquisas").update({ titulo: "Teste Admin (upd)" }).eq("id", ins.data.id);
   if (upd.error) {
     setDiagStatus("FALHOU no UPDATE");
-    setDiagOut({ step: "update", inserted: ins.data, error: errToObj(upd.error) });
+    setDiagOut({ step: "update", inserted: ins.data, error: errToObj(upd.error), hint: getRlsHint(upd.error) });
     return;
   }
 
@@ -726,7 +738,7 @@ async function runWriteTest(){
   const del = await client.from("pesquisas").delete().eq("id", ins.data.id);
   if (del.error) {
     setDiagStatus("FALHOU no DELETE (não é grave)");
-    setDiagOut({ step: "delete", inserted: ins.data, error: errToObj(del.error) });
+    setDiagOut({ step: "delete", inserted: ins.data, error: errToObj(del.error), hint: getRlsHint(del.error) });
     return;
   }
 
