@@ -887,8 +887,15 @@ async function handleImportCsv(event){
 
   const slug = state.current?.slug || normalizeSlug(els.form.querySelector("[name=slug]")?.value || "");
   if (slug) {
-    const csvUrl = await maybeUploadFile(file, `pesquisas/${slug}/mapa`);
-    if (csvUrl) setValue("csvUrl", csvUrl);
+    try {
+      const csvUrl = await maybeUploadFile(file, `pesquisas/${slug}/mapa`);
+      if (csvUrl) setValue("csvUrl", csvUrl);
+    } catch (error) {
+      console.error(error);
+      setSaveMsg("Erro ao enviar CSV.", false);
+      adminMsg(`Erro ao enviar CSV: ${friendlyError(error)}`, "err");
+      return;
+    }
   }
 
   const { error: deleteError } = await state.supabase
@@ -965,11 +972,6 @@ async function maybeUploadFile(file, basePath){
   if (!publicUrl) throw new Error("Falha ao gerar URL pública do arquivo enviado.");
 
   return publicUrl;
-}
-
-  }
-  const { data } = state.supabase.storage.from("site-assets").getPublicUrl(path);
-  return data.publicUrl;
 }
 
 function parseCsv(text){
@@ -1067,6 +1069,10 @@ function escapeHtml(str){
     .replaceAll("'", "&#039;");
 }
 
+function isNewResearch(){
+  return !(window.currentResearchId || currentResearchId);
+}
+
 async function readFormToPayload(){
   const formData = new FormData(els.form);
   const slug = normalizeSlug(formData.get("slug"));
@@ -1077,20 +1083,32 @@ async function readFormToPayload(){
 
   setValue("slug", slug);
 
-  const capaUrl = await maybeUploadFile(formData.get("capaFile"), `pesquisas/${slug}/capa`)
-    || String(formData.get("capaUrl") || "").trim();
+  const existingCapaUrl = String(formData.get("capaUrl") || "").trim();
+  const existingRelatorioUrl = String(formData.get("relatorioUrl") || "").trim();
+  const existingRealizacaoLogoUrl = String(formData.get("realizacaoLogoUrl") || "").trim();
+  const existingFinanciadorLogoUrl = String(formData.get("financiadorLogoUrl") || "").trim();
 
-  const relatorioUrl = await maybeUploadFile(formData.get("relatorioFile"), `pesquisas/${slug}/relatorio`)
-    || String(formData.get("relatorioUrl") || "").trim();
+  const capaUrl = (await maybeUploadFile(formData.get("capaFile"), `pesquisas/${slug}/capa`))
+    || existingCapaUrl;
 
-  const realizacaoLogo = await maybeUploadFile(formData.get("realizacaoLogoFile"), `pesquisas/${slug}/logos/realizacao`)
-    || String(formData.get("realizacaoLogoUrl") || "").trim();
+  const relatorioUrl = (await maybeUploadFile(formData.get("relatorioFile"), `pesquisas/${slug}/relatorio`))
+    || existingRelatorioUrl;
 
-  const financiadorLogo = await maybeUploadFile(formData.get("financiadorLogoFile"), `pesquisas/${slug}/logos/financiador`)
-    || String(formData.get("financiadorLogoUrl") || "").trim();
+  const realizacaoLogo = (await maybeUploadFile(formData.get("realizacaoLogoFile"), `pesquisas/${slug}/logos/realizacao`))
+    || existingRealizacaoLogoUrl;
+
+  const financiadorLogo = (await maybeUploadFile(formData.get("financiadorLogoFile"), `pesquisas/${slug}/logos/financiador`))
+    || existingFinanciadorLogoUrl;
+
+  if (isNewResearch() && !capaUrl) {
+    throw new Error("Envie a capa (arquivo) para cadastrar.");
+  }
+  if (isNewResearch() && !relatorioUrl) {
+    throw new Error("Envie o relatório (PDF) para cadastrar.");
+  }
 
   const csvFallback = String(formData.get("csvUrl") || "").trim();
-  const leituraUrl = String(formData.get("relatorioLeituraUrl") || "").trim();
+  const leituraUrl = relatorioUrl;
   const topicos = await collectTopicos(slug);
   const equipe = await collectEquipe(slug);
   const configJson = buildConfigJsonFromTabs({
@@ -1105,6 +1123,7 @@ async function readFormToPayload(){
   setValue("capaUrl", capaUrl);
   setValue("relatorioUrl", relatorioUrl);
   setValue("relatorioUrlConfirm", relatorioUrl);
+  setValue("relatorioLeituraUrl", leituraUrl);
   setValue("relatorioLeituraUrlConfirm", leituraUrl);
 
   return {
