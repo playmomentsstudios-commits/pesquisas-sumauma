@@ -462,3 +462,100 @@ textarea {
     grid-template-columns: 1fr;
   }
 }
+
+/* ===== Layout ADM (mais moderno) ===== */
+.admin-shell{
+  min-height:100vh;
+  background:#f6f7f8;
+}
+
+.admin-header{
+  position:sticky;
+  top:0;
+  z-index:20;
+  background:#fff;
+  border-bottom:1px solid rgba(0,0,0,.06);
+}
+
+.admin-grid{
+  gap:14px;
+}
+
+.admin-sidebar{
+  position:sticky;
+  top:72px;
+  height: calc(100vh - 90px);
+  overflow:auto;
+  border-right:1px solid rgba(0,0,0,.06);
+}
+
+.admin-editor{
+  min-height: 60vh;
+}
+
+.card{
+  border:1px solid rgba(0,0,0,.06);
+  border-radius:16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.04);
+}
+
+.tabs{
+  position:sticky;
+  top:72px;
+  z-index:10;
+  padding:10px;
+  background:rgba(246,247,248,.90);
+  backdrop-filter: blur(10px);
+  border-radius:14px;
+  border:1px solid rgba(0,0,0,.06);
+}
+
+.tab{
+  border-radius:12px;
+  padding:10px 12px;
+  font-weight:600;
+}
+.tab.active{
+  background:#0f3d2e;
+  color:#fff;
+}
+
+/* ===== Aba Editorial ===== */
+.ed-admin-head{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  flex-wrap:wrap;
+  margin:10px 0 12px;
+}
+.ed-admin-actions{ display:flex; gap:10px; flex-wrap:wrap; }
+.ed-admin-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+.ed-preview-iframe{
+  width:100%;
+  height:560px;
+  border:1px solid rgba(0,0,0,.12);
+  border-radius:14px;
+  background:#fff;
+}
+
+.bloco-item{
+  border:1px solid rgba(0,0,0,.08);
+  border-radius:14px;
+  padding:10px;
+  margin-bottom:10px;
+  background:#fff;
+}
+.bloco-row{
+  display:grid;
+  grid-template-columns: 180px 1fr 120px;
+  gap:10px;
+  align-items:end;
+}
+.bloco-fields{ margin-top:10px; display:grid; gap:10px; }
+
+@media(max-width:980px){
+  .ed-admin-grid{ grid-template-columns: 1fr; }
+  .bloco-row{ grid-template-columns: 1fr; }
+  .admin-sidebar{ position:relative; top:auto; height:auto; }
+  .tabs{ top:0; }
+}

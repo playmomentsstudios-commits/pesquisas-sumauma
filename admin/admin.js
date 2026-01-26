@@ -32,8 +32,8 @@ const els = {
   equipeList: document.getElementById("equipe-list"),
   addEquipe: document.getElementById("add-equipe"),
   capaPreview: document.getElementById("capa-preview"),
-  tabs: document.querySelectorAll(".tab"),
-  tabPanels: document.querySelectorAll("[data-tab-panel]"),
+  tabs: document.querySelectorAll("#pesquisa-form .tabs .tab"),
+  tabPanels: document.querySelectorAll("#pesquisa-form [data-tab-panel]"),
   pontosList: document.getElementById("pontos-list"),
   pontoForm: document.getElementById("ponto-form"),
   pontoFormTitle: document.getElementById("ponto-form-title"),
@@ -165,7 +165,7 @@ els.loginPanel?.appendChild(diag);
 init();
 
 async function init(){
-  state.supabase = await getSupabaseClient();
+  state.supabase = await window.getSupabaseClient?.();
   if (!state.supabase || !window.__SUPABASE_CONFIG_OK__) {
     els.loginError.textContent = "Supabase não configurado. Crie o arquivo js/supabase-config.js.";
     setDiag("Supabase não configurado: confira /js/supabase-config.js e caminhos no /admin/index.html");
@@ -249,23 +249,6 @@ function isRlsError(error, lowerMsg){
 function getRlsHint(error){
   if (!isRlsError(error)) return null;
   return "Possível bloqueio de RLS. Rode o SQL em supabase-admin-policies.sql para liberar INSERT/UPDATE/DELETE para usuários autenticados.";
-}
-
-async function getSupabaseClient(){
-  const loader = window.__SUPABASE_CONFIG_LOADED__;
-  if (loader && typeof loader.then === "function") {
-    try {
-      await loader;
-    } catch (error) {
-      console.warn("[Supabase] Falha ao carregar supabase-config.js", error);
-    }
-  }
-
-  if (!window.supabaseClient) {
-    console.warn("[Supabase] Client indisponível.");
-  }
-
-  return window.supabaseClient || null;
 }
 
 function createEmptyPesquisa(){
@@ -849,6 +832,10 @@ async function runWriteTest(){
 function setTab(tab){
   els.tabs.forEach((btn) => btn.classList.toggle("active", btn.dataset.tab === tab));
   els.tabPanels.forEach((panel) => panel.classList.toggle("hidden", panel.dataset.tabPanel !== tab));
+
+  if (tab === "pontos") {
+    loadPontos().catch(console.error);
+  }
 }
 
 async function loadPontos(){
