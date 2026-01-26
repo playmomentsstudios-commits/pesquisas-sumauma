@@ -103,9 +103,6 @@
               <input type="hidden" name="csvUrl" />
               <input type="hidden" name="capaUrl" />
               <input type="hidden" name="relatorioUrl" />
-              <input type="hidden" name="realizacaoLogoUrl" />
-              <input type="hidden" name="financiadorLogoUrl" />
-
               <div class="upload-row">
                 <div>
                   <label>Capa</label>
@@ -119,6 +116,71 @@
                     URL de leitura (opcional)
                     <input type="text" name="relatorioLeituraUrl" placeholder="https://..." />
                   </label>
+                </div>
+              </div>
+
+              <div class="quick-panels">
+                <div class="card quick-card">
+                  <div class="quick-head">
+                    <h3>Pesquisa (Resumo) — acesso rápido</h3>
+                    <p class="muted">Esses campos alimentam a página /{slug}/pesquisa no modo simples e também servem de base para o modo editorial.</p>
+                  </div>
+
+                  <div class="grid-2">
+                    <label>
+                      Título de introdução
+                      <input name="introTitulo" type="text" />
+                    </label>
+
+                    <label>
+                      Autor da citação
+                      <input name="citacaoAutor" type="text" />
+                    </label>
+                  </div>
+
+                  <label>
+                    Texto de introdução
+                    <textarea name="introTexto" rows="4"></textarea>
+                  </label>
+
+                  <label>
+                    Texto da citação
+                    <textarea name="citacaoTexto" rows="3"></textarea>
+                  </label>
+                </div>
+
+                <div class="card quick-card">
+                  <div class="quick-head">
+                    <h3>Ficha Técnica — acesso rápido</h3>
+                    <p class="muted">Equipe/realização/financiador e informações principais da ficha.</p>
+                  </div>
+
+                  <div class="grid-2">
+                    <label>
+                      Financiador (nome)
+                      <input name="financiadorNome" type="text" />
+                    </label>
+
+                    <label>
+                      Realização (nome)
+                      <input name="realizacaoNome" type="text" />
+                    </label>
+                  </div>
+
+                  <div class="grid-2">
+                    <label>
+                      Logo Financiador (URL ou bucket/path)
+                      <input name="financiadorLogoUrl" type="text" />
+                    </label>
+                    <label>
+                      Logo Realização (URL ou bucket/path)
+                      <input name="realizacaoLogoUrl" type="text" />
+                    </label>
+                  </div>
+
+                  <div class="muted" style="margin-top:8px;font-size:12px;">
+                    A lista completa de equipe continua na aba “Ficha técnica”, mas isso aqui já evita travar se a aba falhar.
+                  </div>
                 </div>
               </div>
 
