@@ -9,8 +9,8 @@
       return;
     }
 
-    const url = pick("https://mcyiqqxeahbumhyjtnni.supabase.co");
-    const anon = pick("sb_publishable_n7lRaut9pIGu1DHYPHPi5Q_rVImjcoH");
+    const url = pick("SUPABASE_URL");
+    const anon = pick("SUPABASE_ANON_KEY");
 
     if (!url || !anon) {
       console.warn("[Supabase] Config ausente. Verifique js/supabase-config.js");
