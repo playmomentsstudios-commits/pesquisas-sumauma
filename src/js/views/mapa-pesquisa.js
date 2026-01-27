@@ -9,7 +9,7 @@ async function renderMapaPesquisa(p){
     ? `${csvUrlBase}${csvUrlBase.includes("?") ? "&" : "?"}v=${Date.now()}`
     : "";
   const pesquisaId = p?.dbId || p?._dbId || "";
-  const supabaseEnabled = !!pesquisaId;
+  const supabaseEnabled = true;
 
   const base = getBasePath();
   let path = (location.pathname || "").replace(/\/+$/,"");
@@ -74,6 +74,7 @@ async function renderMapaPesquisa(p){
           csvUrl: "${csvUrl}",
           pesquisaId: "${escapeHtml(pesquisaId)}",
           supabaseEnabled: ${supabaseEnabled ? "true" : "false"},
+          pesquisaSlug: "${slug}",
           mapId: "${mapId}",
           listId: "${listId}",
           searchId: "${searchId}",
