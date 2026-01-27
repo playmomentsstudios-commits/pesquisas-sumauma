@@ -12,7 +12,7 @@ function dlog(...args){
 }
 
 
-function setHeaderBanner(url){
+function setHeaderBanner(url, pos, overlay){
   const header = document.querySelector(".header");
   if (!header) return;
   if (url) {
@@ -20,6 +20,11 @@ function setHeaderBanner(url){
   } else {
     header.style.removeProperty("--header-banner");
   }
+  const safePos = pos || "center";
+  header.style.setProperty("--header-banner-pos", safePos);
+  const rawOverlay = (overlay === 0 || overlay) ? Number(overlay) : 0.35;
+  const safeOverlay = Math.min(0.6, Math.max(0, rawOverlay));
+  header.style.setProperty("--header-overlay", `rgba(0,0,0,${safeOverlay})`);
 }
 
 
@@ -65,8 +70,12 @@ export async function initRouter(){
 
       if (path === "/"){
         dlog("view=home");
-        const homeBanner = await getSiteConfig("home_banner_url");
-        setHeaderBanner(homeBanner || null);
+        const [homeBanner, homePos, homeOverlay] = await Promise.all([
+          getSiteConfig("home_banner_url"),
+          getSiteConfig("home_banner_pos"),
+          getSiteConfig("home_banner_overlay")
+        ]);
+        setHeaderBanner(homeBanner || null, homePos, homeOverlay);
         app.innerHTML = await renderHome();
         return;
       }
@@ -83,7 +92,7 @@ export async function initRouter(){
         return;
       }
       dlog("pesquisa encontrada?", true);
-      setHeaderBanner(item.bannerUrl || null);
+      setHeaderBanner(item.bannerUrl || null, item.bannerPos, item.bannerOverlay);
 
       const viewNameMap = {
         mapa: "mapa",

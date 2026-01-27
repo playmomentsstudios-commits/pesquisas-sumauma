@@ -37,43 +37,49 @@
           <p id="login-error" class="error"></p>
         </section>
 
-        <section id="admin-panel" class="admin-grid hidden">
-          <aside class="admin-sidebar">
-            <div class="sidebar-head">
-              <button id="btn-new" class="btn primary" type="button">Nova pesquisa</button>
-              <div class="side-title">Pesquisas cadastradas</div>
-            </div>
-            <div id="researchList" class="research-list"></div>
-            <div id="researchListMsg" class="small muted"></div>
-          </aside>
+        <section id="admin-panel" class="hidden">
+          <div class="admin-root-tabs">
+            <button class="root-tab active" type="button" data-root="pesquisas">PESQUISAS</button>
+            <button class="root-tab" type="button" data-root="site">SITE</button>
+          </div>
 
-          <section class="admin-editor">
-            <form id="pesquisa-form" class="card hidden">
-              <div class="form-head">
-                <div>
-                  <h2 id="form-title">Nova pesquisa</h2>
-                  <p class="muted">Preencha os dados base e edite as abas de conteúdo.</p>
+          <section id="root-panel-pesquisas" class="root-panel">
+            <div class="admin-grid">
+              <aside class="admin-sidebar">
+                <div class="sidebar-head">
+                  <button id="btn-new" class="btn primary" type="button">Nova pesquisa</button>
+                  <div class="side-title">Pesquisas cadastradas</div>
                 </div>
-                <div class="form-actions">
-                  <button id="btn-delete" class="btn danger" type="button">Excluir</button>
-                  <button id="btnSalvar" class="btn primary" type="button">Salvar</button>
-                </div>
-                <div id="adminMsg" class="admin-msg"></div>
-              </div>
-              <div id="saveAlert" style="margin-top:10px;display:none;padding:10px 12px;border-radius:12px;font-size:13px;"></div>
-              <details id="saveDetails" style="margin-top:8px;display:none;">
-                <summary style="cursor:pointer;font-size:12px;color:#6b7a75;">Ver detalhes técnicos</summary>
-                <pre id="saveDebug" style="margin-top:8px;background:#fff;border:1px solid rgba(0,0,0,.1);padding:10px;border-radius:12px;white-space:pre-wrap;word-break:break-word;font-size:12px;"></pre>
-              </details>
-              <div id="saveMsg" class="small muted"></div>
+                <div id="researchList" class="research-list"></div>
+                <div id="researchListMsg" class="small muted"></div>
+              </aside>
 
-              <div class="tabs" id="editor-tabs">
-                <button class="tab active" type="button" data-tab="config">Configuração</button>
-                <button class="tab" type="button" data-tab="resumo">Resumo</button>
-                <button class="tab" type="button" data-tab="ficha">Ficha Técnica</button>
-                <button class="tab" type="button" data-tab="mapa">Mapa</button>
-                <button class="tab" type="button" data-tab="banners">Banners</button>
-              </div>
+              <section class="admin-editor">
+                <form id="pesquisa-form" class="card hidden">
+                  <div class="form-head">
+                    <div>
+                      <h2 id="form-title">Nova pesquisa</h2>
+                      <p class="muted">Preencha os dados base e edite as abas de conteúdo.</p>
+                    </div>
+                    <div class="form-actions">
+                      <button id="btn-delete" class="btn danger" type="button">Excluir</button>
+                      <button id="btnSalvar" class="btn primary" type="button">Salvar</button>
+                    </div>
+                    <div id="adminMsg" class="admin-msg"></div>
+                  </div>
+                  <div id="saveAlert" style="margin-top:10px;display:none;padding:10px 12px;border-radius:12px;font-size:13px;"></div>
+                  <details id="saveDetails" style="margin-top:8px;display:none;">
+                    <summary style="cursor:pointer;font-size:12px;color:#6b7a75;">Ver detalhes técnicos</summary>
+                    <pre id="saveDebug" style="margin-top:8px;background:#fff;border:1px solid rgba(0,0,0,.1);padding:10px;border-radius:12px;white-space:pre-wrap;word-break:break-word;font-size:12px;"></pre>
+                  </details>
+                  <div id="saveMsg" class="small muted"></div>
+
+                  <div class="tabs" id="editor-tabs">
+                    <button class="tab active" type="button" data-tab="config">Configuração</button>
+                    <button class="tab" type="button" data-tab="resumo">Resumo</button>
+                    <button class="tab" type="button" data-tab="ficha">Ficha Técnica</button>
+                    <button class="tab" type="button" data-tab="mapa">Mapa</button>
+                  </div>
 
               <div class="tab-panel" data-tab-panel="config">
                 <h3>Configuração</h3>
@@ -267,85 +273,117 @@
                 </div>
               </div>
 
-              <div class="tab-panel hidden" data-tab-panel="banners">
-                <h3 style="margin-top:0">Banners do Cabeçalho</h3>
-                <p class="muted" style="margin-top:4px">
-                  Atualize o banner da Home e o banner da pesquisa selecionada. O site público usa esses banners automaticamente.
-                </p>
+                </form>
 
-                <div class="grid-2">
-                  <div class="card">
-                    <h4>Banner da Home</h4>
-
-                    <div class="row">
-                      <label class="label">Upload (Storage site-assets)</label>
-                      <input id="homeBannerFile" type="file" accept="image/*" />
-                    </div>
-
-                    <div class="row">
-                      <label class="label">Ou URL direta</label>
-                      <input id="homeBannerUrl" class="field" placeholder="https://..." />
-                    </div>
-
-                    <div class="row">
-                      <button id="btnSaveHomeBanner" class="btn primary" type="button">Salvar banner da Home</button>
-                      <span id="homeBannerMsg" class="muted"></span>
-                    </div>
-
-                    <div class="preview">
-                      <img id="homeBannerPreview" alt="Prévia banner Home" style="max-width:100%;border-radius:12px;display:none" />
-                    </div>
+                <div
+                  id="debugPanel"
+                  style="margin-top:14px;padding:12px;border:1px solid rgba(0,0,0,.1);border-radius:12px;background:#fff;"
+                >
+                  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                    <button id="btnDiag" class="btn-mini">Diagnóstico</button>
+                    <button id="btnWriteTest" class="btn-mini">Teste INSERT/UPDATE</button>
+                    <span id="diagStatus" style="font-size:12px;color:#6b7a75;"></span>
                   </div>
-
-                  <div class="card">
-                    <h4>Banner da Pesquisa selecionada</h4>
-                    <p class="muted" style="margin-top:-6px">Selecione uma pesquisa na lista para editar o banner dela.</p>
-
-                    <div class="row">
-                      <label class="label">Upload (Storage site-assets)</label>
-                      <input id="pesquisaBannerFile" type="file" accept="image/*" />
-                    </div>
-
-                    <div class="row">
-                      <label class="label">Ou URL direta</label>
-                      <input id="pesquisaBannerUrl" class="field" placeholder="https://..." />
-                    </div>
-
-                    <div class="row">
-                      <button id="btnSavePesquisaBanner" class="btn primary" type="button">Salvar banner da Pesquisa</button>
-                      <span id="pesquisaBannerMsg" class="muted"></span>
-                    </div>
-
-                    <div class="preview">
-                      <img id="pesquisaBannerPreview" alt="Prévia banner Pesquisa" style="max-width:100%;border-radius:12px;display:none" />
-                    </div>
-                  </div>
+                  <pre
+                    id="diagOut"
+                    style="margin-top:10px;white-space:pre-wrap;word-break:break-word;font-size:12px;color:#0b2a1f;"
+                  ></pre>
                 </div>
-              </div>
-            </form>
-                  </div>
-                </div>
-              </div>
-            </form>
 
-            <div
-              id="debugPanel"
-              style="margin-top:14px;padding:12px;border:1px solid rgba(0,0,0,.1);border-radius:12px;background:#fff;"
-            >
-              <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-                <button id="btnDiag" class="btn-mini">Diagnóstico</button>
-                <button id="btnWriteTest" class="btn-mini">Teste INSERT/UPDATE</button>
-                <span id="diagStatus" style="font-size:12px;color:#6b7a75;"></span>
-              </div>
-              <pre
-                id="diagOut"
-                style="margin-top:10px;white-space:pre-wrap;word-break:break-word;font-size:12px;color:#0b2a1f;"
-              ></pre>
+                <div id="empty-state" class="card">
+                  <h2>Selecione uma pesquisa</h2>
+                  <p class="muted">Use a lista ao lado para editar ou crie uma nova pesquisa.</p>
+                </div>
+              </section>
+            </div>
+          </section>
+
+          <section id="root-panel-site" class="root-panel hidden">
+            <div class="card">
+              <h2>Configurações do Site</h2>
+              <p class="muted">Banners e fundo do cabeçalho (header) do site público.</p>
             </div>
 
-            <div id="empty-state" class="card">
-              <h2>Selecione uma pesquisa</h2>
-              <p class="muted">Use a lista ao lado para editar ou crie uma nova pesquisa.</p>
+            <div class="grid-2">
+              <div class="card">
+                <h4>Banner da Home</h4>
+
+                <div class="row">
+                  <label class="label">Upload (Storage site-assets)</label>
+                  <input id="homeBannerFile" type="file" accept="image/*" />
+                </div>
+
+                <div class="row">
+                  <label class="label">Ou URL direta</label>
+                  <input id="homeBannerUrl" class="field" placeholder="https://..." />
+                </div>
+
+                <div class="row">
+                  <label class="label">Posição</label>
+                  <select id="homeBannerPos" class="field">
+                    <option value="center">center</option>
+                    <option value="top">top</option>
+                    <option value="bottom">bottom</option>
+                  </select>
+                </div>
+
+                <div class="row">
+                  <label class="label">Overlay (0 a 0.60)</label>
+                  <input id="homeBannerOverlay" class="field" type="number" min="0" max="0.6" step="0.05" />
+                </div>
+
+                <div class="row">
+                  <button id="btnSaveHomeBanner" class="btn primary" type="button">Salvar banner da Home</button>
+                  <span id="homeBannerMsg" class="muted"></span>
+                </div>
+
+                <div class="preview">
+                  <img id="homeBannerPreview" alt="Prévia banner Home" style="max-width:100%;border-radius:12px;display:none" />
+                </div>
+              </div>
+
+              <div class="card">
+                <h4>Banner por Pesquisa</h4>
+                <p class="muted" style="margin-top:-6px">Escolha uma pesquisa e atualize o banner do header dela.</p>
+
+                <div class="row">
+                  <label class="label">Pesquisa</label>
+                  <select id="sitePesquisaSelect" class="field"></select>
+                </div>
+
+                <div class="row">
+                  <label class="label">Upload (Storage site-assets)</label>
+                  <input id="pesquisaBannerFile" type="file" accept="image/*" />
+                </div>
+
+                <div class="row">
+                  <label class="label">Ou URL direta</label>
+                  <input id="pesquisaBannerUrl" class="field" placeholder="https://..." />
+                </div>
+
+                <div class="row">
+                  <label class="label">Posição</label>
+                  <select id="pesquisaBannerPos" class="field">
+                    <option value="center">center</option>
+                    <option value="top">top</option>
+                    <option value="bottom">bottom</option>
+                  </select>
+                </div>
+
+                <div class="row">
+                  <label class="label">Overlay (0 a 0.60)</label>
+                  <input id="pesquisaBannerOverlay" class="field" type="number" min="0" max="0.6" step="0.05" />
+                </div>
+
+                <div class="row">
+                  <button id="btnSavePesquisaBanner" class="btn primary" type="button">Salvar banner da Pesquisa</button>
+                  <span id="pesquisaBannerMsg" class="muted"></span>
+                </div>
+
+                <div class="preview">
+                  <img id="pesquisaBannerPreview" alt="Prévia banner Pesquisa" style="max-width:100%;border-radius:12px;display:none" />
+                </div>
+              </div>
             </div>
           </section>
         </section>

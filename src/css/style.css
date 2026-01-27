@@ -20,12 +20,12 @@ img{ display:block; max-width:100%; }
 /* HEADER */
 .header{
   height:160px;
-  background: var(--header-banner, url("../../public/assets/img/banner-capa.png")) center/cover no-repeat;
+  background: var(--header-banner, url("../../public/assets/img/banner-capa.png")) var(--header-banner-pos, center)/cover no-repeat;
   position:relative;
 }
 .header-overlay{
   height:100%;
-  background:rgba(0,0,0,.35);
+  background: var(--header-overlay, rgba(0,0,0,.35));
   display:flex;
   align-items:center;
   justify-content:space-between;
