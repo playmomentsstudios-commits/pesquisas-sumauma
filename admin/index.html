@@ -352,6 +352,121 @@
       </main>
     </div>
 
+    <!-- Modal: Editar Ponto -->
+    <div class="modal-backdrop hidden" id="pontoModal">
+      <div class="modal">
+        <div class="modal-head">
+          <div>
+            <div class="modal-title" id="pontoModalTitle">Editar ponto</div>
+            <div class="modal-sub" id="pontoModalSub">Atualize as informações e clique em Salvar.</div>
+          </div>
+          <button class="btn-mini" id="pontoModalClose" type="button">✕</button>
+        </div>
+
+        <div class="modal-body">
+          <form id="pontoModalForm" class="form-grid">
+            <input type="hidden" id="pontoModalId" />
+
+            <div class="row">
+              <label class="label">Nome</label>
+              <input class="field" id="pm_nome" />
+            </div>
+
+            <div class="row">
+              <label class="label">Categoria</label>
+              <input class="field" id="pm_categoria" />
+            </div>
+
+            <div class="row">
+              <label class="label">Território</label>
+              <input class="field" id="pm_territorio" />
+            </div>
+
+            <div class="row">
+              <label class="label">Contato</label>
+              <input class="field" id="pm_contato" />
+            </div>
+
+            <div class="row">
+              <label class="label">Cidade</label>
+              <input class="field" id="pm_cidade" />
+            </div>
+
+            <div class="row">
+              <label class="label">UF</label>
+              <input class="field" id="pm_uf" maxlength="2" />
+            </div>
+
+            <div class="row">
+              <label class="label">Latitude</label>
+              <input class="field" id="pm_lat" />
+            </div>
+
+            <div class="row">
+              <label class="label">Longitude</label>
+              <input class="field" id="pm_lng" />
+            </div>
+
+            <div class="row">
+              <label class="label">Descrição</label>
+              <textarea class="field" id="pm_descricao" rows="3"></textarea>
+            </div>
+
+            <div class="row">
+              <label class="label">Site</label>
+              <input class="field" id="pm_site" />
+            </div>
+
+            <div class="row">
+              <label class="label">Instagram</label>
+              <input class="field" id="pm_instagram" />
+            </div>
+
+            <div class="row">
+              <label class="label">Facebook</label>
+              <input class="field" id="pm_facebook" />
+            </div>
+
+            <div class="row">
+              <label class="label">WhatsApp</label>
+              <input class="field" id="pm_whatsapp" />
+            </div>
+
+            <div class="row">
+              <label class="label">E-mail</label>
+              <input class="field" id="pm_email" />
+            </div>
+
+            <div class="row">
+              <label class="label">Link</label>
+              <input class="field" id="pm_link" />
+            </div>
+
+            <div class="row">
+              <label class="label">Observação</label>
+              <textarea class="field" id="pm_observacao" rows="2"></textarea>
+            </div>
+
+            <div class="row">
+              <label class="label">Ativo</label>
+              <select class="field" id="pm_ativo">
+                <option value="true">Sim</option>
+                <option value="false">Não</option>
+              </select>
+            </div>
+          </form>
+        </div>
+
+        <div class="modal-foot">
+          <div class="muted" id="pontoModalMsg"></div>
+          <div class="modal-actions">
+            <button class="btn" id="pontoModalCancel" type="button">Cancelar</button>
+            <button class="btn primary" id="pontoModalSave" type="button">Salvar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script>
       (function () {
         const paths = [

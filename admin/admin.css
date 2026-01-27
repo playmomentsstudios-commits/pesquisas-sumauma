@@ -198,6 +198,113 @@ body {
   background: #fff;
 }
 
+/* ===========================
+   MODAL (Editar ponto)
+   =========================== */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  z-index: 9999;
+}
+
+.modal {
+  width: min(920px, 96vw);
+  max-height: 92vh;
+  background: #fff;
+  border-radius: 18px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.22);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-head {
+  padding: 14px 14px 10px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.modal-title {
+  font-weight: 1000;
+  color: #0f3d2e;
+  font-size: 16px;
+}
+
+.modal-sub {
+  color: #6b7a75;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.modal-body {
+  padding: 12px 14px;
+  overflow: auto;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.form-grid .row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-grid textarea.field {
+  resize: vertical;
+}
+
+.modal-foot {
+  padding: 12px 14px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 860px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Ações inline na lista */
+.ponto-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.ponto-actions .btn-mini {
+  padding: 8px 10px;
+  border-radius: 10px;
+  font-weight: 900;
+  font-size: 12px;
+}
+
+.ponto-actions .danger {
+  border: 1px solid rgba(220, 53, 69, 0.35);
+}
+
 .bloco-row {
   display: grid;
   grid-template-columns: 180px 1fr 120px;
