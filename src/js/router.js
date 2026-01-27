@@ -1,4 +1,4 @@
-import { loadPesquisas, getPesquisaBySlug, wireDropdown, spaLinkHandler, getSpaRedirect, escapeHtml } from "./utils.js";
+import { loadPesquisas, getPesquisaBySlug, wireDropdown, spaLinkHandler, getSpaRedirect, escapeHtml, getSiteConfig } from "./utils.js";
 import { getBasePath, stripBase, withBase } from "./basepath.js";
 import renderHome from "./views/home.js";
 import renderMapaPesquisa from "./views/mapa-pesquisa.js";
@@ -10,6 +10,18 @@ const DEBUG_ROUTER = true;
 function dlog(...args){
   if (DEBUG_ROUTER) console.log("[ROUTER]", ...args);
 }
+
+
+function setHeaderBanner(url){
+  const header = document.querySelector(".header");
+  if (!header) return;
+  if (url) {
+    header.style.setProperty("--header-banner", `url("${url}")`);
+  } else {
+    header.style.removeProperty("--header-banner");
+  }
+}
+
 
 export async function initRouter(){
   const app = document.getElementById("app");
@@ -53,6 +65,8 @@ export async function initRouter(){
 
       if (path === "/"){
         dlog("view=home");
+        const homeBanner = await getSiteConfig("home_banner_url");
+        setHeaderBanner(homeBanner || null);
         app.innerHTML = await renderHome();
         return;
       }
@@ -69,6 +83,7 @@ export async function initRouter(){
         return;
       }
       dlog("pesquisa encontrada?", true);
+      setHeaderBanner(item.bannerUrl || null);
 
       const viewNameMap = {
         pesquisa: "pesquisa",

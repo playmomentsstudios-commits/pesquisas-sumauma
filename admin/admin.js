@@ -40,6 +40,16 @@ const els = {
   pontoFormTitle: document.getElementById("ponto-form-title"),
   pontoDelete: document.getElementById("ponto-delete"),
   importCsv: document.getElementById("import-csv"),
+  homeBannerFile: document.getElementById("homeBannerFile"),
+  homeBannerUrl: document.getElementById("homeBannerUrl"),
+  btnSaveHomeBanner: document.getElementById("btnSaveHomeBanner"),
+  homeBannerMsg: document.getElementById("homeBannerMsg"),
+  homeBannerPreview: document.getElementById("homeBannerPreview"),
+  pesquisaBannerFile: document.getElementById("pesquisaBannerFile"),
+  pesquisaBannerUrl: document.getElementById("pesquisaBannerUrl"),
+  btnSavePesquisaBanner: document.getElementById("btnSavePesquisaBanner"),
+  pesquisaBannerMsg: document.getElementById("pesquisaBannerMsg"),
+  pesquisaBannerPreview: document.getElementById("pesquisaBannerPreview"),
   pontoNew: document.getElementById("ponto-new"),
   pontosSearch: document.getElementById("pontos-search"),
   pontosCounter: document.getElementById("pontos-counter"),
@@ -415,6 +425,8 @@ function clearForm(){
 
 function loadResearchToForm(pesquisa){
   state.current = pesquisa;
+  try { loadPesquisaBannerPreview(); } catch {}
+
   setCurrentResearchId(pesquisa?.id || null);
   state.editingPonto = null;
   showForm();
@@ -1839,3 +1851,137 @@ window.addEventListener("input", (event) => {
     setValue("relatorioLeituraUrlConfirm", event.target.value);
   }
 });
+
+
+
+function setBannerMsg(el, text, ok=false){
+  if (!el) return;
+  el.textContent = text || "";
+  el.style.color = ok ? "#198754" : "#6b7a75";
+}
+
+function setPreview(imgEl, url){
+  if (!imgEl) return;
+  if (!url) {
+    imgEl.style.display = "none";
+    imgEl.removeAttribute("src");
+    return;
+  }
+  imgEl.style.display = "block";
+  imgEl.src = url;
+}
+
+
+
+async function loadHomeBannerPreview(){
+  try {
+    const { data, error } = await state.supabase
+      .from("site_config")
+      .select("value")
+      .eq("key", "home_banner_url")
+      .limit(1)
+      .maybeSingle();
+
+    if (error) return;
+    const url = data?.value || "";
+    if (els.homeBannerUrl) els.homeBannerUrl.value = url;
+    setPreview(els.homeBannerPreview, url);
+  } catch {}
+}
+
+async function handleSaveHomeBanner(){
+  hideAlert();
+  try {
+    if (!state.session) throw new Error("Faça login para salvar.");
+    const file = els.homeBannerFile?.files?.[0];
+    const urlInput = (els.homeBannerUrl?.value || "").trim();
+
+    let finalUrl = urlInput;
+
+    if (file) {
+      finalUrl = await maybeUploadFile(file, `site/home-banner`);
+      if (els.homeBannerUrl) els.homeBannerUrl.value = finalUrl;
+    }
+
+    if (!finalUrl) throw new Error("Envie um arquivo ou informe uma URL.");
+
+    const { error } = await state.supabase
+      .from("site_config")
+      .upsert({ key: "home_banner_url", value: finalUrl }, { onConflict: "key" });
+
+    if (error) throw error;
+
+    setPreview(els.homeBannerPreview, finalUrl);
+    setBannerMsg(els.homeBannerMsg, "Banner da Home salvo ✅", true);
+    showAlert("ok", "Banner da Home salvo ✅");
+  } catch (err) {
+    console.error(err);
+    setBannerMsg(els.homeBannerMsg, "Erro: " + friendlyError(err), false);
+    showAlert("err", "Erro: " + friendlyError(err));
+  } finally {
+    if (els.homeBannerFile) els.homeBannerFile.value = "";
+  }
+}
+
+async function loadPesquisaBannerPreview(){
+  const current = state.current;
+  if (!current?.id) {
+    setBannerMsg(els.pesquisaBannerMsg, "Selecione uma pesquisa para editar o banner.", false);
+    setPreview(els.pesquisaBannerPreview, "");
+    if (els.pesquisaBannerUrl) els.pesquisaBannerUrl.value = "";
+    return;
+  }
+
+  // tenta ler do DB (banner_url)
+  const { data, error } = await state.supabase
+    .from("pesquisas")
+    .select("banner_url")
+    .eq("id", current.id)
+    .limit(1)
+    .maybeSingle();
+
+  if (!error) {
+    const url = data?.banner_url || "";
+    if (els.pesquisaBannerUrl) els.pesquisaBannerUrl.value = url;
+    setPreview(els.pesquisaBannerPreview, url);
+    setBannerMsg(els.pesquisaBannerMsg, url ? "Banner atual carregado ✅" : "Sem banner definido ainda.", true);
+  }
+}
+
+async function handleSavePesquisaBanner(){
+  hideAlert();
+  try {
+    if (!state.session) throw new Error("Faça login para salvar.");
+    const current = state.current;
+    if (!current?.id) throw new Error("Selecione uma pesquisa primeiro.");
+
+    const file = els.pesquisaBannerFile?.files?.[0];
+    const urlInput = (els.pesquisaBannerUrl?.value || "").trim();
+
+    let finalUrl = urlInput;
+
+    if (file) {
+      finalUrl = await maybeUploadFile(file, `pesquisas/${current.slug}/banner`);
+      if (els.pesquisaBannerUrl) els.pesquisaBannerUrl.value = finalUrl;
+    }
+
+    if (!finalUrl) throw new Error("Envie um arquivo ou informe uma URL.");
+
+    const { error } = await state.supabase
+      .from("pesquisas")
+      .update({ banner_url: finalUrl })
+      .eq("id", current.id);
+
+    if (error) throw error;
+
+    setPreview(els.pesquisaBannerPreview, finalUrl);
+    setBannerMsg(els.pesquisaBannerMsg, "Banner da pesquisa salvo ✅", true);
+    showAlert("ok", "Banner da pesquisa salvo ✅");
+  } catch (err) {
+    console.error(err);
+    setBannerMsg(els.pesquisaBannerMsg, "Erro: " + friendlyError(err), false);
+    showAlert("err", "Erro: " + friendlyError(err));
+  } finally {
+    if (els.pesquisaBannerFile) els.pesquisaBannerFile.value = "";
+  }
+}

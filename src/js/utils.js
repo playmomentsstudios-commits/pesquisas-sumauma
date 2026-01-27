@@ -66,7 +66,7 @@ export async function loadPesquisas(force = false){
       console.log("[DATA] tentando Supabase…");
       const { data, error } = await client
         .from("pesquisas")
-        .select("id,slug,titulo,ano_base,ordem,status,descricao_curta,sinopse,capa_url,relatorio_pdf_url,leitura_url,csv_fallback,config_json")
+        .select("id,slug,titulo,ano_base,ordem,status,descricao_curta,sinopse,capa_url,relatorio_pdf_url,leitura_url,csv_fallback,banner_url,config_json")
         .eq("status", true)
         .order("ordem", { ascending: true });
       if (error) throw error;
@@ -134,6 +134,7 @@ function mapPesquisaFromDb(row){
     status: !!row.status,
     slug: row.slug,
     capa: fixMaybeLocalUrl(row.capa_url || cfg.capa || ""),
+    bannerUrl: fixMaybeLocalUrl(row.banner_url || cfg.bannerUrl || ""),
     descricaoCurta: row.descricao_curta || "",
     sinopse: row.sinopse || "",
     relatorioPdf: fixMaybeLocalUrl(row.relatorio_pdf_url || cfg.relatorioPdf || ""),
@@ -302,4 +303,25 @@ export function escapeHtml(str){
     .replaceAll(">","&gt;")
     .replaceAll('"',"&quot;")
     .replaceAll("'","&#039;");
+}
+
+
+
+export async function getSiteConfig(key){
+  try {
+    const client = window?.supabaseClient || null;
+    if (!client) return null;
+
+    const { data, error } = await client
+      .from("site_config")
+      .select("value")
+      .eq("key", String(key || ""))
+      .limit(1)
+      .maybeSingle();
+
+    if (error) return null;
+    return data?.value || null;
+  } catch {
+    return null;
+  }
 }
