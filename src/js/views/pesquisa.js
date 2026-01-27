@@ -9,9 +9,8 @@ function renderTabs(slug, active) {
       `/${s}/${sub}`
     )}" data-link>${label}</a>`;
   };
-
   return `
-      <div class="subbar">
+    <div class="subbar">
       <div class="subbar-right">
         ${tab("pesquisa", "Pesquisa")}
         ${tab("relatorio", "Relatório")}
@@ -22,65 +21,37 @@ function renderTabs(slug, active) {
   `;
 }
 
-function renderQuote(citacao) {
-  if (!citacao || (!citacao.texto && !citacao.autor)) return "";
-  const texto = escapeHtml(citacao.texto || "");
-  const autor = escapeHtml(citacao.autor || "");
+function topicBlock(t, idx, total) {
+  const titulo = escapeHtml(t?.titulo || t?.text || t?.texto || "");
+  const desc = escapeHtml(t?.descricao || t?.resumo || t?.texto || "");
+  const img = t?.imagem ? String(t.imagem) : "";
+
+  const hasImg = Boolean(img);
+  const showDividerImg = hasImg;
 
   return `
-    <section class="research-quote">
-      <div class="research-quote-inner">
-        <blockquote>
-          “${texto}”
-          ${autor ? `<footer>${autor}</footer>` : ""}
-        </blockquote>
-      </div>
-    </section>
+    <article class="topic-block">
+      ${titulo ? `<h4 class="topic-title">${titulo}</h4>` : ""}
+      ${desc ? `<p class="topic-desc">${desc}</p>` : ""}
+
+      ${
+        showDividerImg
+          ? `
+            <div class="topic-image-wrap">
+              <img class="topic-image" src="${escapeHtml(img)}" alt="${
+                titulo ? "Imagem do tópico: " + titulo : "Imagem do tópico"
+              }"
+                loading="lazy"
+                onerror="this.style.display='none'; this.closest('.topic-image-wrap') && (this.closest('.topic-image-wrap').style.display='none');"
+              />
+            </div>
+          `
+          : ""
+      }
+
+      ${idx < total - 1 ? `<div class="topic-sep" aria-hidden="true"></div>` : ""}
+    </article>
   `;
-}
-
-function renderTopicsList(topicos) {
-  if (!Array.isArray(topicos) || topicos.length === 0) {
-    return `
-      <div class="research-card">
-        <h3>Tópicos da pesquisa</h3>
-        <p class="muted">Conteúdo ainda não cadastrado em <b>pesquisaResumo.topicos</b>.</p>
-      </div>
-    `;
-  }
-
-  return `
-    <div class="research-card">
-      <h3>Tópicos da pesquisa</h3>
-      <ul class="research-topics">
-        ${topicos
-          .map((t) => `<li>${escapeHtml(t.titulo || t.texto || "")}</li>`)
-          .join("")}
-      </ul>
-    </div>
-  `;
-}
-
-function renderEditorialSections(topicos) {
-  if (!Array.isArray(topicos) || topicos.length === 0) return "";
-
-  // Render “editorial”: título + texto, seguindo vibe do pesquisa.html
-  return topicos
-    .map((t, idx) => {
-      const titulo = escapeHtml(t.titulo || `Tópico ${idx + 1}`);
-      const texto = escapeHtml(t.texto || "");
-      if (!texto) return ""; // se não tiver descrição, não cria seção grande
-
-      return `
-        <section class="research-section">
-          <div class="research-section-inner">
-            <h2>${titulo}</h2>
-            <p>${texto}</p>
-          </div>
-        </section>
-      `;
-    })
-    .join("");
 }
 
 async function renderPesquisa(p) {
@@ -91,26 +62,30 @@ async function renderPesquisa(p) {
   return `
     ${renderTabs(p.slug, "pesquisa")}
 
-    <section class="research-hero">
-      <div class="research-hero-inner">
-        <div class="research-meta">
-          <span class="research-meta-label">Ano base:</span>
-          <span class="research-meta-value">${escapeHtml(p.anoBase || "")}</span>
+    <section class="page">
+      <div class="page-head">
+        <div class="kicker">
+          <span class="badge">Ano base: ${escapeHtml(p.anoBase || "")}</span>
         </div>
 
-        <h1 class="research-title">${escapeHtml(p.titulo || "Pesquisa")}</h1>
-
-        <p class="research-lead">
-          ${escapeHtml(descricao || "Conteúdo ainda não cadastrado.")}
-        </p>
-
-        ${renderTopicsList(topicos)}
+        <h2>${escapeHtml(p.titulo || "Pesquisa")}</h2>
+        <p>${escapeHtml(descricao || "Conteúdo ainda não cadastrado.")}</p>
       </div>
     </section>
 
-    ${renderQuote(resumo.citacao)}
+    <section class="page" style="margin-top:16px">
+      <div class="page-head">
+        <h3>Pesquisa</h3>
+      </div>
 
-    ${renderEditorialSections(topicos)}
+      <div class="topic-list">
+        ${
+          topicos.length
+            ? topicos.map((t, idx) => topicBlock(t, idx, topicos.length)).join("")
+            : `<p>Conteúdo ainda não cadastrado em <b>pesquisaResumo.topicos</b>.</p>`
+        }
+      </div>
+    </section>
   `;
 }
 
