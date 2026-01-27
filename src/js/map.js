@@ -182,63 +182,59 @@
       return null;
     }
   }
-
   async function fetchRows(opts) {
     const supabase = window?.supabaseClient || null;
 
-    // Normaliza entradas
-    const pesquisaId = opts?.pesquisaId || null;
-    const pesquisaSlug = opts?.pesquisaSlug || null;
+    const csvUrl = opts?.csvUrl || "";
     const supabaseEnabled = !!opts?.supabaseEnabled;
 
-    // 1) Tenta Supabase (pontos)
-    if (supabaseEnabled && supabase) {
-      let pid = pesquisaId;
+    let pesquisaId = opts?.pesquisaId || null;
+    const pesquisaSlug = opts?.pesquisaSlug || null;
 
-      // Se não tiver pesquisaId, tenta buscar pelo slug
-      if (!pid && pesquisaSlug) {
-        pid = await getPesquisaIdBySlug(pesquisaSlug);
+    // 1) Supabase: resolve pesquisa_id pelo slug se necessário
+    if (supabaseEnabled && supabase) {
+      if (!pesquisaId && pesquisaSlug) {
+        pesquisaId = await getPesquisaIdBySlug(pesquisaSlug);
       }
 
-      if (pid) {
-        console.log("[Mapa] Carregando pontos do Supabase para pesquisa_id:", pid);
+      if (pesquisaId) {
+        console.log("[Mapa] Supabase: carregando pontos (pesquisa_id):", pesquisaId);
 
         const { data, error } = await supabase
           .from("pontos")
           .select("*")
-          .eq("pesquisa_id", pid)
+          .eq("pesquisa_id", pesquisaId)
           .eq("ativo", true);
 
         if (error) {
-          console.warn("[Mapa] Erro ao buscar pontos no Supabase:", error);
+          console.warn("[Mapa] Erro ao buscar pontos:", error);
         } else if (Array.isArray(data) && data.length > 0) {
           console.log("[Mapa] Pontos carregados:", data.length);
 
           return data.map((row) => ({
-            Nome: row.nome ?? "",
-            Categoria: row.categoria ?? "",
-            Territorio: row.territorio ?? "",
-            Contato: row.contato ?? "",
-            Descricao: row.descricao ?? "",
-            Link: row.link ?? "",
-            Observacao: row.observacao ?? "",
-            Cidade: row.cidade ?? "",
-            UF: row.uf ?? "",
-            Latitude: row.lat ?? "",
-            Longitude: row.lng ?? ""
+            Nome: row.nome,
+            Categoria: row.categoria,
+            Territorio: row.territorio,
+            Contato: row.contato,
+            Cidade: row.cidade,
+            UF: row.uf,
+            Latitude: row.lat,
+            Longitude: row.lng,
+            Descricao: row.descricao,
+            Link: row.link,
+            Observacao: row.observacao
           }));
         } else {
-          console.warn("[Mapa] Supabase retornou 0 pontos ativos. Se houver CSV fallback, tentarei carregar.");
+          console.warn("[Mapa] Supabase retornou 0 pontos ativos. Tentando CSV fallback (se existir).");
         }
       } else {
-        console.warn("[Mapa] Sem pesquisaId/slug para resolver pesquisa_id. Pulando Supabase.");
+        console.warn("[Mapa] Sem pesquisaId e não consegui resolver por slug. Tentando CSV fallback (se existir).");
       }
     }
 
-    // 2) CSV fallback (opcional)
-    if (opts?.csvUrl) {
-      console.log("[Mapa] Carregando CSV fallback:", opts.csvUrl);
-      return await fetchCsv(opts.csvUrl);
+    // 2) CSV fallback
+    if (csvUrl) {
+      return await fetchCsv(csvUrl);
     }
 
     return [];

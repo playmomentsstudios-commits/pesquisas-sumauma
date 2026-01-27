@@ -233,10 +233,16 @@
                 </div>
                 <div class="pontos-grid">
                   <div>
+                    <div class="pontos-toolbar" id="pontos-toolbar">
+                      <button id="ponto-new" class="btn primary" type="button">➕ Cadastrar novo</button>
+                      <input id="pontos-search" class="field" type="text" placeholder="Buscar ponto por nome, cidade ou categoria..." />
+                      <div class="pontos-counter muted" id="pontos-counter">0 pontos</div>
+                    </div>
                     <div id="pontos-list" class="pontos-list"></div>
                   </div>
                   <div class="card">
                     <h4 id="ponto-form-title">Novo ponto</h4>
+                    <div id="ponto-preview" class="ponto-preview hidden"></div>
                     <form id="ponto-form">
                       <label>Nome<input type="text" name="nome" required /></label>
                       <label>Cidade<input type="text" name="cidade" /></label>
