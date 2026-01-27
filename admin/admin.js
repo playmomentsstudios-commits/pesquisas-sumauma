@@ -54,6 +54,29 @@ const els = {
   pontosSearch: document.getElementById("pontos-search"),
   pontosCounter: document.getElementById("pontos-counter"),
   pontoPreview: document.getElementById("ponto-preview"),
+  pontoModal: document.getElementById("pontoModal"),
+  pontoModalClose: document.getElementById("pontoModalClose"),
+  pontoModalCancel: document.getElementById("pontoModalCancel"),
+  pontoModalSave: document.getElementById("pontoModalSave"),
+  pontoModalMsg: document.getElementById("pontoModalMsg"),
+  pontoModalId: document.getElementById("pontoModalId"),
+  pm_nome: document.getElementById("pm_nome"),
+  pm_categoria: document.getElementById("pm_categoria"),
+  pm_territorio: document.getElementById("pm_territorio"),
+  pm_contato: document.getElementById("pm_contato"),
+  pm_cidade: document.getElementById("pm_cidade"),
+  pm_uf: document.getElementById("pm_uf"),
+  pm_lat: document.getElementById("pm_lat"),
+  pm_lng: document.getElementById("pm_lng"),
+  pm_descricao: document.getElementById("pm_descricao"),
+  pm_site: document.getElementById("pm_site"),
+  pm_instagram: document.getElementById("pm_instagram"),
+  pm_facebook: document.getElementById("pm_facebook"),
+  pm_whatsapp: document.getElementById("pm_whatsapp"),
+  pm_email: document.getElementById("pm_email"),
+  pm_link: document.getElementById("pm_link"),
+  pm_observacao: document.getElementById("pm_observacao"),
+  pm_ativo: document.getElementById("pm_ativo"),
   blocosList: document.getElementById("blocos-list"),
   addBlocoBtn: document.getElementById("btn-ed-add-bloco"),
   previewBtn: document.getElementById("btn-ed-preview"),
@@ -222,6 +245,12 @@ async function init(){
   els.importCsv?.addEventListener("change", handleImportCsv);
   els.pontoNew?.addEventListener("click", () => clearPontoForm());
   els.pontosSearch?.addEventListener("input", () => renderPontosList());
+  els.pontoModalClose?.addEventListener("click", closePontoModal);
+  els.pontoModalCancel?.addEventListener("click", closePontoModal);
+  els.pontoModal?.addEventListener("click", (event) => {
+    if (event.target === els.pontoModal) closePontoModal();
+  });
+  els.pontoModalSave?.addEventListener("click", savePontoModal);
   els.addBlocoBtn?.addEventListener("click", () => addBlocoItem());
   els.previewBtn?.addEventListener("click", () => updatePesquisaPreview());
   els.fromResumoBtn?.addEventListener("click", () => generateBlocosFromResumo());
@@ -936,6 +965,110 @@ async function loadPontos(){
   renderPontosList();
 }
 
+function setModalMsg(text, ok = false){
+  if (!els.pontoModalMsg) return;
+  els.pontoModalMsg.textContent = text || "";
+  els.pontoModalMsg.style.color = ok ? "#198754" : "#6b7a75";
+}
+
+function openPontoModal(ponto){
+  if (!ponto?.id) return;
+  state.editingPonto = ponto;
+
+  setModalMsg("");
+
+  els.pontoModalId.value = ponto.id;
+  els.pm_nome.value = ponto.nome || "";
+  els.pm_categoria.value = ponto.categoria || "";
+  els.pm_territorio.value = ponto.territorio || "";
+  els.pm_contato.value = ponto.contato || "";
+  els.pm_cidade.value = ponto.cidade || "";
+  els.pm_uf.value = (ponto.uf || "").toUpperCase();
+  els.pm_lat.value = ponto.lat ?? "";
+  els.pm_lng.value = ponto.lng ?? "";
+  els.pm_descricao.value = ponto.descricao || "";
+  els.pm_site.value = ponto.site || "";
+  els.pm_instagram.value = ponto.instagram || "";
+  els.pm_facebook.value = ponto.facebook || "";
+  els.pm_whatsapp.value = ponto.whatsapp || "";
+  els.pm_email.value = ponto.email || "";
+  els.pm_link.value = ponto.link || "";
+  els.pm_observacao.value = ponto.observacao || "";
+  els.pm_ativo.value = String(ponto.ativo ?? true);
+
+  setModalMsg("Dados carregados. Edite e clique em Salvar.", true);
+
+  els.pontoModal.classList.remove("hidden");
+  document.body.style.overflow = "hidden";
+}
+
+function closePontoModal(){
+  if (!els.pontoModal) return;
+  els.pontoModal.classList.add("hidden");
+  document.body.style.overflow = "";
+  setModalMsg("");
+}
+
+function buildModalPayload(){
+  const toNum = (value) => {
+    const parsed = parseFloat(String(value ?? "").replace(",", "."));
+    return Number.isFinite(parsed) ? parsed : null;
+  };
+
+  return {
+    nome: (els.pm_nome.value || "").trim(),
+    categoria: (els.pm_categoria.value || "").trim() || null,
+    territorio: (els.pm_territorio.value || "").trim() || null,
+    contato: (els.pm_contato.value || "").trim() || null,
+    cidade: (els.pm_cidade.value || "").trim() || null,
+    uf: (els.pm_uf.value || "").trim().toUpperCase() || null,
+    lat: toNum(els.pm_lat.value),
+    lng: toNum(els.pm_lng.value),
+    descricao: (els.pm_descricao.value || "").trim() || null,
+    site: (els.pm_site.value || "").trim() || null,
+    instagram: (els.pm_instagram.value || "").trim() || null,
+    facebook: (els.pm_facebook.value || "").trim() || null,
+    whatsapp: (els.pm_whatsapp.value || "").trim() || null,
+    email: (els.pm_email.value || "").trim() || null,
+    link: (els.pm_link.value || "").trim() || null,
+    observacao: (els.pm_observacao.value || "").trim() || null,
+    ativo: els.pm_ativo.value === "true"
+  };
+}
+
+async function savePontoModal(){
+  hideAlert();
+  try {
+    if (!state.session) throw new Error("Faça login para salvar.");
+    const id = els.pontoModalId?.value || "";
+    if (!id) throw new Error("ID do ponto não encontrado.");
+
+    const payload = buildModalPayload();
+
+    const { error } = await state.supabase
+      .from("pontos")
+      .update(payload)
+      .eq("id", id);
+
+    if (error) throw error;
+
+    const idx = (state.pontos || []).findIndex((p) => p.id === id);
+    if (idx >= 0) state.pontos[idx] = { ...state.pontos[idx], ...payload };
+
+    renderPontosList();
+    showAlert("ok", "Ponto atualizado com sucesso ✅");
+    setModalMsg("Atualizado com sucesso ✅", true);
+
+    setTimeout(() => {
+      closePontoModal();
+    }, 600);
+  } catch (err) {
+    console.error(err);
+    showAlert("err", "Erro ao salvar: " + friendlyError(err));
+    setModalMsg("Erro ao salvar: " + friendlyError(err), false);
+  }
+}
+
 
 function renderPontosList(){
   const q = String(els.pontosSearch?.value || "").trim().toLowerCase();
@@ -959,9 +1092,6 @@ function renderPontosList(){
   list.forEach((ponto) => {
     const item = document.createElement("div");
     item.className = "ponto-item";
-    if (state.editingPonto?.id && state.editingPonto.id === ponto.id) {
-      item.classList.add("active");
-    }
 
     item.innerHTML = `
       <div class="ponto-meta">
@@ -970,23 +1100,15 @@ function renderPontosList(){
       </div>
 
       <div class="ponto-actions">
-        <button class="btn-mini" data-act="edit">Editar</button>
-        <button class="btn-mini" data-act="dup">Duplicar</button>
-        <button class="btn-mini danger" data-act="del">Excluir</button>
+        <button class="btn-mini" data-act="edit" type="button">Editar</button>
+        <button class="btn-mini" data-act="dup" type="button">Duplicar</button>
+        <button class="btn-mini danger" data-act="del" type="button">Excluir</button>
       </div>
     `;
 
-    item.addEventListener("click", (e) => {
-      const act = e.target?.getAttribute?.("data-act");
-      if (act) return;
-      fillPontoForm(ponto);
-      highlightItem(item);
-    });
-
     item.querySelector('[data-act="edit"]')?.addEventListener("click", (e) => {
       e.preventDefault(); e.stopPropagation();
-      fillPontoForm(ponto);
-      highlightItem(item);
+      openPontoModal(ponto);
     });
 
     item.querySelector('[data-act="dup"]')?.addEventListener("click", async (e) => {
@@ -997,19 +1119,12 @@ function renderPontosList(){
     item.querySelector('[data-act="del"]')?.addEventListener("click", async (e) => {
       e.preventDefault(); e.stopPropagation();
       fillPontoForm(ponto);
-      highlightItem(item);
       await handleDeletePonto();
     });
 
     els.pontosList.appendChild(item);
   });
 }
-
-function highlightItem(item){
-  document.querySelectorAll(".ponto-item.active").forEach(el => el.classList.remove("active"));
-  item.classList.add("active");
-}
-
 
 function fillPontoForm(ponto){
   state.editingPonto = ponto;
