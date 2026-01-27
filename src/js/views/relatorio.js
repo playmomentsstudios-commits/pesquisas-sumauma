@@ -10,9 +10,9 @@ function tabs(slug){
   return `
     <div class="subbar">
       <div class="subbar-right">
-        ${tab("mapa","Mapa")}
         ${tab("pesquisa","Pesquisa")}
         ${tab("relatorio","Relatório")}
+        ${tab("mapa","Mapa")}
         ${tab("ficha-tecnica","Ficha Técnica")}
       </div>
     </div>

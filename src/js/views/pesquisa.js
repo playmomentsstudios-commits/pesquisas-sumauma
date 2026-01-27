@@ -15,6 +15,7 @@ function renderTabs(slug, active) {
       <div class="subbar-right">
         ${tab("pesquisa", "Pesquisa")}
         ${tab("relatorio", "Relatório")}
+        ${tab("mapa", "Mapa")}
         ${tab("ficha-tecnica", "Ficha Técnica")}
       </div>
     </div>
