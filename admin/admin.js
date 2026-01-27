@@ -40,6 +40,10 @@ const els = {
   pontoFormTitle: document.getElementById("ponto-form-title"),
   pontoDelete: document.getElementById("ponto-delete"),
   importCsv: document.getElementById("import-csv"),
+  pontoNew: document.getElementById("ponto-new"),
+  pontosSearch: document.getElementById("pontos-search"),
+  pontosCounter: document.getElementById("pontos-counter"),
+  pontoPreview: document.getElementById("ponto-preview"),
   blocosList: document.getElementById("blocos-list"),
   addBlocoBtn: document.getElementById("btn-ed-add-bloco"),
   previewBtn: document.getElementById("btn-ed-preview"),
@@ -206,6 +210,8 @@ async function init(){
   els.pontoForm?.addEventListener("submit", handleSavePonto);
   els.pontoDelete?.addEventListener("click", handleDeletePonto);
   els.importCsv?.addEventListener("change", handleImportCsv);
+  els.pontoNew?.addEventListener("click", () => clearPontoForm());
+  els.pontosSearch?.addEventListener("input", () => renderPontosList());
   els.addBlocoBtn?.addEventListener("click", () => addBlocoItem());
   els.previewBtn?.addEventListener("click", () => updatePesquisaPreview());
   els.fromResumoBtn?.addEventListener("click", () => generateBlocosFromResumo());
@@ -918,20 +924,80 @@ async function loadPontos(){
   renderPontosList();
 }
 
+
 function renderPontosList(){
+  const q = String(els.pontosSearch?.value || "").trim().toLowerCase();
+
+  const list = (state.pontos || []).filter((p) => {
+    if (!q) return true;
+    const hay = `${p.nome || ""} ${p.cidade || ""} ${p.uf || ""} ${p.categoria || ""}`.toLowerCase();
+    return hay.includes(q);
+  });
+
+  if (els.pontosCounter) {
+    els.pontosCounter.textContent = `${list.length} ponto${list.length === 1 ? "" : "s"}`;
+  }
+
   els.pontosList.innerHTML = "";
-  if (!state.pontos.length) {
-    els.pontosList.innerHTML = "<div class=\"muted\">Nenhum ponto cadastrado.</div>";
+  if (!list.length) {
+    els.pontosList.innerHTML = "<div class=\"muted\">Nenhum ponto encontrado.</div>";
     return;
   }
-  state.pontos.forEach((ponto) => {
+
+  list.forEach((ponto) => {
     const item = document.createElement("div");
     item.className = "ponto-item";
-    item.innerHTML = `<strong>${escapeHtml(ponto.nome || "")}</strong><div class="muted">${escapeHtml(ponto.cidade || "")}/${escapeHtml(ponto.uf || "")}</div>`;
-    item.addEventListener("click", () => fillPontoForm(ponto));
+    if (state.editingPonto?.id && state.editingPonto.id === ponto.id) {
+      item.classList.add("active");
+    }
+
+    item.innerHTML = `
+      <div class="ponto-meta">
+        <strong>${escapeHtml(ponto.nome || "")}</strong>
+        <div class="muted">${escapeHtml(ponto.cidade || "")}/${escapeHtml(ponto.uf || "")}${ponto.categoria ? " • " + escapeHtml(ponto.categoria) : ""}</div>
+      </div>
+
+      <div class="ponto-actions">
+        <button class="btn-mini" data-act="edit">Editar</button>
+        <button class="btn-mini" data-act="dup">Duplicar</button>
+        <button class="btn-mini danger" data-act="del">Excluir</button>
+      </div>
+    `;
+
+    item.addEventListener("click", (e) => {
+      const act = e.target?.getAttribute?.("data-act");
+      if (act) return;
+      fillPontoForm(ponto);
+      highlightItem(item);
+    });
+
+    item.querySelector('[data-act="edit"]')?.addEventListener("click", (e) => {
+      e.preventDefault(); e.stopPropagation();
+      fillPontoForm(ponto);
+      highlightItem(item);
+    });
+
+    item.querySelector('[data-act="dup"]')?.addEventListener("click", async (e) => {
+      e.preventDefault(); e.stopPropagation();
+      await duplicatePonto(ponto);
+    });
+
+    item.querySelector('[data-act="del"]')?.addEventListener("click", async (e) => {
+      e.preventDefault(); e.stopPropagation();
+      fillPontoForm(ponto);
+      highlightItem(item);
+      await handleDeletePonto();
+    });
+
     els.pontosList.appendChild(item);
   });
 }
+
+function highlightItem(item){
+  document.querySelectorAll(".ponto-item.active").forEach(el => el.classList.remove("active"));
+  item.classList.add("active");
+}
+
 
 function fillPontoForm(ponto){
   state.editingPonto = ponto;
@@ -950,6 +1016,49 @@ function fillPontoForm(ponto){
   setPontoValue("whatsapp", ponto?.whatsapp || "");
   setPontoValue("email", ponto?.email || "");
   setPontoValue("ativo", String(ponto?.ativo ?? true));
+  updatePontoPreview(ponto);
+}
+
+
+function clearPontoForm(){
+  state.editingPonto = null;
+  els.pontoFormTitle.textContent = "Novo ponto";
+  els.pontoDelete.classList.add("hidden");
+  els.pontoForm.reset();
+  updatePontoPreview(null);
+  // remove destaque
+  document.querySelectorAll(".ponto-item.active").forEach(el => el.classList.remove("active"));
+}
+
+function updatePontoPreview(ponto){
+  const box = els.pontoPreview;
+  if (!box) return;
+  if (!ponto?.id){
+    box.classList.add("hidden");
+    box.innerHTML = "";
+    return;
+  }
+
+  const safe = (v) => escapeHtml(v ?? "");
+  const link = (url) => url ? `<a href="${safe(url)}" target="_blank" rel="noreferrer">${safe(url)}</a>` : `<span class="muted">—</span>`;
+
+  box.classList.remove("hidden");
+  box.innerHTML = `
+    <h5>Prévia do ponto selecionado</h5>
+    <div class="grid">
+      <div><b>Nome:</b> ${safe(ponto.nome)}</div>
+      <div><b>Status:</b> ${ponto.ativo ? "Ativo" : "Inativo"}</div>
+      <div><b>Cidade/UF:</b> ${safe(ponto.cidade || "")}/${safe(ponto.uf || "")}</div>
+      <div><b>Categoria:</b> ${safe(ponto.categoria || "")}</div>
+      <div><b>Latitude:</b> ${safe(ponto.lat ?? "")}</div>
+      <div><b>Longitude:</b> ${safe(ponto.lng ?? "")}</div>
+      <div><b>Site:</b> ${link(ponto.site)}</div>
+      <div><b>Instagram:</b> ${link(ponto.instagram)}</div>
+      <div><b>Facebook:</b> ${link(ponto.facebook)}</div>
+      <div><b>WhatsApp:</b> ${link(ponto.whatsapp)}</div>
+      <div><b>Email:</b> ${safe(ponto.email || "—")}</div>
+    </div>
+  `;
 }
 
 function setPontoValue(name, value){
@@ -985,8 +1094,7 @@ async function handleSavePonto(e){
     console.error(error);
     return;
   }
-  state.editingPonto = null;
-  els.pontoForm.reset();
+  clearPontoForm();
   await loadPontos();
 }
 
@@ -998,8 +1106,31 @@ async function handleDeletePonto(){
     console.error(error);
     return;
   }
-  state.editingPonto = null;
-  els.pontoForm.reset();
+  clearPontoForm();
+  await loadPontos();
+}
+
+async function duplicatePonto(ponto){
+  if (!state.current?.id || !ponto?.id) return;
+
+  const copy = {
+    ...ponto,
+    id: undefined,
+    external_id: null,
+    nome: (ponto.nome || "") + " (cópia)",
+    pesquisa_id: state.current.id
+  };
+
+  delete copy.id;
+
+  const { error } = await state.supabase.from("pontos").insert(copy);
+  if (error) {
+    console.error(error);
+    showAlert("err", "Erro ao duplicar ponto: " + friendlyError(error));
+    return;
+  }
+
+  showAlert("ok", "Ponto duplicado ✅");
   await loadPontos();
 }
 

@@ -9,7 +9,7 @@ async function renderMapaPesquisa(p){
     ? `${csvUrlBase}${csvUrlBase.includes("?") ? "&" : "?"}v=${Date.now()}`
     : "";
   const pesquisaId = p?.dbId || p?._dbId || "";
-  const supabaseEnabled = true;
+  const supabaseEnabled = !!(window && window.supabaseClient);
 
   const base = getBasePath();
   let path = (location.pathname || "").replace(/\/+$/,"");

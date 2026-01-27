@@ -592,3 +592,121 @@ textarea {
   .quick-panels{ grid-template-columns: 1fr; }
   .grid-2{ grid-template-columns: 1fr; }
 }
+
+
+
+/* ==============================
+   ABA PONTOS (MAPA) — upgrade UI
+============================== */
+
+.pontos-toolbar{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  flex-wrap:wrap;
+  margin-bottom:12px;
+}
+
+.pontos-toolbar .field{
+  flex: 1 1 320px;
+  min-width: 260px;
+  border-radius: 12px;
+}
+
+.pontos-counter{
+  font-size:12px;
+  padding:6px 10px;
+  border-radius:999px;
+  background:#f0f5f3;
+  border:1px solid rgba(15,61,46,.12);
+}
+
+.pontos-list{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.ponto-item{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+  padding:12px;
+  border-radius:14px;
+  border:1px solid rgba(0,0,0,.08);
+  background:#fff;
+  box-shadow: 0 12px 24px rgba(15, 61, 46, 0.06);
+  cursor:pointer;
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+
+.ponto-item:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 18px 34px rgba(15,61,46,.10);
+}
+
+.ponto-item.active{
+  border-color:#0f3d2e;
+  box-shadow: 0 0 0 2px rgba(15,61,46,.12), 0 18px 34px rgba(15,61,46,.10);
+}
+
+.ponto-meta{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  min-width: 0;
+}
+
+.ponto-meta strong{
+  font-weight:900;
+}
+
+.ponto-meta .muted{
+  font-size:12px;
+}
+
+.ponto-actions{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+}
+
+.ponto-actions .btn-mini{
+  padding:8px 10px;
+  border-radius:10px;
+  font-weight:900;
+  font-size:12px;
+}
+
+.ponto-preview{
+  margin: 10px 0 14px;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(0,0,0,.08);
+  background: #f8fbfa;
+}
+
+.ponto-preview h5{
+  margin:0 0 6px;
+  font-size:14px;
+}
+
+.ponto-preview .grid{
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap:8px 12px;
+  font-size:12px;
+  color:#374151;
+}
+
+.ponto-preview a{
+  color:#0f3d2e;
+  font-weight:800;
+  text-decoration:none;
+}
+
+.ponto-preview a:hover{
+  text-decoration:underline;
+}
