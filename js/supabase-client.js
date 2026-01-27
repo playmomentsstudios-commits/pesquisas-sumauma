@@ -9,7 +9,7 @@
       return;
     }
 
-    const url = pick("SUPABASE_URL");
+    const url = pick("https://mcyiqqxeahbumhyjtnni.supabase.co");
     const anon = pick("SUPABASE_ANON_KEY");
 
     if (!url || !anon) {
