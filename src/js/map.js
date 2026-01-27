@@ -133,6 +133,7 @@
         <div class="list-item" data-id="${esc(r._id)}">
           <strong>${esc(r.nome || "Sem nome")}</strong>
           <small>${esc(r.territorio || "")}${r.territorio ? " • " : ""}${esc(r.cidade || "")}/${esc(r.estado || "")}${r.categoria ? " • " + esc(r.categoria) : ""}</small>
+          ${contactRowCardHtml(r)}
         </div>
       `).join("");
 
@@ -149,6 +150,12 @@
             STATE.map.setView([row.lat, row.lng], 12, { animate: true });
             mk.openPopup();
           }
+        });
+      });
+
+      listEl.querySelectorAll(".contact-link").forEach(a => {
+        a.addEventListener("click", (ev) => {
+          ev.stopPropagation();
         });
       });
     }
@@ -242,14 +249,14 @@
             Latitude: row.lat,
             Longitude: row.lng,
             Descricao: row.descricao,
-            Território: row.territorio || row.território || row.territorio_nome || "",
+            Território: row.territorio || row.território || "",
             Site: row.site,
             Instagram: row.instagram,
             Facebook: row.facebook,
             WhatsApp: row.whatsapp,
             Email: row.email,
             YouTube: row.youtube,
-            Linkedin: row.linkedin,
+            LinkedIn: row.linkedin,
             TikTok: row.tiktok,
             Telefone: row.telefone
           }));
@@ -483,14 +490,70 @@
     return `<div class="contact-icons">${items.join("")}</div>`;
   }
 
+  function contactRowCardHtml(r) {
+    const links = [];
+
+    const push = (href, label, svg, { text = "", iconOnly = false } = {}) => {
+      if (!href) return;
+      links.push(`
+        <a class="contact-link ${iconOnly ? "icon-only" : ""}" href="${esc(href)}" target="_blank" rel="noopener noreferrer" aria-label="${esc(label)}" title="${esc(label)}">
+          ${svg}
+          ${text ? `<span class="label">${esc(text)}</span>` : ""}
+        </a>
+      `);
+    };
+
+    const pushTel = (value) => {
+      const phone = sanitizePhone(value);
+      if (!phone) return;
+      const href = `tel:${phone}`;
+      links.push(`
+        <a class="contact-link" href="${esc(href)}" aria-label="Telefone" title="Telefone">
+          ${ICON_PHONE}
+          <span class="label">${esc(prettyPhone(value))}</span>
+        </a>
+      `);
+    };
+
+    const pushMail = (value) => {
+      const v = String(value || "").trim();
+      if (!v) return;
+      const href = `mailto:${v}`;
+      links.push(`
+        <a class="contact-link" href="${esc(href)}" aria-label="Email" title="Email">
+          ${ICON_MAIL}
+          <span class="label">${esc(v)}</span>
+        </a>
+      `);
+    };
+
+    push(normalizeUrl(r.site), "Site", ICON_GLOBE, { iconOnly: true });
+    push(normalizeHandleUrl(r.instagram, "https://instagram.com/"), "Instagram", ICON_INSTAGRAM, { iconOnly: true });
+    push(normalizeFacebook(r.facebook), "Facebook", ICON_FACEBOOK, { iconOnly: true });
+    push(normalizeWhatsApp(r.whatsapp), "WhatsApp", ICON_WHATSAPP, { iconOnly: true });
+    pushMail(r.email);
+    push(normalizeYoutube(r.youtube), "YouTube", ICON_YOUTUBE, { iconOnly: true });
+    push(normalizeLinkedin(r.linkedin), "LinkedIn", ICON_LINKEDIN, { iconOnly: true });
+    push(normalizeHandleUrl(r.tiktok, "https://www.tiktok.com/@"), "TikTok", ICON_TIKTOK, { iconOnly: true });
+    pushTel(r.telefone);
+
+    if (!links.length) return "";
+    return `<div class="contact-row">${links.join("")}</div>`;
+  }
+
   function sanitizePhone(v) {
     const s = String(v || "").trim();
     if (!s) return "";
     const cleaned = s.replace(/[^\d+]/g, "");
     const digitsOnly = cleaned.replace(/[^\d]/g, "");
+    if (!digitsOnly) return "";
     if (cleaned.startsWith("+")) return cleaned;
     if (digitsOnly.length >= 10 && digitsOnly.length <= 11) return `+55${digitsOnly}`;
-    return cleaned;
+    return `+${digitsOnly}`;
+  }
+
+  function prettyPhone(v) {
+    return String(v || "").trim();
   }
 
   function normalizeUrl(v) {
@@ -505,6 +568,7 @@
     if (!s) return "";
     if (/^https?:\/\//i.test(s)) return s;
     s = s.replace(/^@+/, "");
+    if (!s) return "";
     return `${base}${encodeURIComponent(s)}`;
   }
 
