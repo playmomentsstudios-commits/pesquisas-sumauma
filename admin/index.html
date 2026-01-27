@@ -72,6 +72,7 @@
                 <button class="tab" type="button" data-tab="resumo">Resumo</button>
                 <button class="tab" type="button" data-tab="ficha">Ficha Técnica</button>
                 <button class="tab" type="button" data-tab="mapa">Mapa</button>
+                <button class="tab" type="button" data-tab="banners">Banners</button>
               </div>
 
               <div class="tab-panel" data-tab-panel="config">
@@ -262,6 +263,62 @@
                         <button class="btn primary" type="submit">Salvar ponto</button>
                       </div>
                     </form>
+                  </div>
+                </div>
+              </div>
+
+              <div class="tab-panel hidden" data-tab-panel="banners">
+                <h3 style="margin-top:0">Banners do Cabeçalho</h3>
+                <p class="muted" style="margin-top:4px">
+                  Atualize o banner da Home e o banner da pesquisa selecionada. O site público usa esses banners automaticamente.
+                </p>
+
+                <div class="grid-2">
+                  <div class="card">
+                    <h4>Banner da Home</h4>
+
+                    <div class="row">
+                      <label class="label">Upload (Storage site-assets)</label>
+                      <input id="homeBannerFile" type="file" accept="image/*" />
+                    </div>
+
+                    <div class="row">
+                      <label class="label">Ou URL direta</label>
+                      <input id="homeBannerUrl" class="field" placeholder="https://..." />
+                    </div>
+
+                    <div class="row">
+                      <button id="btnSaveHomeBanner" class="btn primary" type="button">Salvar banner da Home</button>
+                      <span id="homeBannerMsg" class="muted"></span>
+                    </div>
+
+                    <div class="preview">
+                      <img id="homeBannerPreview" alt="Prévia banner Home" style="max-width:100%;border-radius:12px;display:none" />
+                    </div>
+                  </div>
+
+                  <div class="card">
+                    <h4>Banner da Pesquisa selecionada</h4>
+                    <p class="muted" style="margin-top:-6px">Selecione uma pesquisa na lista para editar o banner dela.</p>
+
+                    <div class="row">
+                      <label class="label">Upload (Storage site-assets)</label>
+                      <input id="pesquisaBannerFile" type="file" accept="image/*" />
+                    </div>
+
+                    <div class="row">
+                      <label class="label">Ou URL direta</label>
+                      <input id="pesquisaBannerUrl" class="field" placeholder="https://..." />
+                    </div>
+
+                    <div class="row">
+                      <button id="btnSavePesquisaBanner" class="btn primary" type="button">Salvar banner da Pesquisa</button>
+                      <span id="pesquisaBannerMsg" class="muted"></span>
+                    </div>
+
+                    <div class="preview">
+                      <img id="pesquisaBannerPreview" alt="Prévia banner Pesquisa" style="max-width:100%;border-radius:12px;display:none" />
+                    </div>
                   </div>
                 </div>
               </div>
