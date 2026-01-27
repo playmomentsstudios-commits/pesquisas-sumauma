@@ -10,7 +10,7 @@
     }
 
     const url = pick("https://mcyiqqxeahbumhyjtnni.supabase.co");
-    const anon = pick("SUPABASE_ANON_KEY");
+    const anon = pick("sb_publishable_n7lRaut9pIGu1DHYPHPi5Q_rVImjcoH");
 
     if (!url || !anon) {
       console.warn("[Supabase] Config ausente. Verifique js/supabase-config.js");
