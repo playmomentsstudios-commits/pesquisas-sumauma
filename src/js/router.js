@@ -1,7 +1,6 @@
 import { loadPesquisas, getPesquisaBySlug, wireDropdown, spaLinkHandler, getSpaRedirect, escapeHtml, getSiteConfig } from "./utils.js";
 import { getBasePath, stripBase, withBase } from "./basepath.js";
 import renderHome from "./views/home.js";
-import renderMapaPesquisa from "./views/mapa-pesquisa.js";
 import renderPesquisa from "./views/pesquisa.js";
 import renderRelatorio from "./views/relatorio.js";
 import renderFichaTecnica from "./views/ficha-tecnica.js";
@@ -74,7 +73,7 @@ export async function initRouter(){
       const parts = path.split("/").filter(Boolean);
       dlog("parts=", parts);
       const slug = parts[0];
-      const sub = parts[1] || "mapa";
+      let sub = parts[1] || "pesquisa";
 
       const item = await getPesquisaBySlug(slug);
       if (!item){
@@ -85,9 +84,14 @@ export async function initRouter(){
       dlog("pesquisa encontrada?", true);
       setHeaderBanner(item.bannerUrl || null);
 
+      // mapa público removido; view file foi excluído
+      if (sub === "mapa"){
+        history.replaceState({}, "", withBase(`/${slug}/pesquisa`));
+        sub = "pesquisa";
+      }
+
       const viewNameMap = {
         pesquisa: "pesquisa",
-        mapa: "mapa",
         "ficha-tecnica": "ficha-tecnica",
         relatorio: "relatorio"
       };
@@ -97,10 +101,6 @@ export async function initRouter(){
 
       if (sub === "pesquisa"){
         app.innerHTML = await renderPesquisa(item);
-        return;
-      }
-      if (sub === "mapa"){
-        app.innerHTML = await renderMapaPesquisa(item);
         return;
       }
       if (sub === "ficha-tecnica"){
