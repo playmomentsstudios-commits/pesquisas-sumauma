@@ -115,6 +115,12 @@
       });
 
       marker.bindPopup(popupHtml(r), { maxWidth: 320 });
+      marker.on("click", () => {
+        try {
+          STATE.map.setView([r.lat, r.lng], 13, { animate: true });
+        } catch (e) {}
+        try { marker.openPopup(); } catch (e) {}
+      });
       marker.addTo(STATE.layer);
 
       STATE.markersById.set(r._id, marker);
@@ -221,6 +227,11 @@
             Latitude: row.lat,
             Longitude: row.lng,
             Descricao: row.descricao,
+            Site: row.site,
+            Instagram: row.instagram,
+            Facebook: row.facebook,
+            WhatsApp: row.whatsapp,
+            Email: row.email,
             Link: row.link,
             Observacao: row.observacao
           }));
@@ -302,7 +313,7 @@
       const lat = toNum(pick(r, ["Latitude", "latitude", "Lat", "lat"]));
       const lng = toNum(pick(r, ["Longitude", "longitude", "Lng", "lng", "Lon", "lon"]));
 
-      const telefone = pick(r, ["Telefone", "telefone", "WhatsApp", "whatsapp"]);
+      const telefone = pick(r, ["Telefone", "telefone", "WhatsApp", "whatsapp", "Contato", "contato"]);
       const email = pick(r, ["Email", "email", "E-mail", "e-mail"]);
       const instagram = pick(r, ["Instagram", "instagram"]);
       const site = pick(r, ["Site", "site", "URL", "url"]);
@@ -371,7 +382,7 @@
 
   function popupHtml(r) {
     const parts = [];
-    parts.push(`<div style="font-family:Arial,sans-serif">`);
+    parts.push(`<div style="font-family:Arial,sans-serif;background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:12px;padding:12px;box-shadow:0 18px 34px rgba(15,61,46,.10)">`);
     parts.push(`<div style="font-weight:bold;color:#0f3d2e;font-size:14px">${esc(r.nome || "")}</div>`);
     if (r.territorio) parts.push(`<div style="color:#555;margin-top:3px">${esc(r.territorio)}</div>`);
     parts.push(`<div style="color:#555;margin-top:3px">${esc(r.cidade || "")}/${esc(r.estado || "")}</div>`);
