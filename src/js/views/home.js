@@ -17,11 +17,11 @@ async function renderHome(){
             </a>
 
             <div class="card-body">
-              <span class="badge">Ano base: ${escapeHtml(p.anoBase || "")}</span>
-
               <h3 class="card-title">
                 <a href="${href}" data-link>${titulo}</a>
               </h3>
+
+              <p class="card-meta">Ano base: ${escapeHtml(p.anoBase || "")}</p>
 
               <div class="card-actions">
                 <a class="btn primary" href="${href}" data-link>Ver Pesquisa</a>
