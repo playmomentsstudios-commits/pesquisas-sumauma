@@ -84,10 +84,6 @@ export async function initRouter(){
       dlog("pesquisa encontrada?", true);
       setHeaderBanner(item.bannerUrl || null);
 
-      // mapa público removido; view file foi excluído
-      if (sub === "mapa"){
-        history.replaceState({}, "", withBase(`/${slug}/pesquisa`));
-        sub = "pesquisa";
       }
 
       const viewNameMap = {
