@@ -1,167 +1,117 @@
 import { escapeHtml } from "../utils.js";
 import { withBase } from "../basepath.js";
 
-function renderTabs(slug, active){
+function renderTabs(slug, active) {
   const s = escapeHtml(slug);
   const tab = (sub, label) => {
     const isActive = sub === active;
-    return `<a class="tab ${isActive ? "tab-active" : "tab-idle"}" href="${withBase(`/${s}/${sub}`)}" data-link>${label}</a>`;
+    return `<a class="tab ${isActive ? "tab-active" : "tab-idle"}" href="${withBase(
+      `/${s}/${sub}`
+    )}" data-link>${label}</a>`;
   };
+
   return `
     <div class="subbar">
       <div class="subbar-right">
-        ${tab("mapa","Mapa")}
-        ${tab("pesquisa","Pesquisa")}
-        ${tab("relatorio","Relatório")}
-        ${tab("ficha-tecnica","Ficha Técnica")}
+        ${tab("mapa", "Mapa")}
+        ${tab("pesquisa", "Pesquisa")}
+        ${tab("relatorio", "Relatório")}
+        ${tab("ficha-tecnica", "Ficha Técnica")}
       </div>
     </div>
   `;
 }
 
-function renderParagraphs(text){
-  const raw = String(text || "").trim();
-  if (!raw) return "";
-  const parts = raw.split(/\n{2,}/g);
-  return parts.map(p => `<p class="ed-p">${escapeHtml(p.trim())}</p>`).join("");
+function renderQuote(citacao) {
+  if (!citacao || (!citacao.texto && !citacao.autor)) return "";
+  const texto = escapeHtml(citacao.texto || "");
+  const autor = escapeHtml(citacao.autor || "");
+
+  return `
+    <section class="research-quote">
+      <div class="research-quote-inner">
+        <blockquote>
+          “${texto}”
+          ${autor ? `<footer>${autor}</footer>` : ""}
+        </blockquote>
+      </div>
+    </section>
+  `;
 }
 
-function renderFullBleedImage(src, alt, legenda){
-  const s = String(src || "").trim();
-  if (!s) return "";
+function renderTopicsList(topicos) {
+  if (!Array.isArray(topicos) || topicos.length === 0) {
+    return `
+      <div class="research-card">
+        <h3>Tópicos da pesquisa</h3>
+        <p class="muted">Conteúdo ainda não cadastrado em <b>pesquisaResumo.topicos</b>.</p>
+      </div>
+    `;
+  }
+
   return `
-    <div class="ed-fullbleed">
-      <div class="ed-fullbleed-inner" style="background-image:url('${escapeHtml(s)}')" role="img" aria-label="${escapeHtml(alt || "")}"></div>
-      ${legenda ? `<div class="ed-caption">${escapeHtml(legenda)}</div>` : ""}
+    <div class="research-card">
+      <h3>Tópicos da pesquisa</h3>
+      <ul class="research-topics">
+        ${topicos
+          .map((t) => `<li>${escapeHtml(t.titulo || t.texto || "")}</li>`)
+          .join("")}
+      </ul>
     </div>
   `;
 }
 
-function renderEditorialBlock(b){
-  const type = String(b?.type || "").toLowerCase();
+function renderEditorialSections(topicos) {
+  if (!Array.isArray(topicos) || topicos.length === 0) return "";
 
-  if (type === "texto"){
-    return `
-      <section class="ed-section">
-        <div class="ed-container">
-          ${renderParagraphs(b?.texto)}
-        </div>
-      </section>
-    `;
-  }
+  // Render “editorial”: título + texto, seguindo vibe do pesquisa.html
+  return topicos
+    .map((t, idx) => {
+      const titulo = escapeHtml(t.titulo || `Tópico ${idx + 1}`);
+      const texto = escapeHtml(t.texto || "");
+      if (!texto) return ""; // se não tiver descrição, não cria seção grande
 
-  if (type === "citacao"){
-    const texto = String(b?.texto || "").trim();
-    if (!texto) return "";
-    return `
-      <section class="ed-quote">
-        <div class="ed-container">
-          <blockquote>
-            “${escapeHtml(texto)}”
-            ${b?.autor ? `<footer>${escapeHtml(b.autor)}</footer>` : ""}
-          </blockquote>
-        </div>
-      </section>
-    `;
-  }
-
-  if (type === "imagem"){
-    return renderFullBleedImage(b?.src, b?.alt, b?.legenda);
-  }
-
-  if (type === "topico"){
-    const titulo = String(b?.titulo || "").trim();
-    const resumo = String(b?.resumo || "").trim();
-    const img = String(b?.imagem || "").trim();
-    return `
-      ${img ? renderFullBleedImage(img, titulo, "") : ""}
-      <section class="ed-section">
-        <div class="ed-container">
-          ${titulo ? `<h2 class="ed-h2">${escapeHtml(titulo)}</h2>` : ""}
-          ${resumo ? `<p class="ed-p">${escapeHtml(resumo)}</p>` : ""}
-        </div>
-      </section>
-    `;
-  }
-
-  if (type === "separador"){
-    const label = String(b?.label || "").trim();
-    return `
-      <section class="ed-sep">
-        <div class="ed-container">
-          ${label ? `<span>${escapeHtml(label)}</span>` : ""}
-        </div>
-      </section>
-    `;
-  }
-
-  return "";
+      return `
+        <section class="research-section">
+          <div class="research-section-inner">
+            <h2>${titulo}</h2>
+            <p>${texto}</p>
+          </div>
+        </section>
+      `;
+    })
+    .join("");
 }
 
-function renderPesquisaFallback(p){
+async function renderPesquisa(p) {
   const resumo = p?.pesquisaResumo || {};
   const topicos = Array.isArray(resumo.topicos) ? resumo.topicos : [];
   const descricao = p.descricaoCurta || p.sinopse || "";
-  return `
-    ${renderTabs(p.slug, "pesquisa")}
-
-    <section class="page">
-      <div class="page-head">
-        <div class="kicker">
-          <span class="badge">Ano base: ${escapeHtml(p.anoBase || "")}</span>
-        </div>
-
-        <h2>${escapeHtml(p.titulo || "Pesquisa")}</h2>
-        <p>${escapeHtml(descricao || "Conteúdo ainda não cadastrado.")}</p>
-
-      </div>
-    </section>
-
-    <section class="page" style="margin-top:16px">
-      <div class="page-head">
-        <h3>Tópicos da pesquisa</h3>
-        ${
-          topicos.length
-            ? `<ul>${topicos.map(t => `<li>${escapeHtml(t.titulo || t.texto || "")}</li>`).join("")}</ul>`
-            : `<p>Conteúdo ainda não cadastrado em <b>pesquisaResumo.topicos</b>.</p>`
-        }
-      </div>
-    </section>
-  `;
-}
-
-function renderPesquisaEditorial(p, blocos){
-  const descricao = p.descricaoCurta || p.sinopse || "";
-
-  const heroBanner = String(p?.capa || "").trim();
-  const heroImage = heroBanner
-    ? `<div class="ed-hero-media" style="background-image:url('${escapeHtml(heroBanner)}')"></div>`
-    : "";
 
   return `
     ${renderTabs(p.slug, "pesquisa")}
 
-    <section class="ed-hero">
-      ${heroImage}
-      <div class="ed-hero-overlay">
-        <div class="ed-container">
-          <div class="ed-kicker">
-            <span class="badge">Ano base: ${escapeHtml(p.anoBase || "")}</span>
-          </div>
-          <h1 class="ed-h1">${escapeHtml(p.titulo || "Pesquisa")}</h1>
-          ${descricao ? `<div class="ed-lead">${renderParagraphs(descricao)}</div>` : ""}
+    <section class="research-hero">
+      <div class="research-hero-inner">
+        <div class="research-meta">
+          <span class="research-meta-label">Ano base:</span>
+          <span class="research-meta-value">${escapeHtml(p.anoBase || "")}</span>
         </div>
+
+        <h1 class="research-title">${escapeHtml(p.titulo || "Pesquisa")}</h1>
+
+        <p class="research-lead">
+          ${escapeHtml(descricao || "Conteúdo ainda não cadastrado.")}
+        </p>
+
+        ${renderTopicsList(topicos)}
       </div>
     </section>
 
-    ${blocos.map(renderEditorialBlock).join("")}
-  `;
-}
+    ${renderQuote(resumo.citacao)}
 
-async function renderPesquisa(p){
-  const blocos = Array.isArray(p?.pesquisaConteudo?.blocos) ? p.pesquisaConteudo.blocos : [];
-  if (blocos.length) return renderPesquisaEditorial(p, blocos);
-  return renderPesquisaFallback(p);
+    ${renderEditorialSections(topicos)}
+  `;
 }
 
 export default renderPesquisa;
