@@ -192,10 +192,27 @@
     const supabase = window?.supabaseClient || null;
 
     const csvUrl = opts?.csvUrl || "";
+    const apiUrl = opts?.apiUrl || "";
     const supabaseEnabled = !!opts?.supabaseEnabled;
 
     let pesquisaId = opts?.pesquisaId || null;
     const pesquisaSlug = opts?.pesquisaSlug || null;
+
+    if (apiUrl) {
+      try {
+        const res = await fetch(apiUrl, { cache: "no-store" });
+        if (!res.ok) {
+          console.warn("[Mapa] /api/pontos respondeu com erro:", res.status);
+        } else {
+          const payload = await res.json();
+          if (payload && Array.isArray(payload.data)) {
+            return payload.data;
+          }
+        }
+      } catch (e) {
+        console.warn("[Mapa] Falha ao buscar /api/pontos:", e);
+      }
+    }
 
     // 1) Supabase: resolve pesquisa_id pelo slug se necessário
     if (supabaseEnabled && supabase) {
@@ -217,24 +234,7 @@
         } else if (Array.isArray(data) && data.length > 0) {
           console.log("[Mapa] Pontos carregados:", data.length);
 
-          return data.map((row) => ({
-            Nome: row.nome,
-            Categoria: row.categoria,
-            Territorio: row.territorio,
-            Contato: row.contato,
-            Cidade: row.cidade,
-            UF: row.uf,
-            Latitude: row.lat,
-            Longitude: row.lng,
-            Descricao: row.descricao,
-            Site: row.site,
-            Instagram: row.instagram,
-            Facebook: row.facebook,
-            WhatsApp: row.whatsapp,
-            Email: row.email,
-            Link: row.link,
-            Observacao: row.observacao
-          }));
+          return data;
         } else {
           console.warn("[Mapa] Supabase retornou 0 pontos ativos. Tentando CSV fallback (se existir).");
         }
@@ -314,10 +314,14 @@
       const lng = toNum(pick(r, ["Longitude", "longitude", "Lng", "lng", "Lon", "lon"]));
 
       const contato = pick(r, ["Contato", "contato", "Telefone", "telefone"]);
+      const telefone = pick(r, ["Telefone", "telefone"]);
       const whatsapp = pick(r, ["WhatsApp", "whatsapp"]);
       const email = pick(r, ["Email", "email", "E-mail", "e-mail"]);
       const instagram = pick(r, ["Instagram", "instagram"]);
       const facebook = pick(r, ["Facebook", "facebook"]);
+      const youtube = pick(r, ["Youtube", "youtube", "YouTube", "youTube"]);
+      const linkedin = pick(r, ["Linkedin", "linkedin", "LinkedIn", "linkedIn"]);
+      const tiktok = pick(r, ["TikTok", "Tiktok", "tiktok"]);
       const site = pick(r, ["Site", "site", "URL", "url"]);
       const link = pick(r, ["Link", "link"]);
       const descricao = pick(r, ["Descrição", "Descricao", "descricao"]);
@@ -332,12 +336,15 @@
         estado: String(estado || "").trim(),
         lat,
         lng,
-        telefone: String(contato || whatsapp || "").trim(),
+        telefone: String(telefone || contato || "").trim(),
         contato: String(contato || "").trim(),
         whatsapp: String(whatsapp || "").trim(),
         email: String(email || "").trim(),
         instagram: String(instagram || "").trim(),
         facebook: String(facebook || "").trim(),
+        youtube: String(youtube || "").trim(),
+        linkedin: String(linkedin || "").trim(),
+        tiktok: String(tiktok || "").trim(),
         site: String(site || "").trim(),
         link: String(link || "").trim(),
         descricao: String(descricao || "").trim(),
@@ -402,23 +409,61 @@
       parts.push(`<div style="margin-top:10px;color:#333;font-size:12px;line-height:1.5">${esc(r.descricao)}</div>`);
     }
 
-    const rows = [];
-    const add = (label, val, href = false) => {
-      if (!val) return;
-      const v = esc(val);
-      rows.push(`<div style="display:flex;gap:8px"><b style="min-width:86px;color:#111">${label}</b><span style="color:#333">${href ? `<a href="${v}" target="_blank" rel="noreferrer" style="color:#0f3d2e;font-weight:800;text-decoration:none">Abrir</a>` : v}</span></div>`);
+    const contacts = [];
+    const addContact = (icon, label, value, href, external = true) => {
+      if (!value) return;
+      const safeValue = esc(value);
+      if (href) {
+        const safeHref = esc(href);
+        const target = external ? ` target="_blank" rel="noreferrer"` : "";
+        contacts.push(`<div>${icon} <a href="${safeHref}"${target} style="color:#0f3d2e;font-weight:800;text-decoration:none">${safeValue}</a></div>`);
+      } else {
+        contacts.push(`<div>${icon} ${safeValue}</div>`);
+      }
     };
 
-    add("Contato", r.contato || r.telefone);
-    add("WhatsApp", r.whatsapp);
-    add("E-mail", r.email);
-    add("Instagram", r.instagram);
-    add("Facebook", r.facebook);
-    add("Site", r.site, true);
-    add("Link", r.link, true);
+    const telefoneValue = String(r.telefone || r.contato || "").trim();
+    const telefoneDigits = digits(telefoneValue);
+    if (telefoneValue) {
+      addContact("📞", "Telefone", telefoneValue, telefoneDigits ? `tel:${telefoneDigits}` : "", false);
+    }
 
-    if (rows.length) {
-      parts.push(`<div style="margin-top:10px;border-top:1px solid rgba(0,0,0,.06);padding-top:10px;display:flex;flex-direction:column;gap:6px;font-size:12px">${rows.join("")}</div>`);
+    const whatsappValue = String(r.whatsapp || "").trim();
+    addContact("💬", "WhatsApp", whatsappValue, asWaUrl(whatsappValue));
+
+    const emailValue = String(r.email || "").trim();
+    if (emailValue) {
+      addContact("✉️", "E-mail", emailValue, `mailto:${emailValue}`, false);
+    }
+
+    const instagramValue = String(r.instagram || "").trim();
+    addContact("📸", "Instagram", instagramValue, asIgUrl(instagramValue));
+
+    const facebookValue = String(r.facebook || "").trim();
+    addContact("📘", "Facebook", facebookValue, asUrl(facebookValue));
+
+    const youtubeValue = String(r.youtube || "").trim();
+    addContact("▶️", "YouTube", youtubeValue, asUrl(youtubeValue));
+
+    const linkedinValue = String(r.linkedin || "").trim();
+    addContact("💼", "LinkedIn", linkedinValue, asUrl(linkedinValue));
+
+    const tiktokValue = String(r.tiktok || "").trim();
+    addContact("🎵", "TikTok", tiktokValue, asTiktokUrl(tiktokValue));
+
+    const siteValue = String(r.site || "").trim();
+    addContact("🌐", "Site", siteValue, asUrl(siteValue));
+
+    const linkValue = String(r.link || "").trim();
+    addContact("🔗", "Link", linkValue, asUrl(linkValue));
+
+    if (contacts.length) {
+      parts.push(
+        `<div style="margin-top:10px;border-top:1px solid rgba(0,0,0,.08);padding-top:8px">` +
+          `<div style="font-weight:700;font-size:12px;margin-bottom:6px;color:#111">Contatos</div>` +
+          `<div style="font-size:12px;line-height:1.6">${contacts.join("")}</div>` +
+        `</div>`
+      );
     }
 
     if (r.observacao) {
@@ -452,5 +497,43 @@
       .replaceAll(">", "&gt;")
       .replaceAll('"', "&quot;")
       .replaceAll("'", "&#039;");
+  }
+
+  function asUrl(value) {
+    const raw = String(value || "").trim();
+    if (!raw) return "";
+    if (/^[a-z][a-z0-9+.-]*:/i.test(raw)) return raw;
+    return `https://${raw}`;
+  }
+
+  function digits(value) {
+    return String(value || "").replace(/\D/g, "");
+  }
+
+  function asIgUrl(value) {
+    const raw = String(value || "").trim();
+    if (!raw) return "";
+    if (/^https?:\/\//i.test(raw)) return raw;
+    const handle = raw.replace(/^@/, "").trim();
+    if (!handle) return "";
+    return `https://instagram.com/${handle}`;
+  }
+
+  function asTiktokUrl(value) {
+    const raw = String(value || "").trim();
+    if (!raw) return "";
+    if (/^https?:\/\//i.test(raw)) return raw;
+    const handle = raw.replace(/^@/, "").trim();
+    if (!handle) return "";
+    return `https://www.tiktok.com/@${handle}`;
+  }
+
+  function asWaUrl(value) {
+    const raw = String(value || "").trim();
+    if (!raw) return "";
+    if (/^https?:\/\//i.test(raw)) return raw;
+    const onlyDigits = digits(raw);
+    if (!onlyDigits) return "";
+    return `https://wa.me/${onlyDigits}`;
   }
 })();
