@@ -84,9 +84,6 @@ export async function initRouter(){
       dlog("pesquisa encontrada?", true);
       setHeaderBanner(item.bannerUrl || null);
 
-      if (sub === "mapa"){
-        history.replaceState({}, "", withBase(`/${slug}/pesquisa`));
-        sub = "pesquisa";
       }
 
       const viewNameMap = {
