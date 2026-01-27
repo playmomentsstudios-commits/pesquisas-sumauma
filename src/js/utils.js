@@ -66,7 +66,7 @@ export async function loadPesquisas(force = false){
       console.log("[DATA] tentando Supabase…");
       const { data, error } = await client
         .from("pesquisas")
-        .select("id,slug,titulo,ano_base,ordem,status,descricao_curta,sinopse,capa_url,relatorio_pdf_url,leitura_url,csv_fallback,banner_url,config_json")
+        .select("id,slug,titulo,ano_base,ordem,status,descricao_curta,sinopse,capa_url,relatorio_pdf_url,leitura_url,csv_fallback,banner_url,banner_pos,banner_overlay,config_json")
         .eq("status", true)
         .order("ordem", { ascending: true });
       if (error) throw error;
@@ -135,6 +135,8 @@ function mapPesquisaFromDb(row){
     slug: row.slug,
     capa: fixMaybeLocalUrl(row.capa_url || cfg.capa || ""),
     bannerUrl: fixMaybeLocalUrl(row.banner_url || cfg.bannerUrl || ""),
+    bannerPos: row.banner_pos || cfg.bannerPos || "center",
+    bannerOverlay: row.banner_overlay ?? cfg.bannerOverlay ?? 0.35,
     descricaoCurta: row.descricao_curta || "",
     sinopse: row.sinopse || "",
     relatorioPdf: fixMaybeLocalUrl(row.relatorio_pdf_url || cfg.relatorioPdf || ""),
@@ -152,6 +154,8 @@ function normalizePesquisaPaths(p){
   return {
     ...p,
     capa: fixMaybeLocalUrl(p.capa || ""),
+    bannerPos: p.bannerPos || "center",
+    bannerOverlay: p.bannerOverlay ?? 0.35,
     relatorioPdf: fixMaybeLocalUrl(p.relatorioPdf || ""),
     leituraUrl: fixMaybeLocalUrl(p.leituraUrl || ""),
     mapa: {

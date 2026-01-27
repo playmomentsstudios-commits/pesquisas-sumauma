@@ -9,12 +9,16 @@ const state = {
 
 let currentResearchId = null;
 let researchCache = [];
+let sitePesquisaLookup = new Map();
 
 const els = {
   loginPanel: document.getElementById("login-panel"),
   loginForm: document.getElementById("login-form"),
   loginError: document.getElementById("login-error"),
   adminPanel: document.getElementById("admin-panel"),
+  rootTabs: document.querySelectorAll(".root-tab"),
+  rootPanelPesquisas: document.getElementById("root-panel-pesquisas"),
+  rootPanelSite: document.getElementById("root-panel-site"),
   user: document.getElementById("admin-user"),
   logout: document.getElementById("btn-logout"),
   list: document.getElementById("researchList"),
@@ -42,11 +46,16 @@ const els = {
   importCsv: document.getElementById("import-csv"),
   homeBannerFile: document.getElementById("homeBannerFile"),
   homeBannerUrl: document.getElementById("homeBannerUrl"),
+  homeBannerPos: document.getElementById("homeBannerPos"),
+  homeBannerOverlay: document.getElementById("homeBannerOverlay"),
   btnSaveHomeBanner: document.getElementById("btnSaveHomeBanner"),
   homeBannerMsg: document.getElementById("homeBannerMsg"),
   homeBannerPreview: document.getElementById("homeBannerPreview"),
+  sitePesquisaSelect: document.getElementById("sitePesquisaSelect"),
   pesquisaBannerFile: document.getElementById("pesquisaBannerFile"),
   pesquisaBannerUrl: document.getElementById("pesquisaBannerUrl"),
+  pesquisaBannerPos: document.getElementById("pesquisaBannerPos"),
+  pesquisaBannerOverlay: document.getElementById("pesquisaBannerOverlay"),
   btnSavePesquisaBanner: document.getElementById("btnSavePesquisaBanner"),
   pesquisaBannerMsg: document.getElementById("pesquisaBannerMsg"),
   pesquisaBannerPreview: document.getElementById("pesquisaBannerPreview"),
@@ -254,6 +263,14 @@ async function init(){
   els.addBlocoBtn?.addEventListener("click", () => addBlocoItem());
   els.previewBtn?.addEventListener("click", () => updatePesquisaPreview());
   els.fromResumoBtn?.addEventListener("click", () => generateBlocosFromResumo());
+  els.btnSaveHomeBanner?.addEventListener("click", handleSaveHomeBanner);
+  els.btnSavePesquisaBanner?.addEventListener("click", handleSavePesquisaBanner);
+  els.sitePesquisaSelect?.addEventListener("change", (event) => {
+    loadPesquisaBannerById(event.target.value);
+  });
+  els.rootTabs?.forEach((tab) => {
+    tab.addEventListener("click", () => setRootTab(tab.dataset.root));
+  });
 
   els.form?.addEventListener("input", (event) => {
     const target = event.target;
@@ -280,6 +297,15 @@ async function init(){
 function setDiag(msg){
   const el = document.getElementById("sbDiag");
   if (el) el.textContent = msg;
+}
+
+function setRootTab(name){
+  const target = name === "site" ? "site" : "pesquisas";
+  els.rootTabs?.forEach((tab) => {
+    tab.classList.toggle("active", tab.dataset.root === target);
+  });
+  els.rootPanelPesquisas?.classList.toggle("hidden", target !== "pesquisas");
+  els.rootPanelSite?.classList.toggle("hidden", target !== "site");
 }
 
 function setDiagStatus(text){
@@ -353,7 +379,10 @@ function setSession(session){
   els.logout.classList.toggle("hidden", !loggedIn);
   els.user.textContent = session?.user?.email || "";
   if (loggedIn) {
+    setRootTab("pesquisas");
     refreshListAndSelect(null);
+    loadHomeBannerPreview();
+    fillSitePesquisaSelect();
   }
 }
 
@@ -454,7 +483,6 @@ function clearForm(){
 
 function loadResearchToForm(pesquisa){
   state.current = pesquisa;
-  try { loadPesquisaBannerPreview(); } catch {}
 
   setCurrentResearchId(pesquisa?.id || null);
   state.editingPonto = null;
@@ -1986,20 +2014,76 @@ function setPreview(imgEl, url){
   imgEl.src = url;
 }
 
+function clampOverlay(value, fallback = 0.35){
+  const num = Number(value);
+  if (Number.isNaN(num)) return fallback;
+  return Math.min(0.6, Math.max(0, num));
+}
+
+async function fillSitePesquisaSelect(){
+  if (!els.sitePesquisaSelect) return;
+  sitePesquisaLookup = new Map();
+  try {
+    const { data, error } = await state.supabase
+      .from("pesquisas")
+      .select("id,slug,titulo,ordem")
+      .order("ordem", { ascending: true });
+    if (error) throw error;
+
+    if (!data?.length) {
+      els.sitePesquisaSelect.innerHTML = `<option value="">Nenhuma pesquisa encontrada</option>`;
+      setBannerMsg(els.pesquisaBannerMsg, "Nenhuma pesquisa encontrada.", false);
+      setPreview(els.pesquisaBannerPreview, "");
+      return;
+    }
+
+    els.sitePesquisaSelect.innerHTML = data.map((pesquisa) => {
+      const titulo = pesquisa.titulo || "(Sem título)";
+      const slug = pesquisa.slug || "";
+      sitePesquisaLookup.set(String(pesquisa.id), { slug });
+      return `<option value="${pesquisa.id}">${escapeHtml(titulo)} (${escapeHtml(slug)})</option>`;
+    }).join("");
+    els.sitePesquisaSelect.value = String(data[0].id);
+    loadPesquisaBannerById(data[0].id);
+  } catch (err) {
+    console.error(err);
+    els.sitePesquisaSelect.innerHTML = `<option value="">Erro ao carregar pesquisas</option>`;
+    setBannerMsg(els.pesquisaBannerMsg, "Erro ao carregar pesquisas para o banner.", false);
+  }
+}
+
+async function getSiteCfg(key){
+  const { data, error } = await state.supabase
+    .from("site_config")
+    .select("value")
+    .eq("key", key)
+    .limit(1)
+    .maybeSingle();
+  if (error) throw error;
+  return data?.value ?? null;
+}
+
+async function setSiteCfg(key, value){
+  const { error } = await state.supabase
+    .from("site_config")
+    .upsert({ key, value }, { onConflict: "key" });
+  if (error) throw error;
+}
+
 
 
 async function loadHomeBannerPreview(){
   try {
-    const { data, error } = await state.supabase
-      .from("site_config")
-      .select("value")
-      .eq("key", "home_banner_url")
-      .limit(1)
-      .maybeSingle();
-
-    if (error) return;
-    const url = data?.value || "";
-    if (els.homeBannerUrl) els.homeBannerUrl.value = url;
+    const [url, pos, overlay] = await Promise.all([
+      getSiteCfg("home_banner_url"),
+      getSiteCfg("home_banner_pos"),
+      getSiteCfg("home_banner_overlay")
+    ]);
+    const safePos = pos || "center";
+    const safeOverlay = clampOverlay(overlay, 0.35);
+    if (els.homeBannerUrl) els.homeBannerUrl.value = url || "";
+    if (els.homeBannerPos) els.homeBannerPos.value = safePos;
+    if (els.homeBannerOverlay) els.homeBannerOverlay.value = safeOverlay;
     setPreview(els.homeBannerPreview, url);
   } catch {}
 }
@@ -2013,6 +2097,10 @@ async function handleSaveHomeBanner(){
 
     let finalUrl = urlInput;
 
+    const posValue = els.homeBannerPos?.value || "center";
+    const overlayValue = clampOverlay(els.homeBannerOverlay?.value, 0.35);
+    if (els.homeBannerOverlay) els.homeBannerOverlay.value = overlayValue;
+
     if (file) {
       finalUrl = await maybeUploadFile(file, `site/home-banner`);
       if (els.homeBannerUrl) els.homeBannerUrl.value = finalUrl;
@@ -2020,11 +2108,11 @@ async function handleSaveHomeBanner(){
 
     if (!finalUrl) throw new Error("Envie um arquivo ou informe uma URL.");
 
-    const { error } = await state.supabase
-      .from("site_config")
-      .upsert({ key: "home_banner_url", value: finalUrl }, { onConflict: "key" });
-
-    if (error) throw error;
+    await Promise.all([
+      setSiteCfg("home_banner_url", finalUrl),
+      setSiteCfg("home_banner_pos", posValue),
+      setSiteCfg("home_banner_overlay", overlayValue)
+    ]);
 
     setPreview(els.homeBannerPreview, finalUrl);
     setBannerMsg(els.homeBannerMsg, "Banner da Home salvo ✅", true);
@@ -2038,28 +2126,38 @@ async function handleSaveHomeBanner(){
   }
 }
 
-async function loadPesquisaBannerPreview(){
-  const current = state.current;
-  if (!current?.id) {
-    setBannerMsg(els.pesquisaBannerMsg, "Selecione uma pesquisa para editar o banner.", false);
-    setPreview(els.pesquisaBannerPreview, "");
-    if (els.pesquisaBannerUrl) els.pesquisaBannerUrl.value = "";
-    return;
-  }
+async function loadPesquisaBannerById(pesquisaId){
+  try {
+    const id = pesquisaId || els.sitePesquisaSelect?.value;
+    if (!id) {
+      setBannerMsg(els.pesquisaBannerMsg, "Selecione uma pesquisa para editar o banner.", false);
+      setPreview(els.pesquisaBannerPreview, "");
+      if (els.pesquisaBannerUrl) els.pesquisaBannerUrl.value = "";
+      return;
+    }
 
-  // tenta ler do DB (banner_url)
-  const { data, error } = await state.supabase
-    .from("pesquisas")
-    .select("banner_url")
-    .eq("id", current.id)
-    .limit(1)
-    .maybeSingle();
+    const { data, error } = await state.supabase
+      .from("pesquisas")
+      .select("banner_url,banner_pos,banner_overlay,slug")
+      .eq("id", id)
+      .limit(1)
+      .maybeSingle();
 
-  if (!error) {
+    if (error) throw error;
     const url = data?.banner_url || "";
+    const pos = data?.banner_pos || "center";
+    const overlay = clampOverlay(data?.banner_overlay, 0.35);
     if (els.pesquisaBannerUrl) els.pesquisaBannerUrl.value = url;
+    if (els.pesquisaBannerPos) els.pesquisaBannerPos.value = pos;
+    if (els.pesquisaBannerOverlay) els.pesquisaBannerOverlay.value = overlay;
+    if (data?.slug) {
+      sitePesquisaLookup.set(String(id), { slug: data.slug });
+    }
     setPreview(els.pesquisaBannerPreview, url);
     setBannerMsg(els.pesquisaBannerMsg, url ? "Banner atual carregado ✅" : "Sem banner definido ainda.", true);
+  } catch (err) {
+    console.error(err);
+    setBannerMsg(els.pesquisaBannerMsg, "Erro ao carregar banner.", false);
   }
 }
 
@@ -2067,16 +2165,31 @@ async function handleSavePesquisaBanner(){
   hideAlert();
   try {
     if (!state.session) throw new Error("Faça login para salvar.");
-    const current = state.current;
-    if (!current?.id) throw new Error("Selecione uma pesquisa primeiro.");
+    const selectedId = els.sitePesquisaSelect?.value;
+    if (!selectedId) throw new Error("Selecione uma pesquisa primeiro.");
 
     const file = els.pesquisaBannerFile?.files?.[0];
     const urlInput = (els.pesquisaBannerUrl?.value || "").trim();
+    const posValue = els.pesquisaBannerPos?.value || "center";
+    const overlayValue = clampOverlay(els.pesquisaBannerOverlay?.value, 0.35);
+    if (els.pesquisaBannerOverlay) els.pesquisaBannerOverlay.value = overlayValue;
 
     let finalUrl = urlInput;
+    let slug = sitePesquisaLookup.get(String(selectedId))?.slug;
+    if (!slug) {
+      const { data, error: slugError } = await state.supabase
+        .from("pesquisas")
+        .select("slug")
+        .eq("id", selectedId)
+        .limit(1)
+        .maybeSingle();
+      if (slugError) throw slugError;
+      slug = data?.slug;
+      if (slug) sitePesquisaLookup.set(String(selectedId), { slug });
+    }
 
     if (file) {
-      finalUrl = await maybeUploadFile(file, `pesquisas/${current.slug}/banner`);
+      finalUrl = await maybeUploadFile(file, `pesquisas/${slug || selectedId}/banner`);
       if (els.pesquisaBannerUrl) els.pesquisaBannerUrl.value = finalUrl;
     }
 
@@ -2084,8 +2197,8 @@ async function handleSavePesquisaBanner(){
 
     const { error } = await state.supabase
       .from("pesquisas")
-      .update({ banner_url: finalUrl })
-      .eq("id", current.id);
+      .update({ banner_url: finalUrl, banner_pos: posValue, banner_overlay: overlayValue })
+      .eq("id", selectedId);
 
     if (error) throw error;
 
