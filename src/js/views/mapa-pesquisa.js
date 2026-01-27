@@ -3,7 +3,11 @@ import { getBasePath, withBase } from "../basepath.js";
 
 async function renderMapaPesquisa(p){
   const slug = escapeHtml(p.slug);
-  const csvUrl = escapeHtml(p?.mapa?.csvUrl || "");
+  const rawCsvUrl = p?.mapa?.csvUrl || "";
+  const csvUrlBase = escapeHtml(rawCsvUrl);
+  const csvUrl = csvUrlBase
+    ? `${csvUrlBase}${csvUrlBase.includes("?") ? "&" : "?"}v=${Date.now()}`
+    : "";
   const pesquisaId = p?.dbId || p?._dbId || "";
   const supabaseEnabled = !!pesquisaId;
 

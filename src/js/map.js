@@ -159,33 +159,41 @@
 
   // ---------- CSV ----------
   async function fetchRows(opts) {
+    // 1) Tenta Supabase (tabela pontos) SOMENTE se existirem pontos.
     if (opts?.supabaseEnabled && opts?.pesquisaId) {
       const supabase = window?.supabaseClient || null;
+
       if (supabase) {
         const { data, error } = await supabase
           .from("pontos")
           .select("*")
           .eq("pesquisa_id", opts.pesquisaId)
           .eq("ativo", true);
-        if (!error && data) {
+
+        // ✅ Se vierem pontos válidos, usa Supabase
+        if (!error && Array.isArray(data) && data.length > 0) {
           return data.map((row) => ({
-            Nome: row.nome,
-            Categoria: row.categoria,
-            Cidade: row.cidade,
-            UF: row.uf,
-            Latitude: row.lat,
-            Longitude: row.lng,
-            Descricao: row.descricao,
-            Site: row.site,
-            Instagram: row.instagram,
-            Facebook: row.facebook,
-            WhatsApp: row.whatsapp,
-            Email: row.email
+            Nome: row.nome ?? "",
+            Categoria: row.categoria ?? "",
+            Cidade: row.cidade ?? "",
+            UF: row.uf ?? "",
+            Latitude: row.lat ?? "",
+            Longitude: row.lng ?? "",
+            Descricao: row.descricao ?? "",
+            Site: row.site ?? "",
+            Instagram: row.instagram ?? "",
+            Facebook: row.facebook ?? "",
+            WhatsApp: row.whatsapp ?? "",
+            Email: row.email ?? ""
           }));
         }
+
+        // ✅ Se não vier nada, cai para CSV
+        console.warn("[Mapa] Supabase sem pontos ativos para esta pesquisa. Usando CSV fallback.");
       }
     }
 
+    // 2) CSV (fallback)
     if (opts?.csvUrl) {
       return await fetchCsv(opts.csvUrl);
     }
@@ -194,6 +202,7 @@
   }
 
   async function fetchCsv(url) {
+    console.log("[Mapa] Carregando CSV:", url);
     const res = await fetch(url, { cache: "no-store" });
     if (!res.ok) return [];
     const text = await res.text();
