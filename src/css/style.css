@@ -297,6 +297,55 @@ select.field{
 .list-item{ padding:10px 10px; border-radius:6px; cursor:pointer; }
 .list-item:hover{ background:#f4f4f4; }
 .list-item small{ display:block; color:#666; margin-top:2px; }
+.list-item .contact-row{
+  margin-top:8px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  align-items:center;
+}
+
+.list-item .contact-link{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  text-decoration:none;
+  border:1px solid #e6e6e6;
+  background:#fff;
+  color:#111;
+  padding:6px 8px;
+  border-radius:8px;
+  font-size:12px;
+  line-height:1;
+  transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+}
+
+.list-item .contact-link:hover{
+  transform: translateY(-1px);
+  border-color:#d0d0d0;
+  box-shadow:0 6px 16px rgba(0,0,0,.10);
+}
+
+.list-item .contact-link svg{
+  width:16px;
+  height:16px;
+  display:block;
+}
+
+.list-item .contact-link.icon-only{
+  padding:6px;
+  width:32px;
+  height:32px;
+  justify-content:center;
+}
+
+.list-item .contact-link .label{
+  display:inline-block;
+  max-width:220px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
 
 .maparea{
   background:#fff;
