@@ -114,7 +114,7 @@
         fillOpacity: 0.9
       });
 
-      marker.bindPopup(popupHtml(r), { maxWidth: 320 });
+      marker.bindPopup(popupHtml(r), { maxWidth: 360 });
       marker.on("click", () => {
         try {
           STATE.map.setView([r.lat, r.lng], 13, { animate: true });
@@ -313,10 +313,15 @@
       const lat = toNum(pick(r, ["Latitude", "latitude", "Lat", "lat"]));
       const lng = toNum(pick(r, ["Longitude", "longitude", "Lng", "lng", "Lon", "lon"]));
 
-      const telefone = pick(r, ["Telefone", "telefone", "WhatsApp", "whatsapp", "Contato", "contato"]);
+      const contato = pick(r, ["Contato", "contato", "Telefone", "telefone"]);
+      const whatsapp = pick(r, ["WhatsApp", "whatsapp"]);
       const email = pick(r, ["Email", "email", "E-mail", "e-mail"]);
       const instagram = pick(r, ["Instagram", "instagram"]);
+      const facebook = pick(r, ["Facebook", "facebook"]);
       const site = pick(r, ["Site", "site", "URL", "url"]);
+      const link = pick(r, ["Link", "link"]);
+      const descricao = pick(r, ["Descrição", "Descricao", "descricao"]);
+      const observacao = pick(r, ["Observacao", "observacao", "Observação", "observação"]);
 
       return {
         _id: `row-${idx + 1}`,
@@ -327,10 +332,16 @@
         estado: String(estado || "").trim(),
         lat,
         lng,
-        telefone: String(telefone || "").trim(),
+        telefone: String(contato || whatsapp || "").trim(),
+        contato: String(contato || "").trim(),
+        whatsapp: String(whatsapp || "").trim(),
         email: String(email || "").trim(),
         instagram: String(instagram || "").trim(),
+        facebook: String(facebook || "").trim(),
         site: String(site || "").trim(),
+        link: String(link || "").trim(),
+        descricao: String(descricao || "").trim(),
+        observacao: String(observacao || "").trim(),
       };
     });
   }
@@ -383,20 +394,37 @@
   function popupHtml(r) {
     const parts = [];
     parts.push(`<div style="font-family:Arial,sans-serif;background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:12px;padding:12px;box-shadow:0 18px 34px rgba(15,61,46,.10)">`);
-    parts.push(`<div style="font-weight:bold;color:#0f3d2e;font-size:14px">${esc(r.nome || "")}</div>`);
-    if (r.territorio) parts.push(`<div style="color:#555;margin-top:3px">${esc(r.territorio)}</div>`);
-    parts.push(`<div style="color:#555;margin-top:3px">${esc(r.cidade || "")}/${esc(r.estado || "")}</div>`);
-    if (r.categoria) parts.push(`<div style="margin-top:6px;font-weight:bold;color:#5a2a12">${esc(r.categoria)}</div>`);
+    parts.push(`<div style="font-weight:900;color:#0f3d2e;font-size:15px;line-height:1.2">${esc(r.nome || "")}</div>`);
+    if (r.categoria) parts.push(`<div style="margin-top:6px;display:inline-block;padding:4px 8px;border-radius:999px;background:#f3efe9;color:#5a2a12;font-weight:800;font-size:12px">${esc(r.categoria)}</div>`);
+    parts.push(`<div style="color:#555;margin-top:8px;font-size:12px">${esc(r.cidade || "")}/${esc(r.estado || "")}${r.territorio ? " • " + esc(r.territorio) : ""}</div>`);
 
-    const contact = [];
-    if (r.telefone) contact.push(`📞 ${esc(r.telefone)}`);
-    if (r.email) contact.push(`✉️ ${esc(r.email)}`);
-    if (r.instagram) contact.push(`📷 ${esc(r.instagram)}`);
-    if (r.site) contact.push(`🔗 ${esc(r.site)}`);
-
-    if (contact.length) {
-      parts.push(`<div style="margin-top:8px;color:#444;font-size:12px;line-height:1.5">${contact.join("<br>")}</div>`);
+    if (r.descricao) {
+      parts.push(`<div style="margin-top:10px;color:#333;font-size:12px;line-height:1.5">${esc(r.descricao)}</div>`);
     }
+
+    const rows = [];
+    const add = (label, val, href = false) => {
+      if (!val) return;
+      const v = esc(val);
+      rows.push(`<div style="display:flex;gap:8px"><b style="min-width:86px;color:#111">${label}</b><span style="color:#333">${href ? `<a href="${v}" target="_blank" rel="noreferrer" style="color:#0f3d2e;font-weight:800;text-decoration:none">Abrir</a>` : v}</span></div>`);
+    };
+
+    add("Contato", r.contato || r.telefone);
+    add("WhatsApp", r.whatsapp);
+    add("E-mail", r.email);
+    add("Instagram", r.instagram);
+    add("Facebook", r.facebook);
+    add("Site", r.site, true);
+    add("Link", r.link, true);
+
+    if (rows.length) {
+      parts.push(`<div style="margin-top:10px;border-top:1px solid rgba(0,0,0,.06);padding-top:10px;display:flex;flex-direction:column;gap:6px;font-size:12px">${rows.join("")}</div>`);
+    }
+
+    if (r.observacao) {
+      parts.push(`<div style="margin-top:10px;color:#666;font-size:11px;line-height:1.4"><b>Obs:</b> ${esc(r.observacao)}</div>`);
+    }
+
     parts.push(`</div>`);
     return parts.join("");
   }
