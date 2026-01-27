@@ -4,6 +4,7 @@ import renderHome from "./views/home.js";
 import renderPesquisa from "./views/pesquisa.js";
 import renderRelatorio from "./views/relatorio.js";
 import renderFichaTecnica from "./views/ficha-tecnica.js";
+import renderMapaPesquisa from "./views/mapa-pesquisa.js";
 
 const DEBUG_ROUTER = true;
 function dlog(...args){
@@ -84,9 +85,8 @@ export async function initRouter(){
       dlog("pesquisa encontrada?", true);
       setHeaderBanner(item.bannerUrl || null);
 
-      }
-
       const viewNameMap = {
+        mapa: "mapa",
         pesquisa: "pesquisa",
         "ficha-tecnica": "ficha-tecnica",
         relatorio: "relatorio"
@@ -97,6 +97,10 @@ export async function initRouter(){
 
       if (sub === "pesquisa"){
         app.innerHTML = await renderPesquisa(item);
+        return;
+      }
+      if (sub === "mapa"){
+        app.innerHTML = await renderMapaPesquisa(item);
         return;
       }
       if (sub === "ficha-tecnica"){
