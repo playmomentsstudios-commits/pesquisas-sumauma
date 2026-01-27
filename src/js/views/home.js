@@ -7,7 +7,7 @@ async function renderHome(){
   return `
     <section class="home-grid" aria-label="Lista de pesquisas">
       ${pesquisas.map(p => {
-        const href = escapeHtml(withBase("/" + p.slug + "/mapa"));
+        const href = escapeHtml(withBase("/" + p.slug + "/pesquisa"));
         const titulo = escapeHtml(p.titulo || "Pesquisa");
         const ano = escapeHtml(p.anoBase || "");
         const capa = p.capa ? escapeHtml(p.capa) : "";
