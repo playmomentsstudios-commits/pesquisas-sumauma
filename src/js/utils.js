@@ -110,7 +110,19 @@ export async function loadPesquisas(force = false){
 
 export async function getPesquisaBySlug(slug){
   const list = await loadPesquisas(false);
-  return list.find(p => p.slug === slug) || null;
+  const item = list.find(p => p.slug === slug) || null;
+  if (!item) return null;
+
+  const supabaseTopicos = await loadPesquisaTopicos(item);
+  if (!supabaseTopicos || !supabaseTopicos.length) return item;
+
+  return {
+    ...item,
+    pesquisaResumo: {
+      ...(item.pesquisaResumo || {}),
+      topicos: supabaseTopicos
+    }
+  };
 }
 
 function mapPesquisaFromDb(row){
@@ -146,6 +158,32 @@ function mapPesquisaFromDb(row){
     pesquisaResumo: normalizePesquisaResumo(pesquisaResumo),
     pesquisaConteudo: normalizePesquisaConteudo(pesquisaConteudo)
   };
+}
+
+async function loadPesquisaTopicos(pesquisa){
+  const client = window?.supabaseClient || null;
+  if (!client || !pesquisa?.dbId) return null;
+
+  try {
+    const { data, error } = await client
+      .from("pesquisa_topicos")
+      .select("id,ordem,titulo,descricao,imagem_url,created_at")
+      .eq("pesquisa_id", pesquisa.dbId)
+      .order("ordem", { ascending: true })
+      .order("created_at", { ascending: true });
+    if (error) throw error;
+
+    return (data || []).map((t) => ({
+      id: t.id,
+      ordem: t.ordem ?? 0,
+      titulo: t.titulo,
+      descricao: t.descricao || "",
+      imagem: fixMaybeLocalUrl(t.imagem_url || "")
+    }));
+  } catch (err) {
+    console.warn("[DATA] Supabase topicos falhou:", err?.message || err);
+    return null;
+  }
 }
 
 function normalizePesquisaPaths(p){
