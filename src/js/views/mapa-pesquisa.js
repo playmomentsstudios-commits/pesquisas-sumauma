@@ -19,32 +19,20 @@ function tabs(slug){
   `;
 }
 
-function normalizeStr(v){
-  return String(v ?? "").trim();
-}
-
-function asLower(v){
-  return normalizeStr(v).toLowerCase();
-}
-
-function isUrl(v){
-  const s = normalizeStr(v);
-  return /^https?:\/\//i.test(s);
-}
+function normalizeStr(v){ return String(v ?? "").trim(); }
+function asLower(v){ return normalizeStr(v).toLowerCase(); }
+function isUrl(v){ return /^https?:\/\//i.test(normalizeStr(v)); }
 
 function asLinkOrText(label, value){
   const esc = (x) => escapeHtml(String(x ?? ""));
   const v = normalizeStr(value);
   if (!v) return "";
-  if (isUrl(v)) {
-    return `<div class="mp-row"><b>${esc(label)}:</b> <a href="${esc(v)}" target="_blank" rel="noreferrer">${esc(v)}</a></div>`;
-  }
+  if (isUrl(v)) return `<div class="mp-row"><b>${esc(label)}:</b> <a href="${esc(v)}" target="_blank" rel="noreferrer">${esc(v)}</a></div>`;
   return `<div class="mp-row"><b>${esc(label)}:</b> ${esc(v)}</div>`;
 }
 
 function cardHtml(p){
   const esc = (v) => escapeHtml(String(v ?? ""));
-
   const nome = normalizeStr(p.nome);
   const cidade = normalizeStr(p.cidade);
   const uf = normalizeStr(p.uf);
@@ -52,7 +40,6 @@ function cardHtml(p){
   const categoria = normalizeStr(p.categoria);
   const descricao = normalizeStr(p.descricao);
 
-  // Melhor visual do popup: título + local + chip + blocos de info
   return `
     <div class="mp-card">
       <div class="mp-head">
@@ -137,11 +124,54 @@ function uniqueSorted(arr){
   const set = new Set(arr.map(v => normalizeStr(v)).filter(Boolean));
   return Array.from(set).sort((a,b) => a.localeCompare(b, "pt-BR", { sensitivity: "base" }));
 }
-
 function buildSelectOptions(values, placeholder){
   const opts = [`<option value="">${escapeHtml(placeholder)}</option>`];
   values.forEach(v => opts.push(`<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`));
   return opts.join("");
+}
+
+function ensureMobileSheet(){
+  let root = document.getElementById("mp-sheet");
+  if (root) return root;
+
+  root = document.createElement("div");
+  root.id = "mp-sheet";
+  root.className = "mp-sheet";
+  root.innerHTML = `
+    <div class="mp-sheet-backdrop" data-close="1"></div>
+    <div class="mp-sheet-panel" role="dialog" aria-modal="true" aria-label="Detalhes do ponto">
+      <div class="mp-sheet-handle"></div>
+      <div class="mp-sheet-head">
+        <div class="mp-sheet-title">Detalhes</div>
+        <button class="mp-sheet-close" type="button" aria-label="Fechar" data-close="1">×</button>
+      </div>
+
+      <div class="mp-sheet-body">
+        <div class="mp-sheet-mapwrap">
+          <div class="mp-sheet-map" id="mp-mini-map"></div>
+          <button class="mp-sheet-openmap" type="button" id="mp-open-fullmap">Abrir mapa</button>
+        </div>
+        <div class="mp-sheet-content" id="mp-sheet-content"></div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(root);
+
+  const closeAll = () => {
+    root.classList.remove("is-open");
+    document.body.classList.remove("no-scroll");
+  };
+
+  root.querySelectorAll("[data-close='1']").forEach(el => {
+    el.addEventListener("click", closeAll);
+  });
+
+  // ESC fecha
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && root.classList.contains("is-open")) closeAll();
+  });
+
+  return root;
 }
 
 export default async function renderMapaPesquisa(p){
@@ -171,7 +201,6 @@ export default async function renderMapaPesquisa(p){
 
           <input class="map-search" id="mp-search" type="search" placeholder="Buscar por nome, cidade ou categoria…" />
 
-          <!-- FILTROS (UF / Cidade / Categoria) -->
           <div class="map-filters" id="mp-filters">
             <select class="map-filter" id="mp-filter-uf" aria-label="Filtrar por estado (UF)">
               <option value="">Estado (UF)</option>
@@ -191,6 +220,8 @@ export default async function renderMapaPesquisa(p){
           </div>
         </aside>
 
+        <!-- No DESKTOP mantém como está (mapa do lado). 
+             No MOBILE, o CSS vai esconder essa área e a experiência vira lista->detalhes -->
         <div class="map-main">
           <div id="${mapId}" class="leaflet-map"></div>
         </div>
@@ -202,7 +233,6 @@ export default async function renderMapaPesquisa(p){
     try {
       const supabase = window?.supabaseClient;
       if (!supabase) {
-        console.warn("[Mapa] supabaseClient não encontrado.");
         const list = document.getElementById("mp-list");
         if (list) list.innerHTML = `<div class="muted">Mapa indisponível (Supabase não configurado).</div>`;
         return;
@@ -219,68 +249,57 @@ export default async function renderMapaPesquisa(p){
       const pontos = await loadPontosByPesquisaId(pesquisaId, opts);
 
       const total = pontos.length;
-
       const counter = document.getElementById("mp-counter");
       if (counter) counter.textContent = `${total} ponto${total === 1 ? "" : "s"}`;
 
+      const isMobile = window.matchMedia && window.matchMedia("(max-width: 680px)").matches;
+
+      // Map (DESKTOP e também usado como "full map" quando quiser)
       const mapEl = document.getElementById(mapId);
-      if (!mapEl || !window.L) return;
+      let map = null;
+      let markers = [];
+      let bounds = [];
 
-      const map = L.map(mapId, { scrollWheelZoom: true });
+      if (mapEl && window.L) {
+        map = L.map(mapId, { scrollWheelZoom: true });
 
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: "&copy; OpenStreetMap"
-      }).addTo(map);
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          attribution: "&copy; OpenStreetMap"
+        }).addTo(map);
 
-      const markers = [];
-      const bounds = [];
-
-      pontos.forEach((pt) => {
-        const m = L.marker([pt.lat, pt.lng]).addTo(map);
-        m.bindPopup(cardHtml(pt), { maxWidth: 420, closeButton: true });
-
-        m.on("click", () => {
-          map.setView([pt.lat, pt.lng], Math.max(map.getZoom(), 13), { animate: true });
-          m.openPopup();
+        pontos.forEach((pt) => {
+          const m = L.marker([pt.lat, pt.lng]).addTo(map);
+          m.bindPopup(cardHtml(pt), { maxWidth: 420, closeButton: true });
+          markers.push({ pt, m });
+          bounds.push([pt.lat, pt.lng]);
         });
 
-        markers.push({ pt, m });
-        bounds.push([pt.lat, pt.lng]);
-      });
+        if (bounds.length) map.fitBounds(bounds, { padding: [30, 30] });
+        else map.setView([-14.2350, -51.9253], 4);
+      }
 
-      if (bounds.length) map.fitBounds(bounds, { padding: [30, 30] });
-      else map.setView([-14.2350, -51.9253], 4);
-
-      // Elements
+      // UI base
       const listEl = document.getElementById("mp-list");
       const searchEl = document.getElementById("mp-search");
-
       const ufEl = document.getElementById("mp-filter-uf");
       const cidadeEl = document.getElementById("mp-filter-cidade");
       const catEl = document.getElementById("mp-filter-categoria");
 
-      // Build base options
+      // Options
       const ufs = uniqueSorted(pontos.map(x => x.uf));
       const categorias = uniqueSorted(pontos.map(x => x.categoria));
-
       if (ufEl) ufEl.innerHTML = buildSelectOptions(ufs, "Estado (UF)");
       if (catEl) catEl.innerHTML = buildSelectOptions(categorias, "Categoria");
 
       const updateCidadeOptions = () => {
         if (!cidadeEl) return;
-
         const uf = normalizeStr(ufEl?.value);
         const cidades = uniqueSorted(
-          pontos
-            .filter(x => !uf || normalizeStr(x.uf) === uf)
-            .map(x => x.cidade)
+          pontos.filter(x => !uf || normalizeStr(x.uf) === uf).map(x => x.cidade)
         );
-
         cidadeEl.innerHTML = buildSelectOptions(cidades, "Cidade");
         cidadeEl.disabled = cidades.length === 0;
       };
-
-      // Initial city options
       updateCidadeOptions();
 
       const applyFilters = () => {
@@ -289,17 +308,78 @@ export default async function renderMapaPesquisa(p){
         const cidade = normalizeStr(cidadeEl?.value);
         const categoria = normalizeStr(catEl?.value);
 
-        return markers.filter(({ pt }) => {
-          // filtros exatos
+        const base = pontos;
+
+        return base.filter((pt) => {
           if (uf && normalizeStr(pt.uf) !== uf) return false;
           if (cidade && normalizeStr(pt.cidade) !== cidade) return false;
           if (categoria && normalizeStr(pt.categoria) !== categoria) return false;
 
-          // busca textual
           if (!q) return true;
           const hay = `${pt.nome || ""} ${pt.cidade || ""} ${pt.uf || ""} ${pt.categoria || ""} ${pt.territorio || ""}`.toLowerCase();
           return hay.includes(q);
         });
+      };
+
+      // MOBILE: bottom sheet + mini map
+      let sheet = null;
+      let miniMap = null;
+      let miniMarker = null;
+
+      const openMobileDetails = (pt) => {
+        sheet = ensureMobileSheet();
+        const contentEl = document.getElementById("mp-sheet-content");
+        if (contentEl) contentEl.innerHTML = cardHtml(pt);
+
+        // Open sheet
+        sheet.classList.add("is-open");
+        document.body.classList.add("no-scroll");
+
+        // Mini map init
+        if (window.L) {
+          const miniEl = document.getElementById("mp-mini-map");
+          if (miniEl) {
+            // Se já existe, destruir para evitar bug de tamanho no Leaflet
+            if (miniMap) {
+              try { miniMap.remove(); } catch {}
+              miniMap = null;
+              miniMarker = null;
+            }
+
+            miniMap = L.map(miniEl, {
+              zoomControl: false,
+              attributionControl: false,
+              dragging: true,
+              scrollWheelZoom: false,
+              doubleClickZoom: false,
+              boxZoom: false,
+              keyboard: false,
+              tap: true
+            });
+
+            L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+              attribution: "&copy; OpenStreetMap"
+            }).addTo(miniMap);
+
+            miniMarker = L.marker([pt.lat, pt.lng]).addTo(miniMap);
+            miniMap.setView([pt.lat, pt.lng], 13);
+
+            // Leaflet precisa recalcular tamanho depois de abrir
+            setTimeout(() => {
+              try { miniMap.invalidateSize(); } catch {}
+            }, 60);
+          }
+        }
+
+        // Botão abrir mapa (leva pro mapa “full” no desktop layout ou abre Google Maps)
+        const openBtn = document.getElementById("mp-open-fullmap");
+        if (openBtn) {
+          openBtn.onclick = () => {
+            // Alternativa simples e “infalível” no mobile: abrir Google Maps
+            const url = `https://www.google.com/maps?q=${pt.lat},${pt.lng}`;
+            window.open(url, "_blank", "noreferrer");
+          };
+        }
       };
 
       const renderList = () => {
@@ -318,7 +398,7 @@ export default async function renderMapaPesquisa(p){
           return;
         }
 
-        listEl.innerHTML = filtered.map(({ pt }, idx) => `
+        listEl.innerHTML = filtered.map((pt, idx) => `
           <button class="map-item" data-idx="${idx}">
             <div class="map-item-title">${escapeHtml(pt.nome || "")}</div>
             <div class="map-item-sub">
@@ -331,10 +411,21 @@ export default async function renderMapaPesquisa(p){
         listEl.querySelectorAll(".map-item").forEach((btn) => {
           btn.addEventListener("click", () => {
             const i = Number(btn.getAttribute("data-idx"));
-            const item = filtered[i];
-            if (!item) return;
-            map.setView([item.pt.lat, item.pt.lng], 13, { animate: true });
-            item.m.openPopup();
+            const pt = filtered[i];
+            if (!pt) return;
+
+            // MOBILE: abre painel de detalhes (com mini mapa)
+            if (isMobile) {
+              openMobileDetails(pt);
+              return;
+            }
+
+            // DESKTOP: comportamento atual (centraliza + abre popup)
+            const found = markers.find(x => x.pt === pt || x.pt?.id === pt?.id);
+            if (found && map) {
+              map.setView([pt.lat, pt.lng], 13, { animate: true });
+              found.m.openPopup();
+            }
           });
         });
       };
@@ -343,7 +434,6 @@ export default async function renderMapaPesquisa(p){
       searchEl?.addEventListener("input", renderList);
 
       ufEl?.addEventListener("change", () => {
-        // Ao mudar UF: reset cidade e recarrega opções de cidade
         updateCidadeOptions();
         if (cidadeEl) cidadeEl.value = "";
         renderList();
@@ -352,6 +442,8 @@ export default async function renderMapaPesquisa(p){
       cidadeEl?.addEventListener("change", renderList);
       catEl?.addEventListener("change", renderList);
 
+      // Se clicar direto em marcador no DESKTOP, mantém popup
+      // No MOBILE o map-main vai estar escondido por CSS, então não interfere.
       renderList();
 
     } catch (e) {
