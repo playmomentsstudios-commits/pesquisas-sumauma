@@ -69,7 +69,24 @@ async function getPesquisaIdBySlug(slug){
   return data?.id || null;
 }
 
-async function loadPontosByPesquisaId(pesquisaId){
+async function loadPontosByPesquisaId(pesquisaId, opts = {}){
+  const apiUrl = opts?.apiUrl;
+  if (apiUrl) {
+    try {
+      const res = await fetch(apiUrl, { cache: "no-store" });
+      if (res.ok) {
+        const payload = await res.json();
+        if (payload && Array.isArray(payload.data)) {
+          return payload.data.filter(r => typeof r.lat === "number" && typeof r.lng === "number");
+        }
+      } else {
+        console.warn("[Mapa] /api/pontos retornou erro:", res.status);
+      }
+    } catch (err) {
+      console.warn("[Mapa] erro ao carregar /api/pontos:", err);
+    }
+  }
+
   const supabase = window?.supabaseClient;
   if (!supabase) return [];
 
@@ -143,7 +160,11 @@ export default async function renderMapaPesquisa(p){
         return;
       }
 
-      const pontos = await loadPontosByPesquisaId(pesquisaId);
+      const opts = {
+        apiUrl: `/api/pontos?pesquisa_id=${escapeHtml(pesquisaId)}&ativo=true`,
+      };
+
+      const pontos = await loadPontosByPesquisaId(pesquisaId, opts);
 
       const counter = document.getElementById("mp-counter");
       if (counter) counter.textContent = `${pontos.length} ponto${pontos.length === 1 ? "" : "s"}`;
@@ -225,4 +246,3 @@ export default async function renderMapaPesquisa(p){
 
   return html;
 }
-
