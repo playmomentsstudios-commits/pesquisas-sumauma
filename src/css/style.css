@@ -899,3 +899,126 @@ img{ display:block; max-width:100%; }
   height: 1px;
   background: rgba(0,0,0,.06);
 }
+
+/* ============================================================
+   MAPA — FILTROS + POPUP CARD (refino final)
+   ============================================================ */
+
+.map-filters{
+  margin: 0 14px 10px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.map-filter{
+  flex: 1;
+  min-width: 140px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,.12);
+  background: #fff;
+  outline: none;
+  font-size: 13px;
+}
+
+.map-filter:disabled{
+  opacity: .55;
+  background: rgba(0,0,0,.03);
+}
+
+.map-filter:focus{
+  border-color: rgba(15,61,46,.55);
+  box-shadow: 0 0 0 3px rgba(15,61,46,.10);
+}
+
+/* Leaflet popup: deixa o card “clean” */
+.leaflet-popup-content{
+  margin: 12px 14px;
+}
+
+.leaflet-popup-content-wrapper{
+  border-radius: 16px;
+}
+
+.mp-card{
+  font-family: Arial, sans-serif;
+  padding: 2px 0;
+}
+
+.mp-head{
+  padding-bottom: 10px;
+}
+
+.mp-title{
+  font-weight: 900;
+  color: #0f3d2e;
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+.mp-sub{
+  color:#666;
+  font-size:12px;
+  margin-top: 6px;
+}
+
+.mp-chip{
+  display:inline-block;
+  margin-top:10px;
+  padding:4px 10px;
+  border-radius:999px;
+  background:#f3efe9;
+  color:#5a2a12;
+  font-weight:900;
+  font-size:12px;
+}
+
+.mp-desc{
+  margin-top: 8px;
+  color:#333;
+  font-size:12px;
+  line-height:1.55;
+}
+
+.mp-grid{
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(0,0,0,.08);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.mp-row b{
+  color:#111;
+}
+
+.mp-row a{
+  color:#0f3d2e;
+  font-weight:900;
+  text-decoration:none;
+  word-break: break-word;
+}
+
+.mp-row a:hover{
+  text-decoration: underline;
+}
+
+.mp-obs{
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(0,0,0,.08);
+  color:#666;
+  font-size:11px;
+  line-height:1.45;
+}
+
+/* Mobile: filtros em coluna e mapa com altura confortável */
+@media (max-width: 680px){
+  .map-filters{ margin: 0 14px 12px; gap: 8px; }
+  .map-filter{ min-width: 100%; }
+  .leaflet-map{ height: 62vh; }
+  .map-main{ min-height: 62vh; }
+}
