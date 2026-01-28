@@ -171,7 +171,7 @@ export default async function renderMapaPesquisa(p){
 
           <input class="map-search" id="mp-search" type="search" placeholder="Buscar por nome, cidade ou categoria…" />
 
-          @-- FILTROS (UF / Cidade / Categoria) --
+
           <div class="map-filters" id="mp-filters">
             <select class="map-filter" id="mp-filter-uf" aria-label="Filtrar por estado (UF)">
               <option value="">Estado (UF)</option>
