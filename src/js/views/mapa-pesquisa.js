@@ -220,8 +220,6 @@ export default async function renderMapaPesquisa(p){
           </div>
         </aside>
 
-        @-- No DESKTOP mantém como está (mapa do lado). 
-             No MOBILE, o CSS vai esconder essa área e a experiência vira lista-detalhes -->
         <div class="map-main">
           <div id="${mapId}" class="leaflet-map"></div>
         </div>
