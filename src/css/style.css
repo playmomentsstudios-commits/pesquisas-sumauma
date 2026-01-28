@@ -1175,3 +1175,127 @@ body.no-scroll{ overflow:hidden; }
   cursor: pointer;
 }
 
+
+/* ============================================================
+   MOBILE REFINEMENT — Público (append no FINAL)
+   ============================================================ */
+
+/* Evita scroll horizontal por overflow acidental */
+@media (max-width: 720px){
+  html, body{ overflow-x:hidden; }
+}
+
+/* HEADER + MENU: empilhar, aumentar áreas clicáveis, busca full */
+@media (max-width: 680px){
+  .header{ height: 190px; }
+  .header-overlay{
+    padding: 14px 16px;
+    align-items:flex-start;
+    gap: 12px;
+    flex-direction: column;
+  }
+
+  .header-logo img{ height: 54px; }
+
+  .menu{
+    width:100%;
+    flex-wrap: wrap;
+    justify-content:flex-start;
+    gap: 10px;
+  }
+
+  .menu-search{
+    width:100%;
+    max-width:100%;
+    order: 1;
+  }
+  .menu-search input{
+    width:100%;
+    padding: 12px 14px;
+    border-radius: 14px;
+  }
+
+  .menu-btn, .menu-link{
+    font-size: 15px;
+    padding: 12px 12px;
+    border-radius: 12px;
+    text-decoration:none;
+    background: rgba(0,0,0,.18);
+    min-height: 44px;
+    display:inline-flex;
+    align-items:center;
+  }
+}
+
+/* Dropdowns/painéis: full width + scroll */
+@media (max-width: 680px){
+  .dropdown-panel,
+  .search-panel{
+    left: 0;
+    right: 0;
+    top: 48px;
+    min-width: auto;
+    max-height: 62vh;
+    overflow: auto;
+    border-radius: 14px;
+  }
+}
+
+/* App padding e consistência */
+@media (max-width: 680px){
+  .app{ padding: 0 16px; margin: 14px auto 40px; }
+}
+
+/* Subbar/abas: ocupar linha e ficar fácil de clicar */
+@media (max-width: 680px){
+  .subbar{ padding: 0 16px; margin: 14px auto 10px; justify-content:flex-start; }
+  .subbar-right{ width: 100%; }
+  .tab{
+    flex: 1;
+    text-align:center;
+    padding: 12px 12px;
+    border-radius: 12px;
+    min-height: 44px;
+  }
+}
+
+/* Cards home: reduzir densidade e ajustar capas */
+@media (max-width: 640px){
+  .home-grid{ padding: 14px 16px 30px; gap: 14px; }
+  .home-card-body{ padding: 14px; }
+  .home-card-title{ font-size: 18px; min-height:auto; }
+  .home-card-cover{ height: 180px; }
+  .home-card-actions{ flex-wrap: wrap; }
+  .home-btn{ width: 100%; min-height: 44px; }
+}
+
+/* Layout mapa: sidebar primeiro, lista com altura confortável */
+@media (max-width: 980px){
+  .layout-mapa{ grid-template-columns: 1fr; }
+}
+@media (max-width: 680px){
+  .sidebar{ min-height: auto; }
+  .list{ max-height: 42vh; }
+  .maparea{ min-height: 52vh; }
+}
+
+/* Tipografia páginas (pesquisa/relatório/ficha): reduzir padding, fontes fluidas */
+@media (max-width: 680px){
+  .suma-section{ padding: 44px 16px; }
+  .suma-section h1{ font-size: 26px; }
+  .suma-section p{ font-size: 15px; }
+  .suma-quote{ padding: 40px 16px; }
+  .suma-quote blockquote{ font-size: 18px; }
+  .suma-full-image{ height: 220px; }
+  .ft-section{ margin: 24px 16px; padding: 28px 16px; }
+}
+
+/* Modal público: largura total no mobile */
+@media (max-width: 680px){
+  .modal{ padding: 12px; }
+  .modal-content{
+    padding: 18px;
+    border-radius: 14px;
+    max-width: 96vw;
+  }
+}
