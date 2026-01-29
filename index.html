@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pesquisas – Instituto Sumaúma</title>
+
+  <!-- Leaflet (OpenStreetMap) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+  <!-- CSS do projeto -->
+  <link rel="stylesheet" href="./src/css/style.css" />
+
+  <!-- SUMAUMA: FAVICON LINKS (BEGIN) -->
+  <!-- Os hrefs são preenchidos pelo app.js (busca no site_config) -->
+  <!-- Favicon dinâmico (carregado via site_config) -->
+  <link id="siteFavicon" rel="icon" href="./public/assets/favicon.png" />
+  <!-- SUMAUMA: FAVICON LINKS (END) -->
+</head>
+
+<body>
+  <!-- HEADER: logo à esquerda + menu à direita -->
+  <header class="header">
+    <div class="header-overlay">
+      <!-- LINHA 1 (topo): logo + menu -->
+      <div class="header-top">
+        <a class="header-logo" href="/" data-link>
+          <!-- ID para trocar via config do site -->
+          <img id="siteLogoImg" src="./public/assets/logos/sumauma-logo.png" alt="Instituto Sumaúma">
+        </a>
+
+        <nav class="menu">
+          <div class="dropdown" id="pesquisasDropdown">
+            <button type="button" class="menu-btn" aria-haspopup="true" aria-expanded="false">
+              Pesquisas <span class="chev">▾</span>
+            </button>
+            <div class="dropdown-panel" role="menu" aria-label="Pesquisas"></div>
+          </div>
+
+          <a class="menu-link" href="https://sumauma.org" target="_blank" rel="noopener noreferrer">
+            Institucional
+          </a>
+        </nav>
+      </div>
+
+      <!-- LINHA 2 (abaixo): busca -->
+      <div class="header-search">
+        <div class="menu-search">
+          <input id="pesquisasSearch" type="search" placeholder="Buscar pesquisas..." aria-label="Buscar pesquisas" />
+          <div id="pesquisasSearchPanel" class="search-panel" role="listbox" aria-label="Resultados da busca"></div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- SPA -->
+  <main id="app" class="app" aria-live="polite"></main>
+
+  <footer class="footer">
+    © <span id="year"></span> Instituto Sumaúma
+  </footer>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Supabase (public) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-config.js"></script>
+  <script src="js/supabase-client.js"></script>
+
+  <!-- App -->
+  <script type="module" src="./src/js/app.js"></script>
+</body>
+</html>
