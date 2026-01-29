@@ -19,18 +19,14 @@ function tabs(slug, active){
   `;
 }
 
-/** Garante URL válida para abrir em nova aba */
 function normalizeExternalUrl(raw){
   const v = String(raw || "").trim();
   if (!v) return "";
-  // aceita http/https/mailto/tel
   if (/^(https?:\/\/|mailto:|tel:)/i.test(v)) return v;
-  // se veio "www..." ou domínio solto, prefixa https
   return `https://${v.replace(/^\/+/, "")}`;
 }
 
 function pickPersonLink(person){
-  // tenta vários nomes de campo (caso o JSON/DB varie)
   const candidates = [
     person?.link,
     person?.url,
@@ -49,6 +45,14 @@ async function renderFichaTecnica(p){
   const realizacao = ft.realizacao || {};
   const financiador = ft.financiador || {};
   const equipe = Array.isArray(ft.equipe) ? ft.equipe : [];
+
+  // descrição do bloco Equipe da Pesquisa (compatível com variações de campo)
+  const equipeDescricao =
+    ft.equipeDescricao ||
+    ft.equipe_descricao ||
+    ft.descricaoEquipe ||
+    ft.descricao_equipe ||
+    "";
 
   const realizacaoLogo = realizacao.logo || withBase("/public/assets/logos/sumauma-logo.png");
   const realizacaoNome = realizacao.nome || "Realização";
@@ -84,6 +88,7 @@ async function renderFichaTecnica(p){
 
     <section class="ft-section">
       <h2>Equipe da Pesquisa</h2>
+      ${equipeDescricao ? `<p class="ft-section-desc">${escapeHtml(equipeDescricao)}</p>` : ``}
 
       <div class="ft-people-grid">
         ${
@@ -99,11 +104,7 @@ async function renderFichaTecnica(p){
                     <img src="${foto}" alt="${nome}">
                     <h3>${nome}</h3>
                     <p>${funcao}</p>
-                    ${
-                      link
-                        ? `<a class="ft-person-link" href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer">Conhecer</a>`
-                        : ``
-                    }
+                    ${link ? `<a class="ft-person-link" href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer">Conhecer</a>` : ``}
                   </div>
                 `;
               }).join("")
