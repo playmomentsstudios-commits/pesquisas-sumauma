@@ -822,17 +822,13 @@ img{ display:block; max-width:100%; }
     padding-bottom: 64px;     /* cria espaço interno para a busca não cortar */
   }
 
-.header-search{
-  position: absolute;
-  left: 50%;
-  bottom: 12px;          /* ↓ controle fino: 8px mais colado | 20px mais alto */
-  transform: translateX(-50%);
-  width: calc(100% - 40px);
-  margin-top: 0;
-  justify-content: center;
-}
-
-
+  .header-search{
+    position: absolute;
+    left: 20px;
+    right: 20px;
+    bottom: 14px;             /* <<< CONTROLE: menor = mais colado embaixo */
+    margin-top: 0;            /* remove o empurrão antigo */
+    justify-content: center;
   }
 
   .header-search .menu-search{
@@ -1438,3 +1434,4 @@ body.no-scroll{ overflow:hidden; }
     white-space: nowrap;         /* nunca quebra “Ficha Técnica” */
     line-height: 1;
   }
+}
