@@ -37,17 +37,25 @@
           <p id="login-error" class="error"></p>
         </section>
 
-        <section id="admin-panel" class="admin-grid hidden">
-          <aside class="admin-sidebar">
+        <section id="admin-panel" class="hidden">
+          <!-- Abas principais (fora do editar pesquisa) -->
+          <div class="main-tabs" id="main-tabs">
+            <button class="main-tab active" type="button" id="mainTabPesquisas" data-main-tab="pesquisas">Pesquisas</button>
+            <button class="main-tab" type="button" id="mainTabSite" data-main-tab="site">Site</button>
+          </div>
+
+          <!-- PAINEL: PESQUISAS -->
+          <section id="mainPanelPesquisas" class="admin-grid" data-main-panel="pesquisas">
+            <aside class="admin-sidebar">
             <div class="sidebar-head">
               <button id="btn-new" class="btn primary" type="button">Nova pesquisa</button>
               <div class="side-title">Pesquisas cadastradas</div>
             </div>
             <div id="researchList" class="research-list"></div>
             <div id="researchListMsg" class="small muted"></div>
-          </aside>
+            </aside>
 
-          <section class="admin-editor">
+            <section class="admin-editor">
             <form id="pesquisa-form" class="card hidden">
               <div class="form-head">
                 <div>
@@ -72,8 +80,7 @@
                 <button class="tab" type="button" data-tab="resumo">Resumo</button>
                 <button class="tab" type="button" data-tab="ficha">Ficha Técnica</button>
                 <button class="tab" type="button" data-tab="mapa">Mapa</button>
-                <button class="tab" type="button" data-tab="banners">Banners</button>
-                <button class="tab" type="button" data-tab="site">Site</button>
+                <button class="tab" type="button" data-tab="banners">Banner</button>
               </div>
 
               <div class="tab-panel" data-tab-panel="config">
@@ -269,33 +276,15 @@
               </div>
 
               <div class="tab-panel hidden" data-tab-panel="banners">
-                <h3>Banners</h3>
+                <h3 style="margin-top:0">Banners do Cabeçalho</h3>
+                <p class="muted" style="margin-top:4px">
+                  Atualize o banner da pesquisa selecionada. (O banner da Home fica em <strong>Site</strong>.)
+                </p>
+
                 <div class="grid-2">
                   <div class="card">
-                    <h4>Banner da Home</h4>
-                    <p class="muted" style="margin-top:-6px;">
-                      Este banner aparece na página inicial antes do mapa.
-                    </p>
-                    <div class="row">
-                      <label class="label">Upload do banner (PNG/JPG)</label>
-                      <input id="homeBannerFile" type="file" accept="image/*" />
-                    </div>
-                    <div class="row">
-                      <label class="label">URL do banner (opcional)</label>
-                      <input id="homeBannerUrl" type="text" class="field" placeholder="https://..." />
-                    </div>
-                    <div class="row">
-                      <button id="btnSaveHomeBanner" class="btn primary" type="button">Salvar banner da Home</button>
-                      <span id="homeBannerMsg" class="muted"></span>
-                    </div>
-                    <img id="homeBannerPreview" class="preview" alt="Prévia banner da Home" />
-                  </div>
-
-                  <div class="card">
-                    <h4>Banner da Pesquisa</h4>
-                    <p class="muted" style="margin-top:-6px;">
-                      Este banner aparece no topo da pesquisa selecionada.
-                    </p>
+                    <h4>Banner da Pesquisa selecionada</h4>
+                    <p class="muted" style="margin-top:-6px">Selecione uma pesquisa na lista para editar o banner dela.</p>
                     <div class="row">
                       <label class="label">Upload do banner (PNG/JPG)</label>
                       <input id="pesquisaBannerFile" type="file" accept="image/*" />
@@ -313,52 +302,74 @@
                 </div>
               </div>
 
-              <!-- SUMAUMA: SITE TAB (BEGIN) -->
-              <div class="tab-panel hidden" data-tab-panel="site">
-                <h3>Site</h3>
-                <p class="muted">Configurações globais do site (valem para todas as páginas).</p>
-
-                <div class="grid-2" style="margin-top:14px;">
-                  <div class="card" style="margin:0; padding:12px;">
-                    <h4 style="margin:0 0 6px;">Ícone do Site (Favicon)</h4>
-                    <p class="muted" style="margin:0 0 10px; font-size:12px; line-height:1.4;">
-                      Esse ícone aparece na aba do navegador e em todas as URLs do site.
-                      Recomendado: PNG quadrado (512×512).
-                    </p>
-
-                    <div class="upload-row" style="margin:0; gap:12px;">
-                      <div>
-                        <label>Favicon (PNG)</label>
-                        <input id="faviconFile" type="file" accept="image/png" />
-                      </div>
-                      <div>
-                        <label>Apple Touch Icon (PNG)</label>
-                        <input id="appleIconFile" type="file" accept="image/png" />
-                      </div>
-                    </div>
-
-                    <div style="display:flex; gap:10px; align-items:center; margin-top:10px; flex-wrap:wrap;">
-                      <button id="btnSaveFavicon" class="btn primary" type="button">Salvar ícones do site</button>
-                      <span id="faviconMsg" class="small muted"></span>
-                    </div>
-
-                    <div style="display:flex; gap:12px; align-items:center; margin-top:10px;">
-                      <img id="faviconPreview" alt="Prévia favicon" style="width:40px;height:40px;border-radius:10px;display:none;border:1px solid rgba(0,0,0,.1);" />
-                      <img id="appleIconPreview" alt="Prévia apple icon" style="width:40px;height:40px;border-radius:10px;display:none;border:1px solid rgba(0,0,0,.1);" />
-                    </div>
-
-                    <div class="muted" style="margin-top:10px; font-size:12px; line-height:1.4;">
-                      <strong>Obs.:</strong> o favicon tem cache agressivo no navegador. Se não mudar na hora, teste em aba anônima.
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <!-- SUMAUMA: SITE TAB (END) -->
-
               <div id="empty-state" class="card">
                 <h2>Selecione uma pesquisa</h2>
                 <p class="muted">Use a lista ao lado para editar ou crie uma nova pesquisa.</p>
               </div>
+            </section>
+          </section>
+
+          <!-- PAINEL: SITE (global, fora das pesquisas) -->
+          <section id="mainPanelSite" class="hidden" data-main-panel="site">
+            <div class="card">
+              <h2>Configurações do Site</h2>
+              <p class="muted">Essas configurações são globais e independentes das pesquisas.</p>
+            </div>
+
+            <div class="grid-2">
+              <div class="card">
+                <h4>Banner da Home</h4>
+                <p class="muted" style="margin-top:-6px;">
+                  Este banner aparece na página inicial antes do mapa.
+                </p>
+                <div class="row">
+                  <label class="label">Upload do banner (PNG/JPG)</label>
+                  <input id="homeBannerFile" type="file" accept="image/*" />
+                </div>
+                <div class="row">
+                  <label class="label">URL do banner (opcional)</label>
+                  <input id="homeBannerUrl" type="text" class="field" placeholder="https://..." />
+                </div>
+                <div class="row">
+                  <button id="btnSaveHomeBanner" class="btn primary" type="button">Salvar banner da Home</button>
+                  <span id="homeBannerMsg" class="muted"></span>
+                </div>
+                <img id="homeBannerPreview" class="preview" alt="Prévia banner da Home" />
+              </div>
+
+              <div class="card" style="margin:0; padding:12px;">
+                <h4 style="margin:0 0 6px;">Ícone do Site (Favicon)</h4>
+                <p class="muted" style="margin:0 0 10px; font-size:12px; line-height:1.4;">
+                  Esse ícone aparece na aba do navegador e em todas as URLs do site.
+                  Recomendado: PNG quadrado (512×512).
+                </p>
+
+                <div class="upload-row" style="margin:0; gap:12px;">
+                  <div>
+                    <label>Favicon (PNG)</label>
+                    <input id="faviconFile" type="file" accept="image/png" />
+                  </div>
+                  <div>
+                    <label>Apple Touch Icon (PNG)</label>
+                    <input id="appleIconFile" type="file" accept="image/png" />
+                  </div>
+                </div>
+
+                <div style="display:flex; gap:10px; align-items:center; margin-top:10px; flex-wrap:wrap;">
+                  <button id="btnSaveFavicon" class="btn primary" type="button">Salvar ícones do site</button>
+                  <span id="faviconMsg" class="small muted"></span>
+                </div>
+
+                <div style="display:flex; gap:12px; align-items:center; margin-top:10px;">
+                  <img id="faviconPreview" alt="Prévia favicon" style="width:40px;height:40px;border-radius:10px;display:none;border:1px solid rgba(0,0,0,.1);" />
+                  <img id="appleIconPreview" alt="Prévia apple icon" style="width:40px;height:40px;border-radius:10px;display:none;border:1px solid rgba(0,0,0,.1);" />
+                </div>
+
+                <div class="muted" style="margin-top:10px; font-size:12px; line-height:1.4;">
+                  <strong>Obs.:</strong> o favicon tem cache agressivo no navegador. Se não mudar na hora, teste em aba anônima.
+                </div>
+              </div>
+            </div>
           </section>
         </section>
       </main>

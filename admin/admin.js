@@ -87,7 +87,11 @@ const els = {
   addBlocoBtn: document.getElementById("btn-ed-add-bloco"),
   previewBtn: document.getElementById("btn-ed-preview"),
   fromResumoBtn: document.getElementById("btn-ed-from-resumo"),
-  previewFrame: document.getElementById("pesquisa-preview-frame")
+  previewFrame: document.getElementById("pesquisa-preview-frame"),
+  mainTabPesquisas: document.getElementById("mainTabPesquisas"),
+  mainTabSite: document.getElementById("mainTabSite"),
+  mainPanelPesquisas: document.getElementById("mainPanelPesquisas"),
+  mainPanelSite: document.getElementById("mainPanelSite")
 };
 
 const quickSyncFields = new Set([
@@ -219,6 +223,32 @@ els.loginPanel?.appendChild(diag);
 
 init();
 
+function setMainTab(tab){
+  const t = tab === "site" ? "site" : "pesquisas";
+  try {
+    localStorage.setItem("adm_main_tab", t);
+  } catch {}
+
+  els.mainTabPesquisas?.classList.toggle("active", t === "pesquisas");
+  els.mainTabSite?.classList.toggle("active", t === "site");
+
+  els.mainPanelPesquisas?.classList.toggle("hidden", t !== "pesquisas");
+  els.mainPanelSite?.classList.toggle("hidden", t !== "site");
+
+  if (t === "site") {
+    loadHomeBannerPreview?.();
+    loadFaviconPreview?.();
+  }
+}
+
+function restoreMainTab(){
+  let stored = "pesquisas";
+  try {
+    stored = localStorage.getItem("adm_main_tab") || "pesquisas";
+  } catch {}
+  setMainTab(stored);
+}
+
 async function init(){
   state.supabase = await window.getSupabaseClient?.();
   if (!state.supabase || !window.__SUPABASE_CONFIG_OK__) {
@@ -284,6 +314,9 @@ async function init(){
     e.preventDefault();
     setTab(btn.dataset.tab);
   });
+
+  els.mainTabPesquisas?.addEventListener("click", () => setMainTab("pesquisas"));
+  els.mainTabSite?.addEventListener("click", () => setMainTab("site"));
 }
 
 function setDiag(msg){
@@ -363,8 +396,9 @@ function setSession(session){
   els.user.textContent = session?.user?.email || "";
   if (loggedIn) {
     refreshListAndSelect(null);
-    try { loadHomeBannerPreview(); } catch {}
-    try { loadFaviconPreview(); } catch {}
+    restoreMainTab();
+  } else {
+    setMainTab("pesquisas");
   }
 }
 

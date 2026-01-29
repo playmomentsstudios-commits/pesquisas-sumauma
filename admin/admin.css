@@ -50,6 +50,34 @@ body {
   margin: 0 auto;
 }
 
+.main-tabs {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin: 0 0 18px 0;
+}
+
+.main-tab {
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: #fff;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-weight: 900;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.main-tab:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgba(15, 61, 46, 0.1);
+}
+
+.main-tab.active {
+  background: #0c3b2e;
+  border-color: #0c3b2e;
+  color: #fff;
+}
+
 .admin-grid {
   display: grid;
   grid-template-columns: 280px 1fr;
