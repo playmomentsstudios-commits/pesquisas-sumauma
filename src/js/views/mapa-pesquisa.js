@@ -229,6 +229,49 @@ export default async function renderMapaPesquisa(p){
 
   queueMicrotask(async () => {
     try {
+      // SUMAUMA: MAPA SHELL HEIGHT (BEGIN)
+      // ===== Ajuste de altura do layout (Opção A: lista rola, mapa fica) =====
+      const setMapShellHeight = () => {
+        const shell = document.querySelector(".map-shell");
+        if (!shell) return;
+
+        const header = document.querySelector("header.header");
+        const footer = document.querySelector("footer.footer");
+
+        // Bloco de título/descrição do topo da página (se existir)
+        const pageHead = document.querySelector(".page-head");
+
+        const headerH = header ? header.offsetHeight : 0;
+        const footerH = footer ? footer.offsetHeight : 0;
+        const headH = pageHead ? pageHead.offsetHeight : 0;
+
+        // Espaços extras (margens/paddings/respiração visual)
+        const extra = 46;
+
+        const available = window.innerHeight - headerH - footerH - headH - extra;
+
+        // mínimo pra não quebrar o layout
+        const h = Math.max(420, available);
+
+        document.documentElement.style.setProperty("--map-shell-h", `${h}px`);
+      };
+
+      setMapShellHeight();
+
+      // Debounce simples
+      let __t = null;
+      const onResize = () => {
+        clearTimeout(__t);
+        __t = setTimeout(() => {
+          setMapShellHeight();
+          // Se o mapa já existir, atualiza tamanho
+          try { window.__sumaumaMapInstance?.invalidateSize?.(); } catch {}
+        }, 120);
+      };
+
+      window.addEventListener("resize", onResize);
+      // SUMAUMA: MAPA SHELL HEIGHT (END)
+
       const supabase = window?.supabaseClient;
       if (!supabase) {
         const list = document.getElementById("mp-list");
@@ -260,6 +303,12 @@ export default async function renderMapaPesquisa(p){
 
       if (mapEl && window.L) {
         map = L.map(mapId, { scrollWheelZoom: true });
+
+        // guarda instância global pra resize (sem mexer no router)
+        window.__sumaumaMapInstance = map;
+
+        // garante que o Leaflet redesenhe com a altura nova
+        setTimeout(() => map.invalidateSize(), 0);
 
         L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
           attribution: "&copy; OpenStreetMap"
