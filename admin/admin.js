@@ -574,6 +574,7 @@ function fillForm(pesquisa){
   setValue("financiadorLogoUrl", ficha.financiador?.logo || "");
   setValue("coordenacao", ficha.coordenacao || "");
   setValue("parceirosApoiadores", ficha.parceirosApoiadores || "");
+  setValue("equipeTexto", (ficha.equipeTexto || ""));
 
   renderTopicos(resumo.topicos || []);
   renderEquipe(ficha.equipe || []);
@@ -622,6 +623,9 @@ function addEquipeItem(membro = {}){
   wrapper.innerHTML = `
     <label>Nome<input type="text" name="equipeNome" value="${escapeHtml(membro.nome || "")}" /></label>
     <label>Função<input type="text" name="equipeFuncao" value="${escapeHtml(membro.funcao || "")}" /></label>
+    <label>Link (WhatsApp / LinkedIn / Portfólio etc.)
+      <input type="url" name="equipeLink" value="${escapeHtml(membro.link || "")}" placeholder="https://..." />
+    </label>
     <div style="display:grid; gap:8px;">
       <label>Foto (arquivo)
         <input type="file" name="equipeFotoFile" accept="image/*" />
@@ -1430,12 +1434,13 @@ async function collectEquipe(slug){
   for (const item of items) {
     const nome = item.querySelector("[name=equipeNome]").value.trim();
     const funcao = item.querySelector("[name=equipeFuncao]").value.trim();
+    const link = item.querySelector("[name=equipeLink]")?.value?.trim() || "";
     const urlInput = item.querySelector("[name=equipeFotoUrl]");
     const file = item.querySelector("[name=equipeFotoFile]").files?.[0];
     const safeName = slugify(nome || `membro-${results.length + 1}`);
     const fotoUrl = await maybeUploadFile(file, `pesquisas/${slug}/equipe/${safeName}`) || urlInput.value.trim();
     urlInput.value = fotoUrl;
-    results.push({ nome, funcao, foto: fotoUrl });
+    results.push({ nome, funcao, foto: fotoUrl, link });
   }
   return results;
 }
@@ -1946,6 +1951,7 @@ function buildConfigJsonFromTabs({ formData, csvFallback, topicos, equipe, reali
       },
       coordenacao: String(formData.get("coordenacao") || "").trim(),
       parceirosApoiadores: String(formData.get("parceirosApoiadores") || "").trim(),
+      equipeTexto: String(formData.get("equipeTexto") || "").trim(),
       equipe
     }
   };
