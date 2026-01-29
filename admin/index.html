@@ -368,6 +368,31 @@
                   <small class="muted">Prévia (48px)</small>
                 </div>
               </div>
+
+              <div class="card">
+                <h4>Logo do Site</h4>
+                <p class="muted" style="margin-top:-6px">
+                  Logo exibida no cabeçalho público. Envie um arquivo ou informe a URL.
+                </p>
+
+                <div class="row">
+                  <label class="label">Upload (Storage site-assets)</label>
+                  <input id="siteLogoFile" type="file" accept="image/*" />
+                </div>
+
+                <div class="row">
+                  <label class="label">Ou URL direta</label>
+                  <input id="siteLogoUrl" class="field" placeholder="https://..." />
+                  <div class="small muted" style="margin-top:6px;">Se enviar um arquivo, a URL será atualizada automaticamente.</div>
+                </div>
+
+                <div class="row">
+                  <button id="btnSaveSiteLogo" class="btn primary" type="button">Salvar logo</button>
+                  <span id="siteLogoMsg" class="muted"></span>
+                </div>
+
+                <img id="siteLogoPreview" alt="Prévia do logo" style="max-width:260px;border-radius:12px;display:none;border:1px solid rgba(0,0,0,.08)" />
+              </div>
             </div>
           </section>
         </section>
