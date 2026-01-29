@@ -1438,38 +1438,3 @@ body.no-scroll{ overflow:hidden; }
     white-space: nowrap;         /* nunca quebra “Ficha Técnica” */
     line-height: 1;
   }
-}
-
-@media (max-width: 768px) {
-
-  /* TROQUE o seletor abaixo pelo container real das 4 sub-abas */
-  .sub-tabs, .tabs, .pesquisa-subtabs, .pesquisa-tabs {
-    display: flex;
-    flex-wrap: nowrap;        /* garante UMA fileira */
-    justify-content: center;  /* centraliza a fileira */
-    align-items: center;
-    gap: 8px;
-    width: 100%;
-    overflow: visible;        /* evita cortar */
-    padding: 10px 12px;
-    box-sizing: border-box;
-    background: #fff;         /* evita “sumir atrás” */
-    position: sticky;         /* fica bonitinho ao rolar */
-    top: 0;                   /* ajuste se tiver header fixo */
-    z-index: 50;
-  }
-
-  /* TROQUE o seletor abaixo pelo botão real das abas */
-  .sub-tabs button, .tabs button,
-  .pesquisa-subtabs a, .pesquisa-tabs a {
-    flex: 1 1 0;              /* cada botão pega 1/4 da linha */
-    min-width: 0;             /* permite encolher sem estourar */
-    text-align: center;
-    white-space: nowrap;      /* mantém em 1 linha */
-    overflow: hidden;
-    text-overflow: ellipsis;  /* se ainda apertar, põe “...” ao invés de cortar feio */
-    padding: 10px 8px;        /* diminui pra caber */
-    font-size: 14px;          /* ajuste fino */
-    border-radius: 14px;
-  }
-}
