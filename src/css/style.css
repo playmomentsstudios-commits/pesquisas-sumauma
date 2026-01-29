@@ -1374,3 +1374,64 @@ body.no-scroll{ overflow:hidden; }
 .ft-person-card-link:hover .ft-person-linkbtn{
   background: rgba(0,0,0,0.10);
 }
+
+/* ============================================================
+   MOBILE FIX — Busca centralizada + Subabas menores 1 linha
+   Cole no FINAL do CSS
+   ============================================================ */
+@media (max-width: 640px){
+
+  /* === 1) BUSCA centralizada no banner === */
+  .header-overlay{
+    position: relative;
+    padding-bottom: 70px; /* espaço pra busca dentro do banner */
+  }
+
+  .header-search{
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 12px;               /* ajuste fino: 8px mais baixo / 18px mais alto */
+    margin: 0;
+    display: flex;
+    justify-content: center;     /* centraliza */
+    padding: 0 16px;             /* respiro lateral */
+  }
+
+  .header-search .menu-search{
+    width: 100%;
+    max-width: 520px;            /* controla a “largura visual” no centro */
+    margin: 0 auto;
+  }
+
+  .menu-search input{
+    width: 100%;
+    height: 42px;
+    padding: 11px 14px;
+  }
+
+  /* === 2) SUBABAS (Pesquisa/Relatório/Mapa/Ficha Técnica) menores e 1 linha === */
+  .subbar{
+    padding: 0 16px;
+    margin: 12px auto 10px;
+    justify-content: center;     /* centraliza o bloco das abas */
+  }
+
+  .subbar-right{
+    gap: 8px;
+    flex-wrap: nowrap;           /* não quebra linha */
+    overflow-x: auto;            /* se precisar, vira “rolagem lateral” */
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 6px;
+  }
+
+  .subbar-right::-webkit-scrollbar{ height: 0; } /* esconde scrollbar no iOS */
+
+  .tab{
+    padding: 8px 10px;           /* menor */
+    font-size: 13px;             /* menor */
+    border-radius: 10px;
+    white-space: nowrap;         /* nunca quebra “Ficha Técnica” */
+    line-height: 1;
+  }
+}
