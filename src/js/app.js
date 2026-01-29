@@ -3,22 +3,16 @@ import { initRouter } from "./router.js";
 import { setYear, loadPesquisas, getSiteConfig } from "./utils.js";
 import { withBase } from "./basepath.js";
 
-// SUMAUMA: SITE ICONS (BEGIN)
-async function initSiteIcons(){
+async function initFavicon(){
   try {
-    const favEl = document.getElementById("sumauma-favicon");
-    const appleEl = document.getElementById("sumauma-apple-icon");
-    if (!favEl && !appleEl) return;
-
     const faviconUrl = await getSiteConfig("favicon_url");
-    const appleUrl = await getSiteConfig("apple_icon_url");
-
-    if (favEl && faviconUrl) favEl.setAttribute("href", faviconUrl);
-    if (appleEl && appleUrl) appleEl.setAttribute("href", appleUrl);
-    if (appleEl && !appleUrl && faviconUrl) appleEl.setAttribute("href", faviconUrl);
-  } catch {}
+    if (!faviconUrl) return;
+    const link = document.getElementById("siteFavicon");
+    if (link) link.setAttribute("href", faviconUrl);
+  } catch (e) {
+    console.warn("[FAVICON] falhou:", e?.message || e);
+  }
 }
-// SUMAUMA: SITE ICONS (END)
 
 
 function initHeaderSearch(){
@@ -78,5 +72,5 @@ setYear();
 const headerLogo = document.querySelector(".header-logo");
 if (headerLogo) headerLogo.setAttribute("href", withBase("/"));
 initHeaderSearch();
-initSiteIcons();
 initRouter();
+initFavicon();
