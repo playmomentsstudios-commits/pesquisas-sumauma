@@ -1511,3 +1511,49 @@ body.no-scroll{ overflow:hidden; }
 }
 .ft-person-link:hover{ filter:brightness(.95); transform: translateY(-1px); }
 .ft-person-link:active{ transform: translateY(0px); }
+/* =========================================
+   FIX DESKTOP: menu + busca na mesma linha
+   ========================================= */
+@media (min-width: 821px) {
+  /* garante header em 2 colunas: logo | nav */
+  .header-overlay{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  /* nav vira uma linha única */
+  .menu{
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    flex-wrap: nowrap !important;
+    gap: 18px !important;
+    white-space: nowrap;
+  }
+
+  /* evita o campo de busca cair para baixo */
+  .menu-search{
+    display: flex !important;
+    align-items: center !important;
+    flex: 0 0 auto !important;
+    width: 320px !important;       /* ajuste aqui se quiser maior/menor */
+    max-width: 38vw !important;
+    margin: 0 !important;
+  }
+
+  .menu-search input{
+    width: 100% !important;
+    height: 40px !important;
+    box-sizing: border-box !important;
+  }
+
+  /* mantém os links do menu sem quebra */
+  #pesquisasDropdown,
+  .menu-link{
+    flex: 0 0 auto !important;
+    white-space: nowrap !important;
+  }
+}
+
