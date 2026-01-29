@@ -1,5 +1,3 @@
-import { supabase } from './supabase-client.js';
-
 const DEFAULTS = {
   colors: {
     green:'#0f3d2e', brown:'#5a2a12', gold:'#ffdd9a',
@@ -115,22 +113,26 @@ export async function renderAppearanceTab(container){
   </div>
   `;
 
-  // carrega 1ª linha do site_config
-  const { data, error } = await supabase
-    .from('site_config')
-    .select('*')
-    .order('id', { ascending: true })
-    .limit(1)
-    .maybeSingle();
-
-  if(error){
-    container.querySelector('#ap_msg').textContent = `Erro ao carregar: ${error.message}`;
+  const msg = container.querySelector('#ap_msg');
+  const supabase = await window.getSupabaseClient?.();
+  if (!supabase) {
+    msg.textContent = "Supabase não configurado. Verifique js/supabase-config.js.";
     return;
   }
 
-  const row = data || {};
-  let appearance = mergeDefaults(row.appearance_json || {});
-  let customCss = row.custom_css || '';
+  const { data, error } = await supabase
+    .from('site_config')
+    .select('config_key, appearance_json, custom_css')
+    .eq('config_key', 'main')
+    .maybeSingle();
+
+  if(error){
+    msg.textContent = `Erro ao carregar: ${error.message}`;
+    return;
+  }
+
+  let appearance = mergeDefaults(data?.appearance_json || {});
+  let customCss = data?.custom_css || '';
 
   const setForm = () => {
     Object.entries(appearance.colors).forEach(([k,v])=>{
@@ -186,21 +188,22 @@ export async function renderAppearanceTab(container){
     customCss = '';
     setForm();
     preview();
-    container.querySelector('#ap_msg').textContent = 'Padrão restaurado (prévia aplicada).';
+    msg.textContent = 'Padrão restaurado (prévia aplicada).';
   });
 
   container.querySelector('#ap_save').addEventListener('click', async () => {
     readForm();
-    container.querySelector('#ap_msg').textContent = 'Salvando...';
+    msg.textContent = 'Salvando...';
 
     const { error: updErr } = await supabase
       .from('site_config')
-      .update({ appearance_json: appearance, custom_css: customCss })
-      .eq('id', row.id);
+      .upsert(
+        { config_key: 'main', appearance_json: appearance, custom_css: customCss },
+        { onConflict: 'config_key' }
+      );
 
-    container.querySelector('#ap_msg').textContent = updErr
+    msg.textContent = updErr
       ? `Erro ao salvar: ${updErr.message}`
       : '✅ Aparência salva com sucesso!';
   });
 }
-

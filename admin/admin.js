@@ -1,3 +1,5 @@
+import { renderAppearanceTab } from "./admin-appearance.js";
+
 const state = {
   supabase: null,
   session: null,
@@ -94,8 +96,10 @@ const els = {
   previewFrame: document.getElementById("pesquisa-preview-frame"),
   mainTabPesquisas: document.getElementById("mainTabPesquisas"),
   mainTabSite: document.getElementById("mainTabSite"),
+  mainTabAparencia: document.getElementById("mainTabAparencia"),
   mainPanelPesquisas: document.getElementById("mainPanelPesquisas"),
-  mainPanelSite: document.getElementById("mainPanelSite")
+  mainPanelSite: document.getElementById("mainPanelSite"),
+  mainPanelAparencia: document.getElementById("mainPanelAparencia")
 };
 
 const quickSyncFields = new Set([
@@ -228,21 +232,27 @@ els.loginPanel?.appendChild(diag);
 init();
 
 function setMainTab(tab){
-  const t = tab === "site" ? "site" : "pesquisas";
+  const t = tab === "site" ? "site" : tab === "aparencia" ? "aparencia" : "pesquisas";
   try {
     localStorage.setItem("adm_main_tab", t);
   } catch {}
 
   els.mainTabPesquisas?.classList.toggle("active", t === "pesquisas");
   els.mainTabSite?.classList.toggle("active", t === "site");
+  els.mainTabAparencia?.classList.toggle("active", t === "aparencia");
 
   els.mainPanelPesquisas?.classList.toggle("hidden", t !== "pesquisas");
   els.mainPanelSite?.classList.toggle("hidden", t !== "site");
+  els.mainPanelAparencia?.classList.toggle("hidden", t !== "aparencia");
 
   if (t === "site") {
     loadHomeBannerPreview?.();
     loadFaviconPreview?.();
     loadSiteLogoPreview?.();
+  }
+
+  if (t === "aparencia" && els.mainPanelAparencia) {
+    void renderAppearanceTab(els.mainPanelAparencia);
   }
 }
 
@@ -323,6 +333,7 @@ async function init(){
 
   els.mainTabPesquisas?.addEventListener("click", () => setMainTab("pesquisas"));
   els.mainTabSite?.addEventListener("click", () => setMainTab("site"));
+  els.mainTabAparencia?.addEventListener("click", () => setMainTab("aparencia"));
 }
 
 function setDiag(msg){
