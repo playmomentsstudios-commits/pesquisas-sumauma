@@ -1,1651 +1,190 @@
-:root{
-  --green:#0f3d2e;
-  --brown:#5a2a12;
-  --gold:#ffdd9a;
+/* ==========================================================
+   PESQUISA.SUMAUMA.ORG — CSS (MOBILE FIX)
+   Ajuste do banner/topo + sub-abas em 1 linha (sem quebrar)
+   Cole ESTE BLOCO NO FINAL do seu arquivo CSS principal.
+   ========================================================== */
 
-  --bg:#f4f4f4;
-  --text:#222;
-  --muted:#555;
-  --white:#fff;
-  --line:#e5e5e5;
+/* ---------- Helpers visuais (mensagens) ---------- */
+.admin-msg.ok{ color:#1f7a3f; }
+.admin-msg.err{ color:#b42318; }
+.admin-msg.muted{ color:rgba(0,0,0,.65); }
 
-  --shadow:0 4px 15px rgba(0,0,0,.08);
-}
-
-*{ box-sizing:border-box; }
-html,body{ margin:0; padding:0; font-family:Arial,sans-serif; background:var(--bg); color:var(--text); }
-a{ color:inherit; text-decoration:none; }
-img{ display:block; max-width:100%; }
-
-/* HEADER */
-.header{
-  height:160px;
-  background: var(--header-banner, url("../../public/assets/img/banner-capa.png")) center/cover no-repeat;
-  position:relative;
-}
-.header-top{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:18px;
-  width:100%;
-}
-.header-search{
-  width:100%;
-  display:flex;
-  justify-content:flex-end;
-  margin-top:10px;
-}
-.header-overlay{
-  height:100%;
-  background:rgba(0,0,0,.35);
-  display:flex;
-  flex-direction:column;
-  align-items:stretch;
-  justify-content:center;
-  padding:18px 30px;
-}
-.header-logo img{
-  height:72px;
-  width:auto;
-}
-
-/* MENU */
-.menu{
-  display:flex;
-  align-items:center;
-  gap:18px;
-}
-.menu-btn, .menu-link{
-  color:#fff;
-  font-size:16px;
-  background:transparent;
-  border:0;
-  cursor:pointer;
-  padding:0;
-  text-decoration:underline;
-}
-.chev{ opacity:.9; }
-
-/* DROPDOWN */
-.dropdown{ position:relative; }
-.dropdown-panel{
-  position:absolute;
-  right:0;
-  top:34px;
-  min-width:360px;
-  background:#fff;
-  border:1px solid var(--line);
-  border-radius:8px;
-  box-shadow:var(--shadow);
-  padding:8px;
-  display:none;      /* <- aqui garante que NÃO aparece sozinho */
-  z-index:999;
-}
-.dropdown.open .dropdown-panel{ display:block; }
-
-.dropdown-item{
-  display:block;
-  padding:10px 10px;
-  border-radius:6px;
-  color:#222;
-}
-.dropdown-item:hover{ background:#f4f4f4; }
-.dropdown-item strong{ display:block; color:var(--green); }
-.dropdown-item small{ display:block; color:#666; margin-top:3px; }
-
-/* APP */
-.app{
-  max-width:1100px;
-  margin:18px auto 50px;
-  padding:0 30px;
-}
-
-/* GRID HOME */
-.grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:20px;
-}
-.card{
-  background:#fff;
-  border-radius:6px;
-  overflow:hidden;
-  box-shadow:var(--shadow);
-  transition:.25s;
-}
-.card:hover{ transform:translateY(-6px); }
-.card-cover{ height:220px; background:#ddd; }
-.card-cover img{ width:100%; height:100%; object-fit:cover; }
-.card-body{ padding:18px; }
-.card-meta{
-  margin:6px 0 12px;
-  color:var(--muted);
-  font-size:13px;
-}
-.card-title{ color:var(--green); margin:0; }
-.card-actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
-
-.btn{
-  padding:10px 14px;
-  border-radius:4px;
-  font-weight:bold;
-  border:0;
-  cursor:pointer;
-}
-.btn.primary{ background:var(--green); color:#fff; }
-.btn.light{ background:#fff; border:1px solid #ddd; color:#222; }
-
-/* ============================================================
-   HOME — Cards estilo capa grande (como mock aprovado)
-   ============================================================ */
-
-.home-grid{
-  display:grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap:18px;
-  padding: 20px 30px 40px;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.home-card{
-  background:#fff;
-  border-radius:16px;
-  overflow:hidden;
-  box-shadow: var(--shadow);
-  border: 1px solid rgba(0,0,0,.06);
-}
-
-.home-card-cover{
-  display:block;
-  width:100%;
-  height:160px;
-  background:#f3f3f3;
-}
-.home-card-cover img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-  display:block;
-}
-
-.home-card-body{
-  padding:14px 14px 16px;
-}
-
-.home-chip{
-  display:inline-block;
-  padding:6px 10px;
-  border-radius:999px;
-  font-size:12px;
-  font-weight:800;
-  color:#222;
-  background:#f2f2f2;
-  margin-bottom:10px;
-}
-
-.home-card-title{
-  margin:0 0 12px;
-  font-size:18px;
-  line-height:1.2;
-  color:#0f3d2e;
-  font-weight:900;
-  min-height: 44px; /* mantém alturas parecidas */
-}
-.home-card-title a{
-  color:inherit;
-  text-decoration:none;
-}
-.home-card-title a:hover{
-  text-decoration:underline;
-}
-
-.home-card-actions{
-  display:flex;
-  gap:10px;
-}
-
-.home-btn{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  padding:10px 14px;
-  border-radius:10px;
-  font-weight:900;
-  text-decoration:none;
-  background:#0f3d2e;
-  color:#fff;
-  border:1px solid rgba(0,0,0,.08);
-}
-.home-btn:hover{ filter: brightness(0.95); }
-
-@media (max-width: 980px){
-  .home-grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 18px 20px 34px; }
-}
+/* ==========================================================
+   MOBILE (até 640px)
+   ========================================================== */
 @media (max-width: 640px){
-  .home-grid{ grid-template-columns: 1fr; }
-  .home-card-cover{ height: 180px; }
-}
 
-/* SUBBAR (abaixo do header): abas marrom/verde */
-.subbar{
-  max-width:1100px;
-  margin:18px auto 14px;
-  padding:0 30px;
-  display:flex;
-  justify-content:flex-end;
-}
-.subbar-right{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-}
-.tab{
-  display:inline-block;
-  padding:10px 14px;
-  border-radius:6px;
-  font-weight:bold;
-  color:#fff;
-}
-.tab-idle{ background:var(--brown); }
-.tab-active{ background:var(--green); }
-
-/* Layout mapa */
-.layout-mapa{
-  display:grid;
-  grid-template-columns: 380px 1fr;
-  gap:16px;
-}
-.sidebar{
-  background:#fff;
-  border-radius:6px;
-  box-shadow:var(--shadow);
-  overflow:hidden;
-  min-height:560px;
-}
-.sidebar-head{ padding:16px; border-bottom:1px solid #eee; }
-.sidebar-head h3{ margin:0 0 6px; color:var(--green); }
-.sidebar-head p{ margin:0; color:#666; font-size:13px; line-height:1.5; }
-
-.filters{
-  padding:14px 16px;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-  border-bottom:1px solid #eee;
-}
-.field{
-  width:100%;
-  padding:11px 12px;
-  border:1px solid #ddd;
-  border-radius:6px;
-  outline:none;
-  font-size:14px;
-}
-.field:focus{
-  border-color:#0f3d2e55;
-  box-shadow:0 0 0 3px rgba(15,61,46,.10);
-}
-
-.list{ padding:8px; max-height:420px; overflow:auto; }
-.list-item{ padding:10px 10px; border-radius:6px; cursor:pointer; }
-.list-item:hover{ background:#f4f4f4; }
-.list-item small{ display:block; color:#666; margin-top:2px; }
-.list-item .contact-row{
-  margin-top:8px;
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
-  align-items:center;
-}
-.list-item .contact-link{
-  display:inline-flex;
-  align-items:center;
-  gap:6px;
-  text-decoration:none;
-  border:1px solid #e6e6e6;
-  background:#fff;
-  color:#111;
-  padding:6px 8px;
-  border-radius:8px;
-  font-size:12px;
-  line-height:1;
-  transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
-}
-.list-item .contact-link:hover{
-  transform: translateY(-1px);
-  border-color:#d0d0d0;
-  box-shadow:0 6px 16px rgba(0,0,0,.10);
-}
-.list-item .contact-link svg{
-  width:16px;
-  height:16px;
-  display:block;
-}
-.list-item .contact-link.icon-only{
-  padding:6px;
-  width:32px;
-  height:32px;
-  justify-content:center;
-}
-.list-item .contact-link .label{
-  display:inline-block;
-  max-width:220px;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-}
-
-.maparea{
-  background:#fff;
-  border-radius:6px;
-  box-shadow:var(--shadow);
-  min-height:560px;
-  overflow:hidden;
-}
-.map-placeholder{
-  height:100%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:30px;
-  color:#666;
-  text-align:center;
-}
-
-/* Modal */
-.modal{
-  display:none;
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.65);
-  z-index:4000;
-  align-items:center;
-  justify-content:center;
-  padding:18px;
-}
-.modal.show{ display:flex; }
-.modal-content{
-  background:#fff;
-  width:100%;
-  max-width:560px;
-  padding:26px;
-  border-radius:8px;
-  text-align:center;
-  position:relative;
-}
-.close{
-  position:absolute;
-  top:10px;
-  right:14px;
-  font-size:22px;
-  cursor:pointer;
-}
-
-/* FOOTER */
-.footer{
-  background:#111;
-  color:#ccc;
-  text-align:center;
-  padding:20px;
-  margin-top:60px;
-}
-
-/* Responsivo */
-@media(max-width:980px){
-  .layout-mapa{ grid-template-columns:1fr; }
-  .maparea{ min-height:420px; }
-}
-@media(max-width:900px){
-  .grid{ grid-template-columns:1fr; }
-}
-@media(max-width:768px){
-  .header{ height:200px; }
-  .header-overlay{ padding:0 20px; }
-}
-
-/* ================= PÁGINA PESQUISA (RESUMO) ================= */
-.suma-section{
-  max-width:1000px;
-  margin:0 auto;
-  padding:70px 30px;
-  background:transparent;
-}
-.suma-section h1{ color:var(--green); font-size:32px; margin:0 0 20px; }
-.suma-section h2{ color:var(--green); margin:0 0 15px; }
-.suma-section p{ font-size:16px; line-height:1.7; margin:0; }
-
-.suma-quote{
-  background:#f4f4f4;
-  padding:60px 30px;
-}
-.suma-quote blockquote{
-  max-width:900px;
-  margin:0 auto;
-  font-size:20px;
-  line-height:1.6;
-  font-style:italic;
-}
-.suma-quote footer{
-  margin-top:20px;
-  font-size:14px;
-  font-weight:bold;
-  font-style:normal;
-}
-
-.suma-full-image{
-  width:100%;
-  height:350px;
-  background-size:cover;
-  background-position:center;
-}
-
-/* ================= FICHA TÉCNICA ================= */
-.ft-section{
-  max-width:1100px;
-  margin:60px auto;
-  padding:50px 30px;
-  background:#fff;
-  border-radius:6px;
-  box-shadow:0 4px 15px rgba(0,0,0,0.05);
-}
-.ft-section h2{
-  color:var(--green);
-  margin-top:0;
-  margin-bottom:35px;
-  border-bottom:2px solid #eee;
-  padding-bottom:10px;
-}
-
-.ft-logos-grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:40px;
-  align-items:center;
-  text-align:center;
-}
-.ft-logo-box h3{
-  color:var(--green);
-  margin:0 0 15px;
-}
-.ft-logo-box img{ max-width:240px; }
-
-.ft-people-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));
-  gap:30px;
-}
-.ft-person-card{
-  background:var(--green);
-  border-radius:6px;
-  padding:25px 20px;
-  text-align:center;
-  color:#fff;
-  transition:transform .25s, box-shadow .25s;
-}
-.ft-person-card:hover{
-  transform:translateY(-6px);
-  box-shadow:0 10px 25px rgba(0,0,0,0.25);
-}
-.ft-person-card img{
-  width:120px;
-  height:120px;
-  border-radius:50%;
-  object-fit:cover;
-  margin:0 auto 15px;
-  border:3px solid rgba(255,255,255,0.25);
-}
-.ft-person-card h3{ margin:10px 0 5px; font-size:18px; }
-.ft-person-card p{ margin:0; font-size:14px; color:var(--gold); }
-
-@media(max-width:768px){
-  .suma-section{ padding:40px 20px; }
-  .suma-quote{ padding:40px 20px; }
-  .ft-section{ margin:20px; padding:30px 20px; }
-  .ft-logos-grid{ grid-template-columns:1fr; }
-}
-
-.leaflet-map{
-  width:100%;
-  height:560px;
-}
-@media(max-width:980px){
-  .leaflet-map{ height:420px; }
-}
-.empty{
-  padding:12px;
-  color:#666;
-}
-
-/* ===== Pesquisa: Editorial + Modular ===== */
-.ed-container{
-  max-width:1000px;
-  margin:0 auto;
-  padding:0 30px;
-}
-
-.ed-hero{
-  position:relative;
-  margin-top:10px;
-  border-radius:8px;
-  overflow:hidden;
-  box-shadow:var(--shadow);
-  background:#111;
-}
-.ed-hero-media{
-  height:220px;
-  background-size:cover;
-  background-position:center;
-  filter:saturate(1.02);
-}
-.ed-hero-overlay{
-  position:relative;
-  padding:22px 0 26px;
-  background:rgba(0,0,0,.40);
-}
-.ed-kicker{ margin-bottom:12px; }
-.ed-h1{
-  margin:0;
-  color:#fff;
-  font-size:34px;
-  line-height:1.15;
-}
-.ed-lead .ed-p{ color:#f3f3f3; opacity:.95; }
-.ed-lead .ed-p:last-child{ margin-bottom:0; }
-
-.ed-section{
-  padding:28px 0;
-}
-.ed-h2{
-  margin:0 0 12px;
-  color:var(--green);
-  font-size:26px;
-}
-.ed-p{
-  margin:0 0 12px;
-  line-height:1.8;
-  color:#222;
-  font-size:16px;
-}
-.ed-p:last-child{ margin-bottom:0; }
-
-.ed-quote{
-  background:#fff;
-  margin:18px 0;
-  padding:30px 0;
-  border-radius:8px;
-  box-shadow:var(--shadow);
-}
-.ed-quote blockquote{
-  margin:0;
-  font-size:20px;
-  line-height:1.6;
-  font-style:italic;
-  color:#222;
-}
-.ed-quote footer{
-  margin-top:14px;
-  font-size:14px;
-  font-weight:bold;
-  color:#333;
-}
-
-/* full-bleed (imagem grande entre blocos) */
-.ed-fullbleed{
-  margin:18px 0;
-}
-.ed-fullbleed-inner{
-  width:100vw;
-  height:360px;
-  margin-left:calc(50% - 50vw);
-  background-size:cover;
-  background-position:center;
-}
-.ed-caption{
-  max-width:1000px;
-  margin:8px auto 0;
-  padding:0 30px;
-  color:#666;
-  font-size:13px;
-}
-
-.ed-sep{
-  padding:10px 0;
-}
-.ed-sep span{
-  display:inline-block;
-  padding:6px 10px;
-  border-radius:999px;
-  background:#eee;
-  color:#444;
-  font-size:12px;
-}
-
-/* responsivo */
-@media(max-width:768px){
-  .ed-container{ padding:0 18px; }
-  .ed-h1{ font-size:26px; }
-  .ed-hero-media{ height:190px; }
-  .ed-fullbleed-inner{ height:280px; }
-  .ed-quote blockquote{ font-size:18px; }
-}
-
-/* ============================================================
-   PESQUISA (layout editorial – baseado no modelo aprovado)
-   ============================================================ */
-
-.research-hero{
-  max-width:1100px;
-  margin:0 auto;
-  padding:0 30px 28px;
-}
-
-.research-hero-inner{
-  padding-top:8px;
-}
-
-.research-meta{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  font-size:13px;
-  color:#333;
-  margin:6px 0 18px;
-}
-.research-meta-label{ opacity:.85; }
-.research-meta-value{ font-weight:700; }
-
-.research-title{
-  margin:0 0 10px;
-  font-size:34px;
-  line-height:1.15;
-  color:#111;
-}
-
-.research-lead{
-  margin:0 0 18px;
-  color:#222;
-  max-width:920px;
-  line-height:1.55;
-}
-
-.research-card{
-  background:#fff;
-  border-radius:10px;
-  box-shadow:var(--shadow);
-  padding:18px 18px;
-  max-width:920px;
-}
-
-.research-card h3{
-  margin:0 0 10px;
-  color:var(--green);
-}
-
-.research-topics{
-  margin:0;
-  padding-left:18px;
-}
-.research-topics li{
-  margin:4px 0;
-  color:#222;
-}
-
-.research-quote{
-  background:#f4f4f4;
-  margin-top:16px;
-}
-.research-quote-inner{
-  max-width:1100px;
-  margin:0 auto;
-  padding:48px 30px;
-}
-.research-quote blockquote{
-  margin:0;
-  max-width:900px;
-  font-size:20px;
-  line-height:1.6;
-  font-style:italic;
-  color:#222;
-}
-.research-quote blockquote footer{
-  margin-top:14px;
-  font-size:13px;
-  font-weight:800;
-  font-style:normal;
-  color:#333;
-}
-
-.research-section{
-  max-width:1100px;
-  margin:0 auto;
-  padding:28px 30px;
-}
-.research-section-inner{
-  max-width:920px;
-}
-.research-section h2{
-  margin:0 0 10px;
-  color:var(--green);
-  font-size:22px;
-}
-.research-section p{
-  margin:0;
-  line-height:1.7;
-  color:#222;
-}
-
-.muted{ color:#666; }
-
-
-
-/* SEARCH HEADER */
-.menu-search{
-  position:relative;
-  width:320px;
-  max-width:38vw;
-}
-.header-search .menu-search{
-  width:420px;
-  max-width:52vw;
-  margin-left:auto;
-}
-.menu-search input{
-  width:100%;
-  padding:10px 12px;
-  border-radius:999px;
-  border:1px solid rgba(255,255,255,.35);
-  background:rgba(0,0,0,.25);
-  color:#fff;
-  outline:none;
-}
-.menu-search input::placeholder{ color: rgba(255,255,255,.85); }
-.menu-search input:focus{
-  border-color: rgba(255,255,255,.65);
-  background: rgba(0,0,0,.32);
-}
-
-.search-panel{
-  position:absolute;
-  top:46px;
-  right:0;
-  left:0;
-  background:#fff;
-  border:1px solid var(--line);
-  border-radius:12px;
-  box-shadow: var(--shadow);
-  overflow:hidden;
-  display:none;
-  z-index:999;
-}
-.search-panel.open{ display:block; }
-.search-item{
-  display:block;
-  padding:10px 12px;
-  border-bottom:1px solid rgba(0,0,0,.06);
-}
-.search-item:last-child{ border-bottom:none; }
-.search-item strong{ display:block; color:var(--green); }
-.search-item small{ display:block; color:#666; margin-top:3px; }
-.search-item:hover{ background:#f5f5f5; }
-
-/* responsivo */
-@media (max-width: 820px){
-  .header-overlay{ gap:12px; }
-  .menu-search{ width:220px; max-width:44vw; }
-  .header-logo img{ height:62px; }
-}
-
-/* HEADER — refinamento mobile/tablet (logo + menu em cima; busca embaixo) */
-@media (max-width: 1024px){
-  .header{ height:auto; min-height:160px; }
-  .header-overlay{ padding:14px 16px; }
-  .header-top{ gap:12px; }
-  .header-logo img{ height:60px; }
-  .menu{ gap:14px; }
-  .menu-btn, .menu-link{ font-size:15px; }
-  .header-search{ justify-content:center; margin-top:12px; }
-  .header-search .menu-search{ width:100%; max-width:680px; }
-  .menu-search input{ width:100%; }
-}
-
-@media (max-width: 640px){
-  .header-logo img{ height:54px; }
-  .menu-btn, .menu-link{ font-size:14px; }
-  .header-search{ margin-top:10px; }
-  .header-search .menu-search{ max-width:100%; }
-  .menu-search input{ padding:11px 12px; }
-}
-
-/* ============================================================
-   MAPA PÚBLICO (novo) — layout + sidebar + popup card
-   ============================================================ */
-
-.map-shell{
-  display:grid;
-  grid-template-columns: 360px 1fr;
-  gap:14px;
-  align-items:stretch;
-}
-
-.map-side{
-  background:#fff;
-  border:1px solid rgba(0,0,0,.08);
-  border-radius:16px;
-  box-shadow: var(--shadow);
-  overflow:hidden;
-  display:flex;
-  flex-direction:column;
-  min-height: 520px;
-}
-
-.map-side-head{
-  padding:14px 14px 10px;
-  border-bottom:1px solid rgba(0,0,0,.06);
-}
-.map-side-title{ font-weight:900; color:#0f3d2e; font-size:14px; }
-.map-side-meta{ color:#6b6b6b; font-size:12px; margin-top:4px; }
-
-.map-search{
-  margin:12px 14px 10px;
-  padding:10px 12px;
-  border-radius:12px;
-  border:1px solid rgba(0,0,0,.12);
-  outline:none;
-}
-.map-search:focus{
-  border-color: rgba(15,61,46,.55);
-  box-shadow: 0 0 0 3px rgba(15,61,46,.10);
-}
-
-.map-list{
-  padding: 0 10px 12px;
-  overflow:auto;
-  flex:1;
-}
-
-.map-item{
-  width:100%;
-  text-align:left;
-  padding:12px 12px;
-  border-radius:14px;
-  border:1px solid rgba(0,0,0,.08);
-  background:#fff;
-  box-shadow: 0 10px 20px rgba(15,61,46,.06);
-  cursor:pointer;
-  margin:10px 4px;
-  transition: transform .12s ease, box-shadow .12s ease;
-}
-.map-item:hover{
-  transform: translateY(-1px);
-  box-shadow: 0 16px 30px rgba(15,61,46,.10);
-}
-.map-item-title{ font-weight:900; color:#0f3d2e; font-size:13px; }
-.map-item-sub{ color:#666; font-size:12px; margin-top:4px; }
-
-.map-main{
-  background:#fff;
-  border:1px solid rgba(0,0,0,.08);
-  border-radius:16px;
-  box-shadow: var(--shadow);
-  overflow:hidden;
-  min-height: 520px;
-}
-.leaflet-map{ height: 520px; }
-
-/* Popup card */
-.mp-card{ font-family: Arial, sans-serif; }
-.mp-title{ font-weight:900; color:#0f3d2e; font-size:15px; }
-.mp-sub{ color:#666; font-size:12px; margin-top:4px; }
-.mp-chip{
-  display:inline-block;
-  margin-top:10px;
-  padding:4px 10px;
-  border-radius:999px;
-  background:#f3efe9;
-  color:#5a2a12;
-  font-weight:900;
-  font-size:12px;
-}
-.mp-desc{ margin-top:10px; color:#333; font-size:12px; line-height:1.5; }
-.mp-grid{
-  margin-top:10px;
-  padding-top:10px;
-  border-top:1px solid rgba(0,0,0,.06);
-  display:flex;
-  flex-direction:column;
-  gap:6px;
-  font-size:12px;
-}
-.mp-row b{ color:#111; }
-.mp-row a{ color:#0f3d2e; font-weight:900; text-decoration:none; }
-.mp-row a:hover{ text-decoration:underline; }
-.mp-obs{ margin-top:10px; color:#666; font-size:11px; line-height:1.4; }
-
-@media (max-width: 980px){
-  .map-shell{ grid-template-columns: 1fr; }
-  .map-side{ min-height: auto; }
-  .map-main{ min-height: 420px; }
-  .leaflet-map{ height: 420px; }
-}
-
-/* ===========================
-   Pesquisa (público) — Tópicos
-   =========================== */
-
-.topic-list{
-  margin-top: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.topic-block{
-  background: #fff;
-  border: 1px solid rgba(0,0,0,.06);
-  border-radius: 16px;
-  box-shadow: var(--shadow);
-  padding: 16px;
-}
-
-.topic-title{
-  margin: 0;
-  font-size: 18px;
-  line-height: 1.2;
-  font-weight: 900;
-  color: #0f3d2e;
-}
-
-.topic-desc{
-  margin: 10px 0 0;
-  font-size: 14px;
-  line-height: 1.6;
-  color: #333;
-}
-
-.topic-image-wrap{
-  margin-top: 12px;
-  border-radius: 14px;
-  overflow: hidden;
-  background: #f3f3f3;
-}
-
-.topic-image{
-  width: 100%;
-  height: 220px;
-  display: block;
-  object-fit: cover;
-}
-
-.topic-sep{
-  margin-top: 14px;
-  height: 1px;
-  background: rgba(0,0,0,.06);
-}
-
-/* ============================================================
-   MAPA — FILTROS + POPUP CARD (refino final)
-   ============================================================ */
-
-.map-filters{
-  margin: 0 14px 10px;
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.map-filter{
-  flex: 1;
-  min-width: 140px;
-  padding: 10px 12px;
-  border-radius: 12px;
-  border: 1px solid rgba(0,0,0,.12);
-  background: #fff;
-  outline: none;
-  font-size: 13px;
-}
-
-.map-filter:disabled{
-  opacity: .55;
-  background: rgba(0,0,0,.03);
-}
-
-.map-filter:focus{
-  border-color: rgba(15,61,46,.55);
-  box-shadow: 0 0 0 3px rgba(15,61,46,.10);
-}
-
-/* Leaflet popup: deixa o card “clean” */
-.leaflet-popup-content{
-  margin: 12px 14px;
-}
-
-.leaflet-popup-content-wrapper{
-  border-radius: 16px;
-}
-
-.mp-card{
-  font-family: Arial, sans-serif;
-  padding: 2px 0;
-}
-
-.mp-head{
-  padding-bottom: 10px;
-}
-
-.mp-title{
-  font-weight: 900;
-  color: #0f3d2e;
-  font-size: 16px;
-  line-height: 1.2;
-}
-
-.mp-sub{
-  color:#666;
-  font-size:12px;
-  margin-top: 6px;
-}
-
-.mp-chip{
-  display:inline-block;
-  margin-top:10px;
-  padding:4px 10px;
-  border-radius:999px;
-  background:#f3efe9;
-  color:#5a2a12;
-  font-weight:900;
-  font-size:12px;
-}
-
-.mp-desc{
-  margin-top: 8px;
-  color:#333;
-  font-size:12px;
-  line-height:1.55;
-}
-
-.mp-grid{
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid rgba(0,0,0,.08);
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  font-size: 12px;
-}
-
-.mp-row b{
-  color:#111;
-}
-
-.mp-row a{
-  color:#0f3d2e;
-  font-weight:900;
-  text-decoration:none;
-  word-break: break-word;
-}
-
-.mp-row a:hover{
-  text-decoration: underline;
-}
-
-.mp-obs{
-  margin-top: 12px;
-  padding-top: 10px;
-  border-top: 1px solid rgba(0,0,0,.08);
-  color:#666;
-  font-size:11px;
-  line-height:1.45;
-}
-
-/* Mobile: filtros em coluna e mapa com altura confortável */
-@media (max-width: 680px){
-  .map-filters{ margin: 0 14px 12px; gap: 8px; }
-  .map-filter{ min-width: 100%; }
-  .leaflet-map{ height: 62vh; }
-  .map-main{ min-height: 62vh; }
-}
-
-/* ============================================================
-   MOBILE (Mapa): lista -> detalhes (bottom sheet) + esconder mapa
-   ============================================================ */
-
-body.no-scroll{ overflow:hidden; }
-
-@media (max-width: 680px){
-  /* No mobile, não mostramos o mapa grande embaixo */
-  .map-shell{ grid-template-columns: 1fr; }
-  .map-main{ display:none; }
-
-  /* Lista com espaço melhor */
-  .map-side{ border-radius: 16px; }
-  .map-list{ max-height: calc(100vh - 420px); }
-}
-
-/* Bottom-sheet */
-.mp-sheet{
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  display: none;
-}
-
-.mp-sheet.is-open{ display:block; }
-
-.mp-sheet-backdrop{
-  position:absolute;
-  inset:0;
-  background: rgba(0,0,0,.42);
-}
-
-.mp-sheet-panel{
-  position:absolute;
-  left:0;
-  right:0;
-  bottom:0;
-  background:#fff;
-  border-top-left-radius: 18px;
-  border-top-right-radius: 18px;
-  box-shadow: 0 -18px 40px rgba(0,0,0,.22);
-  max-height: 88vh;
-  display:flex;
-  flex-direction: column;
-}
-
-.mp-sheet-handle{
-  width: 56px;
-  height: 5px;
-  border-radius: 999px;
-  background: rgba(0,0,0,.18);
-  margin: 10px auto 2px;
-}
-
-.mp-sheet-head{
-  padding: 10px 14px 8px;
-  display:flex;
-  align-items:center;
-  justify-content: space-between;
-  border-bottom: 1px solid rgba(0,0,0,.08);
-}
-
-.mp-sheet-title{
-  font-weight: 900;
-  color:#111;
-}
-
-.mp-sheet-close{
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  border: 1px solid rgba(0,0,0,.10);
-  background: rgba(0,0,0,.03);
-  font-size: 24px;
-  line-height: 1;
-  cursor: pointer;
-}
-
-.mp-sheet-body{
-  padding: 12px 14px 16px;
-  overflow:auto;
-}
-
-.mp-sheet-mapwrap{
-  position: relative;
-  margin-bottom: 12px;
-  border-radius: 14px;
-  overflow: hidden;
-  border: 1px solid rgba(0,0,0,.10);
-}
-
-.mp-sheet-map{
-  height: 160px;
-  width: 100%;
-}
-
-.mp-sheet-openmap{
-  position:absolute;
-  right: 10px;
-  bottom: 10px;
-  padding: 10px 12px;
-  border-radius: 12px;
-  border: 1px solid rgba(0,0,0,.10);
-  background: rgba(255,255,255,.92);
-  font-weight: 900;
-  cursor: pointer;
-}
-
-/* SUMAUMA: MAPA STICKY/LISTA SCROLL (BEGIN) */
-.map-shell{
-  display:grid;
-  grid-template-columns: 360px 1fr;
-  gap:14px;
-  align-items:stretch;
-
-  /* Altura controlada por viewport (setada via JS) */
-  height: var(--map-shell-h, 520px);
-  max-height: var(--map-shell-h, 520px);
-}
-
-.map-side{
-  background:#fff;
-  border:1px solid rgba(0,0,0,.08);
-  border-radius:16px;
-  box-shadow: var(--shadow);
-  overflow:hidden;
-
-  display:flex;
-  flex-direction:column;
-
-  /* ESSENCIAL: não deixar o lado crescer pela lista */
-  height: 100%;
-  min-height: 0;
-}
-
-.map-side-head{
-  padding:14px 14px 10px;
-  border-bottom:1px solid rgba(0,0,0,.06);
-}
-.map-side-title{ font-weight:900; color:#0f3d2e; font-size:14px; }
-.map-side-meta{ color:#6b6b6b; font-size:12px; margin-top:4px; }
-
-.map-search{
-  margin:12px 14px 10px;
-  padding:10px 12px;
-  border-radius:12px;
-  border:1px solid rgba(0,0,0,.12);
-  outline:none;
-}
-.map-search:focus{
-  border-color: rgba(15,61,46,.55);
-  box-shadow: 0 0 0 3px rgba(15,61,46,.10);
-}
-
-/* A LISTA vira o scroll (interno) */
-.map-list{
-  padding: 0 10px 12px;
-  overflow-y: auto;
-  overflow-x: hidden;
-  flex: 1;
-
-  /* ESSENCIAL: permitir o overflow funcionar em flex */
-  min-height: 0;
-}
-
-.map-item{
-  width:100%;
-  text-align:left;
-  padding:12px 12px;
-  border-radius:14px;
-  border:1px solid rgba(0,0,0,.08);
-  background:#fff;
-  box-shadow: 0 10px 20px rgba(15,61,46,.06);
-  cursor:pointer;
-  margin:10px 4px;
-  transition: transform .12s ease, box-shadow .12s ease;
-}
-.map-item:hover{
-  transform: translateY(-1px);
-  box-shadow: 0 16px 30px rgba(15,61,46,.10);
-}
-.map-item-title{ font-weight:900; color:#0f3d2e; font-size:13px; }
-.map-item-sub{ color:#666; font-size:12px; margin-top:4px; }
-
-.map-main{
-  background:#fff;
-  border:1px solid rgba(0,0,0,.08);
-  border-radius:16px;
-  box-shadow: var(--shadow);
-  overflow:hidden;
-
-  /* Mantém o mapa alinhado à altura do shell */
-  height: 100%;
-  min-height: 0;
-}
-
-/* Mapa acompanha 100% do container (não altura fixa) */
-.leaflet-map{
-  height: 100%;
-  min-height: 0;
-}
-
-/* MOBILE: volta a ser fluxo normal (sem altura travada) */
-@media (max-width: 980px){
-  .map-shell{
-    grid-template-columns: 1fr;
-    height: auto;
-    max-height: none;
-  }
-  .map-side{ height: auto; min-height: auto; }
-  .map-main{ height: 420px; min-height: 420px; }
-  .leaflet-map{ height: 420px; }
-}
-/* SUMAUMA: MAPA STICKY/LISTA SCROLL (END) */
-
-.ft-team-text{
-  margin: 10px 0 18px;
-  color: #2f2f2f;
-  line-height: 1.5;
-}
-
-.ft-person-card{
-  display: block;
-  text-decoration: none;
-  color: inherit;
-  position: relative;
-}
-
-.ft-person-card-link{
-  cursor: pointer;
-}
-
-.ft-person-linkbtn{
-  margin-top: 12px;
-  display: inline-block;
-  padding: 8px 12px;
-  border-radius: 999px;
-  background: rgba(0,0,0,0.06);
-  border: 1px solid rgba(0,0,0,0.10);
-  font-size: 13px;
-}
-
-.ft-person-card-link:hover .ft-person-linkbtn{
-  background: rgba(0,0,0,0.10);
-}
-
-/* ============================================================
-   AJUSTES — HEADER (SÓ DESKTOP) + FICHA TÉCNICA (BOTÃO CONHECER)
-   ============================================================ */
-
-/* Desktop: forçar menu em linha e manter itens perto da busca */
-@media (min-width: 821px){
-  .menu{
-    display:flex;
-    align-items:center;
-    gap:18px;
-    flex-wrap:nowrap;      /* não quebrar linha no desktop */
+  /* ========================================================
+     1) TOPO / BANNER
+     - Resolve o “banner maior que o bloco do topo”
+     - Evita sobra de altura, margin/padding extra
+     - Funciona tanto para background-image quanto <img>
+     ======================================================== */
+
+  /* Tenta acertar os principais wrappers sem depender de 1 classe só */
+  header,
+  .header,
+  .topo,
+  .top-bar,
+  .top-header,
+  .site-header,
+  .hero,
+  .banner,
+  .top-banner,
+  .header-hero {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+    overflow: hidden !important;
   }
 
-  /* Busca */
-  .menu-search{
-    order: 1;
-    width: 320px;
-    max-width: 38vw;
-    flex: 0 0 auto;
+  /* Se o banner for background-image */
+  .hero,
+  .banner,
+  .top-banner,
+  .header-hero {
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
   }
 
-  /* Dropdown Pesquisas */
-  #pesquisasDropdown{
-    order: 2;
-    flex: 0 0 auto;
-  }
-
-  /* Link Institucional */
-  .menu-link{
-    order: 3;
-    flex: 0 0 auto;
-    white-space: nowrap;
-  }
-}
-
-/* =========================
-   FICHA TÉCNICA — ajustes visuais
-   ========================= */
-
-/* Nome do integrante sempre branco */
-.ft-person-card h3{
-  color:#fff !important;
-}
-
-/* Botão "Conhecer" (azul, texto branco) */
-.ft-person-link{
-  display:inline-block;
-  margin-top: 12px;
-  background:#0A58CA;
-  color:#fff !important;
-  padding: 9px 14px;
-  border-radius: 8px;
-  font-weight: 800;
-  font-size: 13px;
-  text-decoration: none;
-  transition: transform .15s ease, opacity .15s ease;
-}
-
-.ft-person-link:hover{
-  opacity:.95;
-  transform: translateY(-1px);
-}
-
-.ft-person-link:active{
-  transform: translateY(0px);
-}
-
-/* ============================================================
-   PATCH — MENU DESKTOP / BANNER MOBILE / FICHA TÉCNICA
-   ============================================================ */
-
-/* DESKTOP: garantir busca ao lado do menu (mesma linha) */
-@media (min-width: 821px){
-  .header-overlay{
-    /* garante alinhamento e evita quebra estranha */
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:16px;
-  }
-
-  .menu{
-    display:flex;
-    align-items:center;
-    gap:18px;
-    flex-wrap:nowrap;      /* CRÍTICO: impede menu ir pra cima/baixo */
-    white-space:nowrap;
-  }
-
-  /* busca tem largura controlada e não força quebra */
-  .menu-search{
-    flex: 0 1 320px;
-    width: 320px;
-    max-width: 38vw;
-    min-width: 220px;
-    order: 1;
-  }
-
-  #pesquisasDropdown{ order: 2; }
-  .menu-link{ order: 3; }
-
-  .menu-btn, .menu-link{
-    white-space:nowrap;
-  }
-}
-
-/* MOBILE: corrigir banner “vazando” (header deve crescer com o conteúdo) */
-@media (max-width: 820px){
-  .header{
-    height:auto;           /* CRÍTICO: não cortar conteúdo */
-    min-height:160px;      /* mantém presença do banner */
-  }
-
-  .header-overlay{
-    height:auto;           /* overlay acompanha conteúdo */
-    padding:14px 16px;     /* reduz padding e evita estouro lateral */
-    flex-wrap:wrap;        /* permite quebrar com ordem natural no mobile */
-    row-gap:10px;
-  }
-
-  /* evita que a busca estoure horizontalmente no mobile */
-  .menu{
-    flex-wrap:wrap;
-    gap:12px;
-  }
-
-  .menu-search{
-    width:min(420px, 100%);
-    max-width:100%;
-  }
-}
-
-/* FICHA TÉCNICA: descrição abaixo do título (Equipe da Pesquisa) */
-.ft-section-desc{
-  margin:-22px 0 26px;
-  color:#666;
-  font-size:14px;
-  line-height:1.6;
-}
-
-/* FICHA TÉCNICA: botão "Conhecer" azul com texto branco */
-.ft-person-link{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  margin-top: 12px;
-  background:#0A58CA;
-  color:#fff !important;
-  padding:9px 14px;
-  border-radius:10px;
-  font-weight:900;
-  font-size:13px;
-  text-decoration:none;
-  border:1px solid rgba(255,255,255,0.15);
-  transition: transform .15s ease, filter .15s ease;
-}
-.ft-person-link:hover{ filter:brightness(.95); transform: translateY(-1px); }
-.ft-person-link:active{ transform: translateY(0px); }
-/* =========================================
-   FIX DESKTOP: menu + busca na mesma linha
-   ========================================= */
-@media (min-width: 821px) {
-  /* garante header em 2 colunas: logo | nav */
-  .header-overlay{
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-  }
-
-  /* nav vira uma linha única */
-  .menu{
-    display: flex !important;
-    align-items: center !important;
-    justify-content: flex-end !important;
-    flex-wrap: nowrap !important;
-    gap: 18px !important;
-    white-space: nowrap;
-  }
-
-  /* evita o campo de busca cair para baixo */
-  .menu-search{
-    display: flex !important;
-    align-items: center !important;
-    flex: 0 0 auto !important;
-    width: 320px !important;       /* ajuste aqui se quiser maior/menor */
-    max-width: 38vw !important;
-    margin: 0 !important;
-  }
-
-  .menu-search input{
+  /* Se o banner for um <img> dentro do topo */
+  header img,
+  .header img,
+  .topo img,
+  .top-header img,
+  .site-header img,
+  .hero img,
+  .banner img,
+  .top-banner img,
+  .header-hero img {
     width: 100% !important;
-    height: 40px !important;
-    box-sizing: border-box !important;
+    display: block !important;
+    object-fit: cover !important;
   }
 
-  /* mantém os links do menu sem quebra */
-  #pesquisasDropdown,
-  .menu-link{
-    flex: 0 0 auto !important;
+  /* Tamanho controlado do banner no mobile (ajuste fino aqui) */
+  .hero img,
+  .banner img,
+  .top-banner img,
+  .header-hero img {
+    height: 160px !important;     /* ajuste: 140~200 */
+    max-height: 160px !important; /* mantém consistente */
+  }
+
+  /* Evita “gap” embaixo do banner por line-height do container */
+  .hero,
+  .banner,
+  .top-banner,
+  .header-hero {
+    line-height: 0 !important;
+  }
+
+  /* ========================================================
+     2) SUB-ABAS (Pesquisa / Relatório / Mapa / Ficha Técnica)
+     - Ficam na MESMA LINHA
+     - Botões menores
+     - Se não couber: rola horizontal (não quebra linha)
+     ======================================================== */
+
+  /* Wrapper das sub-abas (pega vários nomes comuns) */
+  .subtabs,
+  .tabs,
+  .tabs-row,
+  .tab-row,
+  .nav-tabs,
+  .pesquisa-tabs,
+  .tabs-pesquisa,
+  .nav-subtabs {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    gap: 8px !important;
+
+    /* Mantém tudo na mesma linha + permite scroll horizontal */
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
     white-space: nowrap !important;
+
+    /* espaço para não “cortar” embaixo */
+    padding-bottom: 6px !important;
+    margin-bottom: 10px !important;
+  }
+
+  /* Esconde scrollbar (iOS/Chrome) — opcional */
+  .subtabs::-webkit-scrollbar,
+  .tabs::-webkit-scrollbar,
+  .tabs-row::-webkit-scrollbar,
+  .tab-row::-webkit-scrollbar,
+  .nav-tabs::-webkit-scrollbar,
+  .pesquisa-tabs::-webkit-scrollbar,
+  .tabs-pesquisa::-webkit-scrollbar,
+  .nav-subtabs::-webkit-scrollbar {
+    height: 0 !important;
+  }
+
+  /* Botões/links das sub-abas */
+  .subtabs button,
+  .tabs button,
+  .tabs-row button,
+  .tab-row button,
+  .nav-tabs button,
+  .pesquisa-tabs button,
+  .tabs-pesquisa button,
+  .nav-subtabs button,
+  .subtabs a,
+  .tabs a,
+  .tabs-row a,
+  .tab-row a,
+  .nav-tabs a,
+  .pesquisa-tabs a,
+  .tabs-pesquisa a,
+  .nav-subtabs a {
+    flex: 0 0 auto !important;       /* não estica, não quebra */
+    white-space: nowrap !important;  /* texto 1 linha */
+    padding: 10px 12px !important;   /* menor */
+    font-size: 14px !important;      /* menor */
+    line-height: 1 !important;
+    border-radius: 12px !important;
+  }
+
+  /* Se existir um botão maior “Ficha Técnica”, mantém no mesmo padrão */
+  .subtabs .btn,
+  .tabs .btn,
+  .tabs-row .btn,
+  .tab-row .btn,
+  .nav-tabs .btn,
+  .pesquisa-tabs .btn,
+  .tabs-pesquisa .btn,
+  .nav-subtabs .btn {
+    padding: 10px 12px !important;
+    font-size: 14px !important;
+    border-radius: 12px !important;
+  }
+
+  /* ========================================================
+     3) Ajustes finos de layout para não “estourar” no mobile
+     ======================================================== */
+
+  /* Containers principais: evita lateral cortada */
+  .container,
+  .wrap,
+  .page,
+  main,
+  .content {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Caso a barra de busca esteja alta demais */
+  input[type="search"],
+  .search input,
+  .searchbar input {
+    height: 44px !important;
+    font-size: 14px !important;
   }
 }
-
-
-/* ============================================================
-   PATCH — MENU DESKTOP / BANNER MOBILE / FICHA TÉCNICA
-   ============================================================ */
-
-/* DESKTOP: garantir busca ao lado do menu (mesma linha) */
-@media (min-width: 821px){
-  .header-overlay{
-    /* garante alinhamento e evita quebra estranha */
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:16px;
-  }
-
-  .menu{
-    display:flex;
-    align-items:center;
-    gap:18px;
-    flex-wrap:nowrap;      /* CRÍTICO: impede menu ir pra cima/baixo */
-    white-space:nowrap;
-  }
-
-  /* busca tem largura controlada e não força quebra */
-  .menu-search{
-    flex: 0 1 320px;
-    width: 320px;
-    max-width: 38vw;
-    min-width: 220px;
-    order: 1;
-  }
-
-  #pesquisasDropdown{ order: 2; }
-  .menu-link{ order: 3; }
-
-  .menu-btn, .menu-link{
-    white-space:nowrap;
-  }
-}
-
-/* MOBILE: corrigir banner “vazando” (header deve crescer com o conteúdo) */
-@media (max-width: 820px){
-  .header{
-    height:auto;           /* CRÍTICO: não cortar conteúdo */
-    min-height:160px;      /* mantém presença do banner */
-  }
-
-  .header-overlay{
-    height:auto;           /* overlay acompanha conteúdo */
-    padding:14px 16px;     /* reduz padding e evita estouro lateral */
-    flex-wrap:wrap;        /* permite quebrar com ordem natural no mobile */
-    row-gap:10px;
-  }
-
-  /* evita que a busca estoure horizontalmente no mobile */
-  .menu{
-    flex-wrap:wrap;
-    gap:12px;
-  }
-
-  .menu-search{
-    width:min(420px, 100%);
-    max-width:100%;
-  }
-}
-
-/* FICHA TÉCNICA: descrição abaixo do título (Equipe da Pesquisa) */
-.ft-section-desc{
-  margin:-22px 0 26px;
-  color:#666;
-  font-size:14px;
-  line-height:1.6;
-}
-
-/* FICHA TÉCNICA: botão "Conhecer" azul com texto branco */
-.ft-person-link{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  margin-top: 12px;
-  background:#0A58CA;
-  color:#fff !important;
-  padding:9px 14px;
-  border-radius:10px;
-  font-weight:900;
-  font-size:13px;
-  text-decoration:none;
-  border:1px solid rgba(255,255,255,0.15);
-  transition: transform .15s ease, filter .15s ease;
-}
-.ft-person-link:hover{ filter:brightness(.95); transform: translateY(-1px); }
-.ft-person-link:active{ transform: translateY(0px); }
