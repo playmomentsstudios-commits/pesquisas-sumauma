@@ -1281,3 +1281,34 @@ body.no-scroll{ overflow:hidden; }
   .leaflet-map{ height: 420px; }
 }
 /* SUMAUMA: MAPA STICKY/LISTA SCROLL (END) */
+
+.ft-team-text{
+  margin: 10px 0 18px;
+  color: #2f2f2f;
+  line-height: 1.5;
+}
+
+.ft-person-card{
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  position: relative;
+}
+
+.ft-person-card-link{
+  cursor: pointer;
+}
+
+.ft-person-linkbtn{
+  margin-top: 12px;
+  display: inline-block;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(0,0,0,0.06);
+  border: 1px solid rgba(0,0,0,0.10);
+  font-size: 13px;
+}
+
+.ft-person-card-link:hover .ft-person-linkbtn{
+  background: rgba(0,0,0,0.10);
+}
