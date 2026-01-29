@@ -1175,3 +1175,109 @@ body.no-scroll{ overflow:hidden; }
   cursor: pointer;
 }
 
+/* SUMAUMA: MAPA STICKY/LISTA SCROLL (BEGIN) */
+.map-shell{
+  display:grid;
+  grid-template-columns: 360px 1fr;
+  gap:14px;
+  align-items:stretch;
+
+  /* Altura controlada por viewport (setada via JS) */
+  height: var(--map-shell-h, 520px);
+  max-height: var(--map-shell-h, 520px);
+}
+
+.map-side{
+  background:#fff;
+  border:1px solid rgba(0,0,0,.08);
+  border-radius:16px;
+  box-shadow: var(--shadow);
+  overflow:hidden;
+
+  display:flex;
+  flex-direction:column;
+
+  /* ESSENCIAL: não deixar o lado crescer pela lista */
+  height: 100%;
+  min-height: 0;
+}
+
+.map-side-head{
+  padding:14px 14px 10px;
+  border-bottom:1px solid rgba(0,0,0,.06);
+}
+.map-side-title{ font-weight:900; color:#0f3d2e; font-size:14px; }
+.map-side-meta{ color:#6b6b6b; font-size:12px; margin-top:4px; }
+
+.map-search{
+  margin:12px 14px 10px;
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid rgba(0,0,0,.12);
+  outline:none;
+}
+.map-search:focus{
+  border-color: rgba(15,61,46,.55);
+  box-shadow: 0 0 0 3px rgba(15,61,46,.10);
+}
+
+/* A LISTA vira o scroll (interno) */
+.map-list{
+  padding: 0 10px 12px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  flex: 1;
+
+  /* ESSENCIAL: permitir o overflow funcionar em flex */
+  min-height: 0;
+}
+
+.map-item{
+  width:100%;
+  text-align:left;
+  padding:12px 12px;
+  border-radius:14px;
+  border:1px solid rgba(0,0,0,.08);
+  background:#fff;
+  box-shadow: 0 10px 20px rgba(15,61,46,.06);
+  cursor:pointer;
+  margin:10px 4px;
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+.map-item:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 16px 30px rgba(15,61,46,.10);
+}
+.map-item-title{ font-weight:900; color:#0f3d2e; font-size:13px; }
+.map-item-sub{ color:#666; font-size:12px; margin-top:4px; }
+
+.map-main{
+  background:#fff;
+  border:1px solid rgba(0,0,0,.08);
+  border-radius:16px;
+  box-shadow: var(--shadow);
+  overflow:hidden;
+
+  /* Mantém o mapa alinhado à altura do shell */
+  height: 100%;
+  min-height: 0;
+}
+
+/* Mapa acompanha 100% do container (não altura fixa) */
+.leaflet-map{
+  height: 100%;
+  min-height: 0;
+}
+
+/* MOBILE: volta a ser fluxo normal (sem altura travada) */
+@media (max-width: 980px){
+  .map-shell{
+    grid-template-columns: 1fr;
+    height: auto;
+    max-height: none;
+  }
+  .map-side{ height: auto; min-height: auto; }
+  .map-main{ height: 420px; min-height: 420px; }
+  .leaflet-map{ height: 420px; }
+}
+/* SUMAUMA: MAPA STICKY/LISTA SCROLL (END) */
