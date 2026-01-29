@@ -1557,3 +1557,95 @@ body.no-scroll{ overflow:hidden; }
   }
 }
 
+
+/* ============================================================
+   PATCH — MENU DESKTOP / BANNER MOBILE / FICHA TÉCNICA
+   ============================================================ */
+
+/* DESKTOP: garantir busca ao lado do menu (mesma linha) */
+@media (min-width: 821px){
+  .header-overlay{
+    /* garante alinhamento e evita quebra estranha */
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+  }
+
+  .menu{
+    display:flex;
+    align-items:center;
+    gap:18px;
+    flex-wrap:nowrap;      /* CRÍTICO: impede menu ir pra cima/baixo */
+    white-space:nowrap;
+  }
+
+  /* busca tem largura controlada e não força quebra */
+  .menu-search{
+    flex: 0 1 320px;
+    width: 320px;
+    max-width: 38vw;
+    min-width: 220px;
+    order: 1;
+  }
+
+  #pesquisasDropdown{ order: 2; }
+  .menu-link{ order: 3; }
+
+  .menu-btn, .menu-link{
+    white-space:nowrap;
+  }
+}
+
+/* MOBILE: corrigir banner “vazando” (header deve crescer com o conteúdo) */
+@media (max-width: 820px){
+  .header{
+    height:auto;           /* CRÍTICO: não cortar conteúdo */
+    min-height:160px;      /* mantém presença do banner */
+  }
+
+  .header-overlay{
+    height:auto;           /* overlay acompanha conteúdo */
+    padding:14px 16px;     /* reduz padding e evita estouro lateral */
+    flex-wrap:wrap;        /* permite quebrar com ordem natural no mobile */
+    row-gap:10px;
+  }
+
+  /* evita que a busca estoure horizontalmente no mobile */
+  .menu{
+    flex-wrap:wrap;
+    gap:12px;
+  }
+
+  .menu-search{
+    width:min(420px, 100%);
+    max-width:100%;
+  }
+}
+
+/* FICHA TÉCNICA: descrição abaixo do título (Equipe da Pesquisa) */
+.ft-section-desc{
+  margin:-22px 0 26px;
+  color:#666;
+  font-size:14px;
+  line-height:1.6;
+}
+
+/* FICHA TÉCNICA: botão "Conhecer" azul com texto branco */
+.ft-person-link{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  margin-top: 12px;
+  background:#0A58CA;
+  color:#fff !important;
+  padding:9px 14px;
+  border-radius:10px;
+  font-weight:900;
+  font-size:13px;
+  text-decoration:none;
+  border:1px solid rgba(255,255,255,0.15);
+  transition: transform .15s ease, filter .15s ease;
+}
+.ft-person-link:hover{ filter:brightness(.95); transform: translateY(-1px); }
+.ft-person-link:active{ transform: translateY(0px); }
