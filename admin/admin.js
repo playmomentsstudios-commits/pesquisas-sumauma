@@ -1818,7 +1818,8 @@ async function readFormToPayload(){
   const capaUrl = (await maybeUploadFile(formData.get("capaFile"), `pesquisas/${slug}/capa`))
     || existingCapaUrl;
 
-  const relatorioUrl = (await maybeUploadFile(formData.get("relatorioFile"), `pesquisas/${slug}/relatorio`))
+  /* SUMAUMA: SEO PDF filename */
+  const relatorioUrl = (await maybeUploadFile(formData.get("relatorioFile"), `pesquisas/${slug}/relatorio-${slug}`))
     || existingRelatorioUrl;
 
   const realizacaoLogo = (await maybeUploadFile(formData.get("realizacaoLogoFile"), `pesquisas/${slug}/logos/realizacao`))
