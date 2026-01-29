@@ -19,6 +19,31 @@ function tabs(slug, active){
   `;
 }
 
+/** Garante URL válida para abrir em nova aba */
+function normalizeExternalUrl(raw){
+  const v = String(raw || "").trim();
+  if (!v) return "";
+  // aceita http/https/mailto/tel
+  if (/^(https?:\/\/|mailto:|tel:)/i.test(v)) return v;
+  // se veio "www..." ou domínio solto, prefixa https
+  return `https://${v.replace(/^\/+/, "")}`;
+}
+
+function pickPersonLink(person){
+  // tenta vários nomes de campo (caso o JSON/DB varie)
+  const candidates = [
+    person?.link,
+    person?.url,
+    person?.perfil,
+    person?.site,
+    person?.website,
+    person?.linkedin,
+    person?.instagram
+  ];
+  const found = candidates.find(v => String(v || "").trim());
+  return found ? normalizeExternalUrl(found) : "";
+}
+
 async function renderFichaTecnica(p){
   const ft = p.fichaTecnica || {};
   const realizacao = ft.realizacao || {};
@@ -60,33 +85,29 @@ async function renderFichaTecnica(p){
     <section class="ft-section">
       <h2>Equipe da Pesquisa</h2>
 
-      ${
-        (ft.equipeTexto || "").trim()
-          ? `<p class="ft-team-text">${escapeHtml(ft.equipeTexto)}</p>`
-          : ``
-      }
-
       <div class="ft-people-grid">
         ${
           equipe.length
             ? equipe.map(person => {
-                const foto = person.foto || withBase("/public/assets/img/equipe/placeholder.jpg");
-                const nome = person.nome || "";
-                const funcao = person.funcao || "";
-                const link = (person.link || "").trim();
+                const foto = escapeHtml(person.foto || withBase("/public/assets/img/equipe/placeholder.jpg"));
+                const nome = escapeHtml(person.nome || "");
+                const funcao = escapeHtml(person.funcao || "");
+                const link = pickPersonLink(person);
 
-                const inner = `
-                  <img src="${escapeHtml(foto)}" alt="${escapeHtml(nome)}">
-                  <h3>${escapeHtml(nome)}</h3>
-                  <p>${escapeHtml(funcao)}</p>
-                  ${link ? `<span class="ft-person-linkbtn" aria-label="Abrir link do integrante">Link</span>` : ``}
+                return `
+                  <div class="ft-person-card">
+                    <img src="${foto}" alt="${nome}">
+                    <h3>${nome}</h3>
+                    <p>${funcao}</p>
+                    ${
+                      link
+                        ? `<a class="ft-person-link" href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer">Conhecer</a>`
+                        : ``
+                    }
+                  </div>
                 `;
-
-                return link
-                  ? `<a class="ft-person-card ft-person-card-link" href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer">${inner}</a>`
-                  : `<div class="ft-person-card">${inner}</div>`;
               }).join("")
-            : `<div style="color:#666;">Nenhum integrante cadastrado.</div>`
+            : `<div style="color:#666;">Nenhum integrante cadastrado no JSON.</div>`
         }
       </div>
     </section>

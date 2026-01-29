@@ -1352,3 +1352,70 @@ body.no-scroll{ overflow:hidden; }
 .ft-person-card-link:hover .ft-person-linkbtn{
   background: rgba(0,0,0,0.10);
 }
+
+/* ============================================================
+   AJUSTES — HEADER (SÓ DESKTOP) + FICHA TÉCNICA (BOTÃO CONHECER)
+   ============================================================ */
+
+/* Desktop: forçar menu em linha e manter itens perto da busca */
+@media (min-width: 821px){
+  .menu{
+    display:flex;
+    align-items:center;
+    gap:18px;
+    flex-wrap:nowrap;      /* não quebrar linha no desktop */
+  }
+
+  /* Busca */
+  .menu-search{
+    order: 1;
+    width: 320px;
+    max-width: 38vw;
+    flex: 0 0 auto;
+  }
+
+  /* Dropdown Pesquisas */
+  #pesquisasDropdown{
+    order: 2;
+    flex: 0 0 auto;
+  }
+
+  /* Link Institucional */
+  .menu-link{
+    order: 3;
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+}
+
+/* =========================
+   FICHA TÉCNICA — ajustes visuais
+   ========================= */
+
+/* Nome do integrante sempre branco */
+.ft-person-card h3{
+  color:#fff !important;
+}
+
+/* Botão "Conhecer" (azul, texto branco) */
+.ft-person-link{
+  display:inline-block;
+  margin-top: 12px;
+  background:#0A58CA;
+  color:#fff !important;
+  padding: 9px 14px;
+  border-radius: 8px;
+  font-weight: 800;
+  font-size: 13px;
+  text-decoration: none;
+  transition: transform .15s ease, opacity .15s ease;
+}
+
+.ft-person-link:hover{
+  opacity:.95;
+  transform: translateY(-1px);
+}
+
+.ft-person-link:active{
+  transform: translateY(0px);
+}
