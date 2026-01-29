@@ -73,6 +73,7 @@
                 <button class="tab" type="button" data-tab="ficha">Ficha Técnica</button>
                 <button class="tab" type="button" data-tab="mapa">Mapa</button>
                 <button class="tab" type="button" data-tab="banners">Banners</button>
+                <button class="tab" type="button" data-tab="site">Site</button>
               </div>
 
               <div class="tab-panel" data-tab-panel="config">
@@ -310,44 +311,54 @@
                     <img id="pesquisaBannerPreview" class="preview" alt="Prévia banner da Pesquisa" />
                   </div>
                 </div>
+              </div>
 
-                <!-- SUMAUMA: FAVICON ADMIN UI (BEGIN) -->
+              <!-- SUMAUMA: SITE TAB (BEGIN) -->
+              <div class="tab-panel hidden" data-tab-panel="site">
+                <h3>Site</h3>
+                <p class="muted">Configurações globais do site (valem para todas as páginas).</p>
+
                 <div class="grid-2" style="margin-top:14px;">
-                  <div class="card">
-                    <h4>Ícone do Site (Favicon)</h4>
-                    <p class="muted" style="margin-top:-6px">
-                      Esse ícone aparece na aba do navegador e em todas as páginas do site.
-                      Recomendado: PNG quadrado (512x512 ou 256x256).
+                  <div class="card" style="margin:0; padding:12px;">
+                    <h4 style="margin:0 0 6px;">Ícone do Site (Favicon)</h4>
+                    <p class="muted" style="margin:0 0 10px; font-size:12px; line-height:1.4;">
+                      Esse ícone aparece na aba do navegador e em todas as URLs do site.
+                      Recomendado: PNG quadrado (512×512).
                     </p>
 
-                    <div class="row">
-                      <label class="label">Upload favicon (salva como site/favicon.png no Storage site-assets)</label>
-                      <input id="faviconFile" type="file" accept="image/png" />
+                    <div class="upload-row" style="margin:0; gap:12px;">
+                      <div>
+                        <label>Favicon (PNG)</label>
+                        <input id="faviconFile" type="file" accept="image/png" />
+                      </div>
+                      <div>
+                        <label>Apple Touch Icon (PNG)</label>
+                        <input id="appleIconFile" type="file" accept="image/png" />
+                      </div>
                     </div>
 
-                    <div class="row">
-                      <label class="label">Upload Apple Touch Icon (salva como site/apple-touch-icon.png)</label>
-                      <input id="appleIconFile" type="file" accept="image/png" />
-                    </div>
-
-                    <div class="row">
+                    <div style="display:flex; gap:10px; align-items:center; margin-top:10px; flex-wrap:wrap;">
                       <button id="btnSaveFavicon" class="btn primary" type="button">Salvar ícones do site</button>
-                      <span id="faviconMsg" class="muted"></span>
+                      <span id="faviconMsg" class="small muted"></span>
                     </div>
 
-                    <div class="preview" style="display:flex;gap:12px;align-items:center;">
+                    <div style="display:flex; gap:12px; align-items:center; margin-top:10px;">
                       <img id="faviconPreview" alt="Prévia favicon" style="width:40px;height:40px;border-radius:10px;display:none;border:1px solid rgba(0,0,0,.1);" />
                       <img id="appleIconPreview" alt="Prévia apple icon" style="width:40px;height:40px;border-radius:10px;display:none;border:1px solid rgba(0,0,0,.1);" />
                     </div>
+
+                    <div class="muted" style="margin-top:10px; font-size:12px; line-height:1.4;">
+                      <strong>Obs.:</strong> o favicon tem cache agressivo no navegador. Se não mudar na hora, teste em aba anônima.
+                    </div>
                   </div>
                 </div>
-                <!-- SUMAUMA: FAVICON ADMIN UI (END) -->
               </div>
+              <!-- SUMAUMA: SITE TAB (END) -->
 
-            <div id="empty-state" class="card">
-              <h2>Selecione uma pesquisa</h2>
-              <p class="muted">Use a lista ao lado para editar ou crie uma nova pesquisa.</p>
-            </div>
+              <div id="empty-state" class="card">
+                <h2>Selecione uma pesquisa</h2>
+                <p class="muted">Use a lista ao lado para editar ou crie uma nova pesquisa.</p>
+              </div>
           </section>
         </section>
       </main>
