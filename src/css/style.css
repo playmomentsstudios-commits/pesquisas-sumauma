@@ -10,6 +10,15 @@
   --line:#e5e5e5;
 
   --shadow:0 4px 15px rgba(0,0,0,.08);
+  --tab-radius:12px;
+  --tab-font-size:13px;
+  --tab-pad-y:8px;
+  --tab-pad-x:8px;
+  --tab-gap:8px;
+  --header-mobile-height:200px;
+  --header-search-bottom:12px;
+  --header-overlay-pad-x:20px;
+  --header-overlay-pad-bottom:64px;
 }
 
 *{ box-sizing:border-box; }
@@ -238,14 +247,15 @@ img{ display:block; max-width:100%; }
 }
 .subbar-right{
   display:flex;
-  gap:10px;
+  gap:var(--tab-gap);
   flex-wrap:wrap;
 }
 .tab{
   display:inline-block;
-  padding:10px 14px;
-  border-radius:6px;
+  padding:var(--tab-pad-y) var(--tab-pad-x);
+  border-radius:var(--tab-radius);
   font-weight:bold;
+  font-size:var(--tab-font-size);
   color:#fff;
 }
 .tab-idle{ background:var(--brown); }
@@ -401,8 +411,8 @@ img{ display:block; max-width:100%; }
   .grid{ grid-template-columns:1fr; }
 }
 @media(max-width:768px){
-  .header{ height:200px; }
-  .header-overlay{ padding:0 20px; }
+  .header{ height:var(--header-mobile-height); }
+  .header-overlay{ padding:0 var(--header-overlay-pad-x); }
 }
 
 /* ================= PÁGINA PESQUISA (RESUMO) ================= */
@@ -813,20 +823,20 @@ img{ display:block; max-width:100%; }
 @media (max-width: 640px){
   /* ===== AJUSTE MOBILE: busca “dentro” do banner, colada no fundo ===== */
   .header{
-    height: 200px;            /* garante altura do banner no mobile */
+    height: var(--header-mobile-height);            /* garante altura do banner no mobile */
   }
 
   .header-overlay{
     position: relative;       /* referência pro absolute da busca */
-    padding: 0 20px;          /* mantém seu padding lateral */
-    padding-bottom: 64px;     /* cria espaço interno para a busca não cortar */
+    padding: 0 var(--header-overlay-pad-x);          /* mantém seu padding lateral */
+    padding-bottom: var(--header-overlay-pad-bottom);     /* cria espaço interno para a busca não cortar */
   }
 
   .header-search{
     position: absolute;
-    left: 20px;
-    right: 20px;
-    bottom: 14px;             /* <<< CONTROLE: menor = mais colado embaixo */
+    left: var(--header-overlay-pad-x);
+    right: var(--header-overlay-pad-x);
+    bottom: var(--header-search-bottom);             /* <<< CONTROLE: menor = mais colado embaixo */
     margin-top: 0;            /* remove o empurrão antigo */
     justify-content: center;
   }

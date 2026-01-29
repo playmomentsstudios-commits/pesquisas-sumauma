@@ -67,6 +67,67 @@ function initHeaderSearch(){
   });
 }
 
+function applySiteAppearance(config){
+  const styleId = "siteAppearanceVars";
+  const old = document.getElementById(styleId);
+  if (old) old.remove();
+
+  const ap = config?.appearance_json || {};
+  const colors = ap.colors || {};
+  const tabs = ap.tabs || {};
+  const header = ap.header || {};
+
+  const css = `
+:root{
+  --green:${colors.green || "#0f3d2e"};
+  --brown:${colors.brown || "#5a2a12"};
+  --gold:${colors.gold || "#ffdd9a"};
+  --bg:${colors.bg || "#f4f4f4"};
+  --text:${colors.text || "#222"};
+  --muted:${colors.muted || "#555"};
+  --line:${colors.line || "#e5e5e5"};
+
+  --tab-radius:${(tabs.radius ?? 12)}px;
+  --tab-font-size:${(tabs.fontSize ?? 13)}px;
+  --tab-pad-y:${(tabs.padY ?? 8)}px;
+  --tab-pad-x:${(tabs.padX ?? 8)}px;
+  --tab-gap:${(tabs.gap ?? 8)}px;
+
+  --header-mobile-height:${(header.mobileHeight ?? 200)}px;
+  --header-search-bottom:${(header.searchBottom ?? 12)}px;
+  --header-overlay-pad-x:${(header.overlayPadX ?? 20)}px;
+  --header-overlay-pad-bottom:${(header.overlayPadBottom ?? 64)}px;
+}
+${config?.custom_css || ""}`.trim();
+
+  const style = document.createElement("style");
+  style.id = styleId;
+  style.textContent = css;
+  document.head.appendChild(style);
+}
+
+async function initSiteAppearance(){
+  try {
+    const client = await window.getSupabaseClient?.();
+    if (!client) return;
+
+    const { data, error } = await client
+      .from("site_config")
+      .select("appearance_json, custom_css")
+      .eq("config_key", "main")
+      .maybeSingle();
+
+    if (error) {
+      console.warn("[APPEARANCE] falhou:", error.message || error);
+      return;
+    }
+
+    if (data) applySiteAppearance(data);
+  } catch (e) {
+    console.warn("[APPEARANCE] falhou:", e?.message || e);
+  }
+}
+
 
 setYear();
 (async () => {
@@ -83,3 +144,4 @@ if (headerLogo) headerLogo.setAttribute("href", withBase("/"));
 initHeaderSearch();
 initRouter();
 initFavicon();
+initSiteAppearance();
