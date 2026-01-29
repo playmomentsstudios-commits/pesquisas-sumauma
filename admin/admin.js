@@ -51,11 +51,10 @@ const els = {
   pesquisaBannerMsg: document.getElementById("pesquisaBannerMsg"),
   pesquisaBannerPreview: document.getElementById("pesquisaBannerPreview"),
   faviconFile: document.getElementById("faviconFile"),
-  appleIconFile: document.getElementById("appleIconFile"),
+  faviconUrl: document.getElementById("faviconUrl"),
   btnSaveFavicon: document.getElementById("btnSaveFavicon"),
   faviconMsg: document.getElementById("faviconMsg"),
   faviconPreview: document.getElementById("faviconPreview"),
-  appleIconPreview: document.getElementById("appleIconPreview"),
   pontoNew: document.getElementById("ponto-new"),
   pontosSearch: document.getElementById("pontos-search"),
   pontosCounter: document.getElementById("pontos-counter"),
@@ -2032,49 +2031,20 @@ function setPreview(imgEl, url){
   imgEl.src = url;
 }
 
-// SUMAUMA: FAVICON ADMIN (BEGIN)
-async function uploadFixedPng(file, fixedPath){
-  if (!(file instanceof File)) return "";
-  const path = String(fixedPath || "").endsWith(".png") ? String(fixedPath) : `${fixedPath}.png`;
-
-  const { error } = await state.supabase.storage
-    .from("site-assets")
-    .upload(path, file, { upsert: true, contentType: "image/png" });
-
-  if (error) throw new Error(`Falha ao enviar ícone (Storage): ${error.message || "sem detalhe"}`);
-
-  const { data } = state.supabase.storage.from("site-assets").getPublicUrl(path);
-  const publicUrl = data?.publicUrl || "";
-  if (!publicUrl) throw new Error("Falha ao gerar URL pública do ícone.");
-  return publicUrl;
-}
-
 async function loadFaviconPreview(){
   try {
-    const { data: fav } = await state.supabase
+    const { data, error } = await state.supabase
       .from("site_config")
       .select("value")
       .eq("key", "favicon_url")
       .limit(1)
       .maybeSingle();
 
-    const { data: apple } = await state.supabase
-      .from("site_config")
-      .select("value")
-      .eq("key", "apple_icon_url")
-      .limit(1)
-      .maybeSingle();
-
-    const favUrl = fav?.value || "";
-    const appleUrl = apple?.value || "";
-
-    setPreview(els.faviconPreview, favUrl);
-    setPreview(els.appleIconPreview, appleUrl);
-
-    if (els.faviconMsg) {
-      els.faviconMsg.textContent = favUrl || appleUrl ? "Ícones atuais carregados ✅" : "Ainda não configurado.";
-      els.faviconMsg.style.color = (favUrl || appleUrl) ? "#198754" : "#6b7a75";
-    }
+    if (error) return;
+    const url = data?.value || "";
+    if (els.faviconUrl) els.faviconUrl.value = url;
+    setPreview(els.faviconPreview, url);
+    setBannerMsg(els.faviconMsg, url ? "Favicon atual carregado ✅" : "Sem favicon definido ainda.", true);
   } catch {}
 }
 
@@ -2082,54 +2052,35 @@ async function handleSaveFavicon(){
   hideAlert();
   try {
     if (!state.session) throw new Error("Faça login para salvar.");
+    const file = els.faviconFile?.files?.[0];
+    const urlInput = (els.faviconUrl?.value || "").trim();
 
-    const faviconFile = els.faviconFile?.files?.[0] || null;
-    const appleFile = els.appleIconFile?.files?.[0] || null;
+    let finalUrl = urlInput;
 
-    if (!faviconFile && !appleFile) {
-      throw new Error("Envie pelo menos um arquivo PNG (favicon e/ou apple-touch-icon).");
+    if (file) {
+      finalUrl = await maybeUploadFile(file, "site/favicon");
+      if (els.faviconUrl) els.faviconUrl.value = finalUrl;
     }
 
-    let faviconUrl = "";
-    let appleUrl = "";
+    if (!finalUrl) throw new Error("Envie um arquivo ou informe uma URL.");
 
-    if (faviconFile) {
-      faviconUrl = await uploadFixedPng(faviconFile, "site/favicon.png");
-      setPreview(els.faviconPreview, faviconUrl);
-      const { error } = await state.supabase
-        .from("site_config")
-        .upsert({ key: "favicon_url", value: faviconUrl }, { onConflict: "key" });
-      if (error) throw error;
-    }
+    const { error } = await state.supabase
+      .from("site_config")
+      .upsert({ key: "favicon_url", value: finalUrl }, { onConflict: "key" });
 
-    if (appleFile) {
-      appleUrl = await uploadFixedPng(appleFile, "site/apple-touch-icon.png");
-      setPreview(els.appleIconPreview, appleUrl);
-      const { error } = await state.supabase
-        .from("site_config")
-        .upsert({ key: "apple_icon_url", value: appleUrl }, { onConflict: "key" });
-      if (error) throw error;
-    }
+    if (error) throw error;
 
-    if (els.faviconMsg) {
-      els.faviconMsg.textContent = "Ícones do site salvos ✅ (pode levar alguns minutos para atualizar no navegador)";
-      els.faviconMsg.style.color = "#198754";
-    }
-
-    showAlert("ok", "Ícones do site salvos ✅ (se não mudar na hora, limpe o cache ou teste em aba anônima)");
+    setPreview(els.faviconPreview, finalUrl);
+    setBannerMsg(els.faviconMsg, "Favicon salvo ✅", true);
+    showAlert("ok", "Favicon salvo ✅");
   } catch (err) {
     console.error(err);
-    if (els.faviconMsg) {
-      els.faviconMsg.textContent = "Erro: " + friendlyError(err);
-      els.faviconMsg.style.color = "#b42318";
-    }
+    setBannerMsg(els.faviconMsg, "Erro: " + friendlyError(err), false);
     showAlert("err", "Erro: " + friendlyError(err));
   } finally {
     if (els.faviconFile) els.faviconFile.value = "";
-    if (els.appleIconFile) els.appleIconFile.value = "";
   }
 }
-// SUMAUMA: FAVICON ADMIN (END)
 
 
 

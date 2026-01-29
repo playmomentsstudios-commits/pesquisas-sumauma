@@ -337,36 +337,30 @@
                 <img id="homeBannerPreview" class="preview" alt="Prévia banner da Home" />
               </div>
 
-              <div class="card" style="margin:0; padding:12px;">
-                <h4 style="margin:0 0 6px;">Ícone do Site (Favicon)</h4>
-                <p class="muted" style="margin:0 0 10px; font-size:12px; line-height:1.4;">
-                  Esse ícone aparece na aba do navegador e em todas as URLs do site.
-                  Recomendado: PNG quadrado (512×512).
+              <div class="card">
+                <h4>Ícone do Site (Favicon)</h4>
+                <p class="muted" style="margin-top:-6px">
+                  Recomendado: PNG quadrado (ex: 256x256). O site usa automaticamente.
                 </p>
 
-                <div class="upload-row" style="margin:0; gap:12px;">
-                  <div>
-                    <label>Favicon (PNG)</label>
-                    <input id="faviconFile" type="file" accept="image/png" />
-                  </div>
-                  <div>
-                    <label>Apple Touch Icon (PNG)</label>
-                    <input id="appleIconFile" type="file" accept="image/png" />
-                  </div>
+                <div class="row">
+                  <label class="label">Upload (Storage site-assets)</label>
+                  <input id="faviconFile" type="file" accept="image/png,image/x-icon,image/svg+xml,image/*" />
                 </div>
 
-                <div style="display:flex; gap:10px; align-items:center; margin-top:10px; flex-wrap:wrap;">
-                  <button id="btnSaveFavicon" class="btn primary" type="button">Salvar ícones do site</button>
-                  <span id="faviconMsg" class="small muted"></span>
+                <div class="row">
+                  <label class="label">Ou URL direta</label>
+                  <input id="faviconUrl" class="field" placeholder="https://..." />
                 </div>
 
-                <div style="display:flex; gap:12px; align-items:center; margin-top:10px;">
-                  <img id="faviconPreview" alt="Prévia favicon" style="width:40px;height:40px;border-radius:10px;display:none;border:1px solid rgba(0,0,0,.1);" />
-                  <img id="appleIconPreview" alt="Prévia apple icon" style="width:40px;height:40px;border-radius:10px;display:none;border:1px solid rgba(0,0,0,.1);" />
+                <div class="row">
+                  <button id="btnSaveFavicon" class="btn primary" type="button">Salvar favicon</button>
+                  <span id="faviconMsg" class="muted"></span>
                 </div>
 
-                <div class="muted" style="margin-top:10px; font-size:12px; line-height:1.4;">
-                  <strong>Obs.:</strong> o favicon tem cache agressivo no navegador. Se não mudar na hora, teste em aba anônima.
+                <div class="preview" style="display:flex;gap:12px;align-items:center">
+                  <img id="faviconPreview" alt="Prévia favicon" style="width:48px;height:48px;border-radius:12px;display:none;border:1px solid rgba(0,0,0,.08)" />
+                  <small class="muted">Prévia (48px)</small>
                 </div>
               </div>
             </div>
