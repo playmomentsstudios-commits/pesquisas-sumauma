@@ -811,10 +811,32 @@ img{ display:block; max-width:100%; }
 }
 
 @media (max-width: 640px){
-  .header-logo img{ height:54px; }
-  .menu-btn, .menu-link{ font-size:14px; }
-  .header-search{ margin-top:10px; }
-  .header-search .menu-search{ max-width:100%; }
+  /* ===== AJUSTE MOBILE: busca “dentro” do banner, colada no fundo ===== */
+  .header{
+    height: 200px;            /* garante altura do banner no mobile */
+  }
+
+  .header-overlay{
+    position: relative;       /* referência pro absolute da busca */
+    padding: 0 20px;          /* mantém seu padding lateral */
+    padding-bottom: 64px;     /* cria espaço interno para a busca não cortar */
+  }
+
+  .header-search{
+    position: absolute;
+    left: 20px;
+    right: 20px;
+    bottom: 14px;             /* <<< CONTROLE: menor = mais colado embaixo */
+    margin-top: 0;            /* remove o empurrão antigo */
+    justify-content: center;
+  }
+
+  .header-search .menu-search{
+    width: 100%;
+    max-width: 100%;
+    margin-left: 0;
+  }
+
   .menu-search input{ padding:11px 12px; }
 }
 
