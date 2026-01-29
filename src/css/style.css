@@ -188,3 +188,60 @@
     font-size: 14px !important;
   }
 }
+
+/* ===== Header: busca + menu lado a lado (DESKTOP) ===== */
+@media (min-width: 768px) {
+  .header-top--desktop-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex: 1;
+    justify-content: flex-end;
+    min-width: 0;
+  }
+
+  .header-logo {
+    flex: 0 0 auto;
+  }
+
+  .menu-search {
+    flex: 1 1 520px;
+    max-width: 640px;
+    min-width: 260px;
+  }
+
+  .menu {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+}
+
+/* ===== Mobile: empilha (confortável) ===== */
+@media (max-width: 767px) {
+  .header-top--desktop-row {
+    display: block;
+  }
+
+  .header-right {
+    display: block;
+    margin-top: 10px;
+  }
+
+  .menu {
+    margin-top: 10px;
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+}
