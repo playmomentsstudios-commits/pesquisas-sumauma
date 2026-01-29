@@ -1352,3 +1352,103 @@ body.no-scroll{ overflow:hidden; }
 .ft-person-card-link:hover .ft-person-linkbtn{
   background: rgba(0,0,0,0.10);
 }
+
+/* ============================================================
+   HEADER — Menu ao lado do campo de busca (DESKTOP)
+   ============================================================ */
+@media (min-width: 1025px){
+  .header-top--desktop-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:18px;
+    width:100%;
+  }
+
+  .header-right{
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+    gap:16px;
+    flex:1;
+    min-width:0;
+  }
+
+  /* Busca cresce, mas não empurra o menu pra baixo */
+  .header-right .menu-search{
+    width:520px;
+    max-width:48vw;
+    min-width:320px;
+  }
+
+  /* Menu sempre em 1 linha */
+  .header-right .menu{
+    flex:0 0 auto;
+    white-space:nowrap;
+    gap:18px;
+  }
+
+  /* Remove qualquer regra antiga que dependia do .header-search */
+  .header-search{ display:none !important; }
+}
+
+/* Tablet/Mobile: mantém empilhado do jeito atual (header-top + busca centralizada) */
+@media (max-width: 1024px){
+  .header-right{ display:block; }
+  .header-right .menu-search{
+    width:100%;
+    max-width:680px;
+    margin:12px auto 0;
+  }
+  .header-right .menu{
+    display:flex;
+    justify-content:flex-end;
+    margin-top:8px;
+  }
+}
+
+/* ============================================================
+   FICHA TÉCNICA — Botões/links dos cards da equipe harmoniosos
+   (pílula, alinhado, consistente com o tema verde + branco)
+   ============================================================ */
+.ft-person-linkbtn{
+  margin-top: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  padding: 10px 14px;
+  border-radius: 999px;
+
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1;
+
+  color: #fff;
+  background: rgba(255,255,255,0.14);
+  border: 1px solid rgba(255,255,255,0.26);
+
+  transition: transform .12s ease, box-shadow .12s ease, background .12s ease, border-color .12s ease;
+}
+
+.ft-person-card-link:hover .ft-person-linkbtn{
+  background: rgba(255,255,255,0.22);
+  border-color: rgba(255,255,255,0.34);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(0,0,0,0.18);
+}
+
+/* Se tiver mais de 1 botão/link por pessoa, eles ficam padronizados */
+.ft-person-card .ft-person-linkbtn{
+  min-width: 140px;
+}
+
+/* Mobile: botão ocupa mais largura e fica bem “tocável” */
+@media (max-width: 640px){
+  .ft-person-linkbtn{
+    width: 100%;
+    justify-content: center;
+    padding: 12px 14px;
+  }
+}
