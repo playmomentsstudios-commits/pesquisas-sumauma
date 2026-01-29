@@ -80,7 +80,6 @@
                 <button class="tab" type="button" data-tab="resumo">Resumo</button>
                 <button class="tab" type="button" data-tab="ficha">Ficha Técnica</button>
                 <button class="tab" type="button" data-tab="mapa">Mapa</button>
-                <button class="tab" type="button" data-tab="banners">Banner</button>
               </div>
 
               <div class="tab-panel" data-tab-panel="config">
@@ -133,6 +132,33 @@
                       <input type="text" name="relatorioLeituraUrl" placeholder="https://..." />
                     </label>
                   </div>
+                </div>
+
+                <div class="card" style="margin-top:12px;">
+                  <h4 style="margin:0 0 6px;">Banner do topo (desta pesquisa)</h4>
+                  <p class="muted" style="margin:0 0 10px;">
+                    Esse banner aparece no topo quando a pessoa entra nesta pesquisa publicada (no cabeçalho).
+                  </p>
+                  <div class="grid-2">
+                    <div class="row">
+                      <label class="label">Upload do banner (PNG/JPG)</label>
+                      <input id="pesquisaBannerFile" type="file" accept="image/*" />
+                    </div>
+                    <div class="row">
+                      <label class="label">URL do banner (opcional)</label>
+                      <input id="pesquisaBannerUrl" type="text" class="field" placeholder="https://..." />
+                    </div>
+                  </div>
+                  <div
+                    class="row"
+                    style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px;"
+                  >
+                    <button id="btnSavePesquisaBanner" class="btn primary" type="button">
+                      Salvar banner desta pesquisa
+                    </button>
+                    <span id="pesquisaBannerMsg" class="muted"></span>
+                  </div>
+                  <img id="pesquisaBannerPreview" class="preview" alt="Prévia banner da Pesquisa" />
                 </div>
 
                 <input type="hidden" name="csvUrl" />
@@ -271,33 +297,6 @@
                         <button class="btn primary" type="submit">Salvar ponto</button>
                       </div>
                     </form>
-                  </div>
-                </div>
-              </div>
-
-              <div class="tab-panel hidden" data-tab-panel="banners">
-                <h3 style="margin-top:0">Banners do Cabeçalho</h3>
-                <p class="muted" style="margin-top:4px">
-                  Atualize o banner da pesquisa selecionada. (O banner da Home fica em <strong>Site</strong>.)
-                </p>
-
-                <div class="grid-2">
-                  <div class="card">
-                    <h4>Banner da Pesquisa selecionada</h4>
-                    <p class="muted" style="margin-top:-6px">Selecione uma pesquisa na lista para editar o banner dela.</p>
-                    <div class="row">
-                      <label class="label">Upload do banner (PNG/JPG)</label>
-                      <input id="pesquisaBannerFile" type="file" accept="image/*" />
-                    </div>
-                    <div class="row">
-                      <label class="label">URL do banner (opcional)</label>
-                      <input id="pesquisaBannerUrl" type="text" class="field" placeholder="https://..." />
-                    </div>
-                    <div class="row">
-                      <button id="btnSavePesquisaBanner" class="btn primary" type="button">Salvar banner da Pesquisa</button>
-                      <span id="pesquisaBannerMsg" class="muted"></span>
-                    </div>
-                    <img id="pesquisaBannerPreview" class="preview" alt="Prévia banner da Pesquisa" />
                   </div>
                 </div>
               </div>
