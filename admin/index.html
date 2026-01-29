@@ -267,6 +267,83 @@
                 </div>
               </div>
 
+              <div class="tab-panel hidden" data-tab-panel="banners">
+                <h3>Banners</h3>
+                <div class="grid-2">
+                  <div class="card">
+                    <h4>Banner da Home</h4>
+                    <p class="muted" style="margin-top:-6px;">
+                      Este banner aparece na página inicial antes do mapa.
+                    </p>
+                    <div class="row">
+                      <label class="label">Upload do banner (PNG/JPG)</label>
+                      <input id="homeBannerFile" type="file" accept="image/*" />
+                    </div>
+                    <div class="row">
+                      <label class="label">URL do banner (opcional)</label>
+                      <input id="homeBannerUrl" type="text" class="field" placeholder="https://..." />
+                    </div>
+                    <div class="row">
+                      <button id="btnSaveHomeBanner" class="btn primary" type="button">Salvar banner da Home</button>
+                      <span id="homeBannerMsg" class="muted"></span>
+                    </div>
+                    <img id="homeBannerPreview" class="preview" alt="Prévia banner da Home" />
+                  </div>
+
+                  <div class="card">
+                    <h4>Banner da Pesquisa</h4>
+                    <p class="muted" style="margin-top:-6px;">
+                      Este banner aparece no topo da pesquisa selecionada.
+                    </p>
+                    <div class="row">
+                      <label class="label">Upload do banner (PNG/JPG)</label>
+                      <input id="pesquisaBannerFile" type="file" accept="image/*" />
+                    </div>
+                    <div class="row">
+                      <label class="label">URL do banner (opcional)</label>
+                      <input id="pesquisaBannerUrl" type="text" class="field" placeholder="https://..." />
+                    </div>
+                    <div class="row">
+                      <button id="btnSavePesquisaBanner" class="btn primary" type="button">Salvar banner da Pesquisa</button>
+                      <span id="pesquisaBannerMsg" class="muted"></span>
+                    </div>
+                    <img id="pesquisaBannerPreview" class="preview" alt="Prévia banner da Pesquisa" />
+                  </div>
+                </div>
+
+                <!-- SUMAUMA: FAVICON ADMIN UI (BEGIN) -->
+                <div class="grid-2" style="margin-top:14px;">
+                  <div class="card">
+                    <h4>Ícone do Site (Favicon)</h4>
+                    <p class="muted" style="margin-top:-6px">
+                      Esse ícone aparece na aba do navegador e em todas as páginas do site.
+                      Recomendado: PNG quadrado (512x512 ou 256x256).
+                    </p>
+
+                    <div class="row">
+                      <label class="label">Upload favicon (salva como site/favicon.png no Storage site-assets)</label>
+                      <input id="faviconFile" type="file" accept="image/png" />
+                    </div>
+
+                    <div class="row">
+                      <label class="label">Upload Apple Touch Icon (salva como site/apple-touch-icon.png)</label>
+                      <input id="appleIconFile" type="file" accept="image/png" />
+                    </div>
+
+                    <div class="row">
+                      <button id="btnSaveFavicon" class="btn primary" type="button">Salvar ícones do site</button>
+                      <span id="faviconMsg" class="muted"></span>
+                    </div>
+
+                    <div class="preview" style="display:flex;gap:12px;align-items:center;">
+                      <img id="faviconPreview" alt="Prévia favicon" style="width:40px;height:40px;border-radius:10px;display:none;border:1px solid rgba(0,0,0,.1);" />
+                      <img id="appleIconPreview" alt="Prévia apple icon" style="width:40px;height:40px;border-radius:10px;display:none;border:1px solid rgba(0,0,0,.1);" />
+                    </div>
+                  </div>
+                </div>
+                <!-- SUMAUMA: FAVICON ADMIN UI (END) -->
+              </div>
+
             <div id="empty-state" class="card">
               <h2>Selecione uma pesquisa</h2>
               <p class="muted">Use a lista ao lado para editar ou crie uma nova pesquisa.</p>
