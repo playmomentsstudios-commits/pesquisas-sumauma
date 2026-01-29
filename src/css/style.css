@@ -10,6 +10,32 @@
   --line:#e5e5e5;
 
   --shadow:0 4px 15px rgba(0,0,0,.08);
+
+  /* ===== APARÊNCIA (controlado pelo ADM) ===== */
+  --tab-radius: 12px;
+  --tab-font-size: 13px;
+  --tab-pad-y: 8px;
+  --tab-pad-x: 8px;
+  --tab-gap: 8px;
+
+  --header-mobile-height: 200px;
+  --header-overlay-pad-x: 20px;
+  --header-overlay-pad-bottom: 64px;
+  --header-search-bottom: 12px;
+}
+
+:root{
+  --green:#0f3d2e;
+  --brown:#5a2a12;
+  --gold:#ffdd9a;
+
+  --bg:#f4f4f4;
+  --text:#222;
+  --muted:#555;
+  --white:#fff;
+  --line:#e5e5e5;
+
+  --shadow:0 4px 15px rgba(0,0,0,.08);
 }
 
 *{ box-sizing:border-box; }
