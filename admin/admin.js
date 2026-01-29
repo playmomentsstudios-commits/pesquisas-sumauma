@@ -50,6 +50,11 @@ const els = {
   btnSavePesquisaBanner: document.getElementById("btnSavePesquisaBanner"),
   pesquisaBannerMsg: document.getElementById("pesquisaBannerMsg"),
   pesquisaBannerPreview: document.getElementById("pesquisaBannerPreview"),
+  siteLogoFile: document.getElementById("siteLogoFile"),
+  siteLogoUrl: document.getElementById("siteLogoUrl"),
+  btnSaveSiteLogo: document.getElementById("btnSaveSiteLogo"),
+  siteLogoMsg: document.getElementById("siteLogoMsg"),
+  siteLogoPreview: document.getElementById("siteLogoPreview"),
   faviconFile: document.getElementById("faviconFile"),
   faviconUrl: document.getElementById("faviconUrl"),
   btnSaveFavicon: document.getElementById("btnSaveFavicon"),
@@ -237,6 +242,7 @@ function setMainTab(tab){
   if (t === "site") {
     loadHomeBannerPreview?.();
     loadFaviconPreview?.();
+    loadSiteLogoPreview?.();
   }
 }
 
@@ -291,6 +297,7 @@ async function init(){
   els.fromResumoBtn?.addEventListener("click", () => generateBlocosFromResumo());
   els.btnSaveHomeBanner?.addEventListener("click", handleSaveHomeBanner);
   els.btnSavePesquisaBanner?.addEventListener("click", handleSavePesquisaBanner);
+  els.btnSaveSiteLogo?.addEventListener("click", handleSaveSiteLogo);
   els.btnSaveFavicon?.addEventListener("click", handleSaveFavicon);
 
   els.form?.addEventListener("input", (event) => {
@@ -2035,6 +2042,61 @@ function setPreview(imgEl, url){
   }
   imgEl.style.display = "block";
   imgEl.src = url;
+}
+
+async function loadSiteLogoPreview(){
+  try {
+    const { data, error } = await state.supabase
+      .from("site_config")
+      .select("value")
+      .eq("key", "site_logo_url")
+      .limit(1)
+      .maybeSingle();
+
+    if (error) return;
+    const url = data?.value || "";
+    if (els.siteLogoUrl) els.siteLogoUrl.value = url;
+    setPreview(els.siteLogoPreview, url);
+    setBannerMsg(
+      els.siteLogoMsg,
+      url ? "Logo atual carregado ✅" : "Nenhum logo personalizado definido ainda.",
+      true
+    );
+  } catch {}
+}
+
+async function handleSaveSiteLogo(){
+  hideAlert();
+  try {
+    if (!state.session) throw new Error("Faça login para salvar.");
+    const file = els.siteLogoFile?.files?.[0];
+    const urlInput = (els.siteLogoUrl?.value || "").trim();
+
+    let finalUrl = urlInput;
+
+    if (file) {
+      finalUrl = await maybeUploadFile(file, "site/logo");
+      if (els.siteLogoUrl) els.siteLogoUrl.value = finalUrl;
+    }
+
+    if (!finalUrl) throw new Error("Envie um arquivo ou informe uma URL.");
+
+    const { error } = await state.supabase
+      .from("site_config")
+      .upsert({ key: "site_logo_url", value: finalUrl }, { onConflict: "key" });
+
+    if (error) throw error;
+
+    setPreview(els.siteLogoPreview, finalUrl);
+    setBannerMsg(els.siteLogoMsg, "Logo salvo ✅", true);
+    showAlert("ok", "Logo do site salvo ✅");
+  } catch (err) {
+    console.error(err);
+    setBannerMsg(els.siteLogoMsg, "Erro: " + friendlyError(err), false);
+    showAlert("err", "Erro: " + friendlyError(err));
+  } finally {
+    if (els.siteLogoFile) els.siteLogoFile.value = "";
+  }
 }
 
 async function loadFaviconPreview(){

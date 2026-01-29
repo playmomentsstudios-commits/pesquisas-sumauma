@@ -69,6 +69,15 @@ function initHeaderSearch(){
 
 
 setYear();
+(async () => {
+  try {
+    const logoUrl = await getSiteConfig("site_logo_url");
+    const img = document.getElementById("siteLogoImg");
+    if (img && logoUrl) img.src = logoUrl;
+  } catch (e) {
+    console.warn("[LOGO] falhou:", e?.message || e);
+  }
+})();
 const headerLogo = document.querySelector(".header-logo");
 if (headerLogo) headerLogo.setAttribute("href", withBase("/"));
 initHeaderSearch();
