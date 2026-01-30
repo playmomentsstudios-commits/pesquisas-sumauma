@@ -313,35 +313,240 @@ export async function renderAppearanceFichaTecnica(container){
 
     if (idx === 5) {
       const b = ft.linkBtn || {};
+      const bgHex = b.bgHex || "#ffffff";
+      const bgAlpha = b.bgAlpha ?? 12;
+      const borderHex = b.borderHex || "#ffffff";
+      const borderAlpha = b.borderAlpha ?? 20;
+      const borderW = b.borderW ?? 1;
       view.innerHTML = `
-        <h3>Botão Link</h3>
-        <div class="adm-grid">
-          <label class="adm-field"><span>BG</span><input type="text" id="b_bg" value="${b.bg || "rgba(0,0,0,0.06)"}"></label>
-          <label class="adm-field"><span>Borda</span><input type="text" id="b_bd" value="${b.border || "1px solid rgba(0,0,0,0.10)"}"></label>
-          <label class="adm-field"><span>Cor</span><input type="color" id="b_c" value="${b.color || "#111111"}"></label>
-          <label class="adm-field"><span>Radius</span><input type="number" id="b_r" value="${b.radius ?? 999}" min="0" max="999"></label>
-          <label class="adm-field"><span>Pad Y</span><input type="number" id="b_py" value="${b.padY ?? 8}" min="0" max="20"></label>
-          <label class="adm-field"><span>Pad X</span><input type="number" id="b_px" value="${b.padX ?? 12}" min="0" max="30"></label>
-          <label class="adm-field"><span>Fonte</span><input type="number" id="b_fs" value="${b.fontSize ?? 13}" min="10" max="20"></label>
-          <label class="adm-field"><span>Peso</span><input type="number" id="b_fw" value="${b.fontWeight ?? 800}" min="100" max="900" step="100"></label>
-          <label class="adm-field"><span>Hover BG</span><input type="text" id="b_h" value="${b.hoverBg || "rgba(0,0,0,0.10)"}"></label>
+        <div class="ui-card">
+          <div class="ui-head">
+            <div>
+              <h3>Botão Link</h3>
+              <p class="ui-muted">Ajuste o estilo do botão “Link” nos cards da Ficha Técnica.</p>
+            </div>
+
+            <div class="ui-preview">
+              <a class="ft-person-linkbtn" href="javascript:void(0)">Ver link</a>
+            </div>
+          </div>
+
+          <div class="ui-grid">
+            <div class="ui-control">
+              <label>Texto</label>
+              <div class="ui-row">
+                <input type="color" id="b_text_hex" value="${b.color || "#111111"}">
+                <input type="text" id="b_text_hex_txt" value="${b.color || "#111111"}" placeholder="#FFFFFF">
+              </div>
+            </div>
+
+            <div class="ui-control">
+              <label>Fundo</label>
+              <div class="ui-row">
+                <input type="color" id="b_bg_hex" value="${bgHex}">
+                <input type="text" id="b_bg_hex_txt" value="${bgHex}" placeholder="#FFFFFF">
+              </div>
+              <div class="ui-row">
+                <span class="ui-mini">Opacidade</span>
+                <input type="range" id="b_bg_a" min="0" max="100" value="${bgAlpha}">
+                <span class="ui-mini" id="b_bg_a_val">${bgAlpha}%</span>
+              </div>
+            </div>
+
+            <div class="ui-control">
+              <label>Borda</label>
+              <div class="ui-row">
+                <span class="ui-mini">Espessura</span>
+                <input type="range" id="b_bw" min="0" max="6" value="${borderW}">
+                <span class="ui-mini" id="b_bw_val">${borderW}px</span>
+              </div>
+              <div class="ui-row">
+                <input type="color" id="b_bd_hex" value="${borderHex}">
+                <input type="text" id="b_bd_hex_txt" value="${borderHex}" placeholder="#FFFFFF">
+              </div>
+              <div class="ui-row">
+                <span class="ui-mini">Opacidade</span>
+                <input type="range" id="b_bd_a" min="0" max="100" value="${borderAlpha}">
+                <span class="ui-mini" id="b_bd_a_val">${borderAlpha}%</span>
+              </div>
+            </div>
+
+            <div class="ui-control">
+              <label>Formato e tipografia</label>
+              <div class="ui-row">
+                <span class="ui-mini">Radius</span>
+                <input type="range" id="b_r" min="0" max="999" value="${b.radius ?? 999}">
+                <span class="ui-mini" id="b_r_val">${b.radius ?? 999}</span>
+              </div>
+
+              <div class="ui-row">
+                <span class="ui-mini">Tamanho</span>
+                <input type="range" id="b_fs" min="10" max="20" value="${b.fontSize ?? 13}">
+                <span class="ui-mini" id="b_fs_val">${b.fontSize ?? 13}px</span>
+              </div>
+
+              <div class="ui-row">
+                <span class="ui-mini">Peso</span>
+                <input type="range" id="b_fw" min="300" max="900" step="100" value="${b.fontWeight ?? 800}">
+                <span class="ui-mini" id="b_fw_val">${b.fontWeight ?? 800}</span>
+              </div>
+
+              <div class="ui-row">
+                <span class="ui-mini">Padding Y</span>
+                <input type="range" id="b_py" min="0" max="18" value="${b.padY ?? 8}">
+                <span class="ui-mini" id="b_py_val">${b.padY ?? 8}px</span>
+              </div>
+
+              <div class="ui-row">
+                <span class="ui-mini">Padding X</span>
+                <input type="range" id="b_px" min="0" max="28" value="${b.padX ?? 12}">
+                <span class="ui-mini" id="b_px_val">${b.padX ?? 12}px</span>
+              </div>
+            </div>
+
+            <div class="ui-control ui-full">
+              <label>Preset rápido</label>
+              <div class="ui-presets">
+                <button class="ui-preset" data-preset="inst">Institucional (verde)</button>
+                <button class="ui-preset" data-preset="brown">Marrom + branco</button>
+                <button class="ui-preset" data-preset="dark">Dark elegante</button>
+                <button class="ui-preset" data-preset="clean">Clean</button>
+              </div>
+            </div>
+          </div>
         </div>
       `;
-      const bind = () => {
+
+      const clampHex = (value, fallback) => {
+        const trimmed = (value || "").trim();
+        return /^#([0-9a-fA-F]{6})$/.test(trimmed) ? trimmed : fallback;
+      };
+
+      const hexToRgba = (hex, alphaPct) => {
+        const cleaned = hex.replace("#", "");
+        const r = Number.parseInt(cleaned.slice(0, 2), 16);
+        const g = Number.parseInt(cleaned.slice(2, 4), 16);
+        const b = Number.parseInt(cleaned.slice(4, 6), 16);
+        const alpha = Math.max(0, Math.min(100, Number(alphaPct))) / 100;
+        return `rgba(${r},${g},${b},${alpha.toFixed(2)})`;
+      };
+
+      const sync = () => {
+        const textHex = clampHex(
+          view.querySelector("#b_text_hex_txt").value,
+          view.querySelector("#b_text_hex").value
+        );
+        view.querySelector("#b_text_hex").value = textHex;
+        view.querySelector("#b_text_hex_txt").value = textHex;
+
+        const bgHexValue = clampHex(
+          view.querySelector("#b_bg_hex_txt").value,
+          view.querySelector("#b_bg_hex").value
+        );
+        view.querySelector("#b_bg_hex").value = bgHexValue;
+        view.querySelector("#b_bg_hex_txt").value = bgHexValue;
+
+        const borderHexValue = clampHex(
+          view.querySelector("#b_bd_hex_txt").value,
+          view.querySelector("#b_bd_hex").value
+        );
+        view.querySelector("#b_bd_hex").value = borderHexValue;
+        view.querySelector("#b_bd_hex_txt").value = borderHexValue;
+
+        const bgA = Number(view.querySelector("#b_bg_a").value);
+        const bdA = Number(view.querySelector("#b_bd_a").value);
+        const bw = Number(view.querySelector("#b_bw").value);
+
+        const r = Number(view.querySelector("#b_r").value);
+        const fs = Number(view.querySelector("#b_fs").value);
+        const fw = Number(view.querySelector("#b_fw").value);
+        const py = Number(view.querySelector("#b_py").value);
+        const px = Number(view.querySelector("#b_px").value);
+
+        view.querySelector("#b_bg_a_val").textContent = `${bgA}%`;
+        view.querySelector("#b_bd_a_val").textContent = `${bdA}%`;
+        view.querySelector("#b_bw_val").textContent = `${bw}px`;
+        view.querySelector("#b_r_val").textContent = `${r}`;
+        view.querySelector("#b_fs_val").textContent = `${fs}px`;
+        view.querySelector("#b_fw_val").textContent = `${fw}`;
+        view.querySelector("#b_py_val").textContent = `${py}px`;
+        view.querySelector("#b_px_val").textContent = `${px}px`;
+
         ft.linkBtn = {
-          bg: view.querySelector("#b_bg").value,
-          border: view.querySelector("#b_bd").value,
-          color: view.querySelector("#b_c").value,
-          radius: Number(view.querySelector("#b_r").value),
-          padY: Number(view.querySelector("#b_py").value),
-          padX: Number(view.querySelector("#b_px").value),
-          fontSize: Number(view.querySelector("#b_fs").value),
-          fontWeight: Number(view.querySelector("#b_fw").value),
-          hoverBg: view.querySelector("#b_h").value
+          bgHex: bgHexValue,
+          bgAlpha: bgA,
+          borderHex: borderHexValue,
+          borderAlpha: bdA,
+          borderW: bw,
+          color: textHex,
+          radius: r,
+          fontSize: fs,
+          fontWeight: fw,
+          padY: py,
+          padX: px,
+          bg: hexToRgba(bgHexValue, bgA),
+          border: `${bw}px solid ${hexToRgba(borderHexValue, bdA)}`,
+          hoverBg: hexToRgba(bgHexValue, Math.min(bgA + 8, 100))
         };
+
         preview();
       };
-      view.querySelectorAll("input").forEach((i) => i.addEventListener("input", bind));
+
+      view.querySelectorAll(".ui-preset").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const preset = btn.dataset.preset;
+          if (preset === "inst") {
+            view.querySelector("#b_bg_hex").value = "#0f3d2e";
+            view.querySelector("#b_bg_hex_txt").value = "#0f3d2e";
+            view.querySelector("#b_bg_a").value = 12;
+            view.querySelector("#b_text_hex").value = "#0f3d2e";
+            view.querySelector("#b_text_hex_txt").value = "#0f3d2e";
+            view.querySelector("#b_bd_hex").value = "#0f3d2e";
+            view.querySelector("#b_bd_hex_txt").value = "#0f3d2e";
+            view.querySelector("#b_bd_a").value = 25;
+            view.querySelector("#b_bw").value = 1;
+          }
+          if (preset === "brown") {
+            view.querySelector("#b_bg_hex").value = "#5a2a12";
+            view.querySelector("#b_bg_hex_txt").value = "#5a2a12";
+            view.querySelector("#b_bg_a").value = 14;
+            view.querySelector("#b_text_hex").value = "#ffffff";
+            view.querySelector("#b_text_hex_txt").value = "#ffffff";
+            view.querySelector("#b_bd_hex").value = "#ffffff";
+            view.querySelector("#b_bd_hex_txt").value = "#ffffff";
+            view.querySelector("#b_bd_a").value = 18;
+            view.querySelector("#b_bw").value = 1;
+          }
+          if (preset === "dark") {
+            view.querySelector("#b_bg_hex").value = "#000000";
+            view.querySelector("#b_bg_hex_txt").value = "#000000";
+            view.querySelector("#b_bg_a").value = 16;
+            view.querySelector("#b_text_hex").value = "#ffffff";
+            view.querySelector("#b_text_hex_txt").value = "#ffffff";
+            view.querySelector("#b_bd_hex").value = "#ffffff";
+            view.querySelector("#b_bd_hex_txt").value = "#ffffff";
+            view.querySelector("#b_bd_a").value = 18;
+            view.querySelector("#b_bw").value = 1;
+          }
+          if (preset === "clean") {
+            view.querySelector("#b_bg_hex").value = "#ffffff";
+            view.querySelector("#b_bg_hex_txt").value = "#ffffff";
+            view.querySelector("#b_bg_a").value = 0;
+            view.querySelector("#b_text_hex").value = "#111111";
+            view.querySelector("#b_text_hex_txt").value = "#111111";
+            view.querySelector("#b_bd_hex").value = "#111111";
+            view.querySelector("#b_bd_hex_txt").value = "#111111";
+            view.querySelector("#b_bd_a").value = 12;
+            view.querySelector("#b_bw").value = 1;
+          }
+          sync();
+        });
+      });
+
+      view.querySelectorAll("input").forEach((el) => el.addEventListener("input", sync));
+      view.querySelectorAll('input[type="text"]').forEach((el) => el.addEventListener("change", sync));
+
+      sync();
       return;
     }
 
