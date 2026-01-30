@@ -952,61 +952,23 @@ export async function renderAppearanceFichaTecnica(container) {
         }
       };
 
-      const sync = () => {
-        const b2 = ft.linkBtn || {};
-        const bgA = Number(view.querySelector('#btn_bg_a').value);
-        const bdA = Number(view.querySelector('#btn_bd_a').value);
-        const bw = Number(view.querySelector('#btn_bw').value);
-        const r = Number(view.querySelector('#btn_r').value);
-        const fs = Number(view.querySelector('#btn_fs').value);
-        const fw = Number(view.querySelector('#btn_fw').value);
-        const py = Number(view.querySelector('#btn_py').value);
-        const px = Number(view.querySelector('#btn_px').value);
 
-        view.querySelector('#btn_bg_a_val').textContent = `${bgA}%`;
-        view.querySelector('#btn_bd_a_val').textContent = `${bdA}%`;
-        view.querySelector('#btn_bw_val').textContent = `${bw}px`;
-        view.querySelector('#btn_r_val').textContent = `${r}`;
-        view.querySelector('#btn_fs_val').textContent = `${fs}px`;
-        view.querySelector('#btn_fw_val').textContent = `${fw}`;
-        view.querySelector('#btn_py_val').textContent = `${py}px`;
-        view.querySelector('#btn_px_val').textContent = `${px}px`;
-
-        const bgHex2 = b2.bgHex || bgHex;
-        const bdHex2 = b2.borderHex || bdHex;
-
-        ft.linkBtn = {
-          ...(b2),
-          bgAlpha: bgA,
-          borderAlpha: bdA,
-          borderW: bw,
           radius: r,
           fontSize: fs,
           fontWeight: fw,
           padY: py,
           padX: px,
 
-          // compat: strings usadas pelo front
-          bg: hexToRgba(bgHex2, bgA),
-          border: `${bw}px solid ${hexToRgba(bdHex2, bdA)}`,
-          hoverBg: hexToRgba(bgHex2, Math.min(bgA + 8, 100)),
         };
 
         preview();
       };
 
-      view.querySelectorAll('input[type="range"]').forEach((el) => el.addEventListener('input', sync));
-      view.querySelectorAll('.ui-preset').forEach((btn) => {
-        btn.addEventListener('click', () => {
-          setPreset(btn.dataset.preset);
-          // atualizar sliders conforme preset (mantém UX)
-          const b3 = ft.linkBtn || {};
-          view.querySelector('#btn_bg_a').value = b3.bgAlpha ?? 12;
-          view.querySelector('#btn_bd_a').value = b3.borderAlpha ?? 20;
-          view.querySelector('#btn_bw').value = b3.borderW ?? 1;
+
           sync();
         });
       });
+
 
       sync();
       return;
