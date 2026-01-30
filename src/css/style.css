@@ -1473,3 +1473,95 @@ body.no-scroll{ overflow:hidden; }
     border-radius: 14px;
   }
 }
+
+/* ===== Ficha Técnica (novo visual) ===== */
+.page-ficha-tecnica{
+  background:#ffffff;
+}
+
+/* mantém seções com fundo branco */
+.page-ficha-tecnica .ft-section{
+  background:#ffffff;
+}
+
+/* ---- Cards participantes (verde) ---- */
+.page-ficha-tecnica .ft-person-card.ft-card--participant{
+  display:block;                 /* funciona pra <a> e <div> */
+  text-decoration:none;
+  background:#0f3d2e;            /* verde */
+  border-radius:14px;
+  padding:14px;
+  box-shadow:0 6px 18px rgba(0,0,0,0.10);
+  transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
+}
+
+.page-ficha-tecnica .ft-person-card.ft-card--participant:hover{
+  transform: translateY(-3px);
+  box-shadow:0 10px 24px rgba(0,0,0,0.18);
+  filter: brightness(1.02);
+}
+
+/* conteúdo interno */
+.page-ficha-tecnica .ft-person-inner{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.page-ficha-tecnica .ft-person-photo{
+  width:64px;
+  height:64px;
+  border-radius:999px;
+  object-fit:cover;
+  border:2px solid rgba(255,255,255,0.22);
+  background: rgba(255,255,255,0.08);
+}
+
+.page-ficha-tecnica .ft-person-photo.placeholder{
+  display:inline-block;
+}
+
+/* Nome branco */
+.page-ficha-tecnica .ft-person-name{
+  margin:0;
+  color:#ffffff !important;
+  font-weight:900;
+}
+
+/* Função/Cargo amarelo */
+.page-ficha-tecnica .ft-person-role{
+  margin:4px 0 0 0;
+  color:#ffdd9a !important;      /* amarelo */
+  font-weight:800;
+}
+
+/* ---- Botão Link removido: se ainda existir algum resquício, esconde ---- */
+.page-ficha-tecnica .ft-person-linkbtn,
+.page-ficha-tecnica .ft-person-card-link{
+  display:none !important;
+}
+
+/* ---- Boxes de “Apresenta” e “Financiador” (cinza claro) ---- */
+.page-ficha-tecnica .ft-logo-box.ft-logo--apresenta,
+.page-ficha-tecnica .ft-logo-box.ft-logo--financiador{
+  background:#f2f2f2;
+  border:1px solid #e6e6e6;
+  border-radius:14px;
+}
+
+/* (opcional) deixar título dessas caixas um pouco mais escuro */
+.page-ficha-tecnica .ft-logo-box.ft-logo--apresenta h3,
+.page-ficha-tecnica .ft-logo-box.ft-logo--financiador h3{
+  color:#111111 !important;
+}
+
+/* mobile refinado */
+@media (max-width: 640px){
+  .page-ficha-tecnica .ft-person-photo{
+    width:56px;
+    height:56px;
+  }
+  .page-ficha-tecnica .ft-person-card.ft-card--participant{
+    padding:12px;
+  }
+}

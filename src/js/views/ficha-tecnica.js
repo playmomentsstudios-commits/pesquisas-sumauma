@@ -30,6 +30,36 @@ async function renderFichaTecnica(p){
 
   const financiadorLogo = financiador.logo || "";
   const financiadorNome = financiador.nome || "Financiador";
+  const renderPersonCard = (person = {}) => {
+    const name = person?.nome || person?.name || "";
+    const role = person?.funcao || person?.papel || person?.role || "";
+    const photo = person?.foto_url || person?.foto || person?.photo_url || "";
+    const link = person?.link || person?.url || person?.site || person?.instagram || "";
+
+    const safeName = escapeHtml(name);
+    const safeRole = escapeHtml(role);
+    const safePhoto = escapeHtml(photo);
+    const safeLink = escapeHtml(String(link).trim());
+    const inner = `
+      <div class="ft-person-inner">
+        ${
+          photo
+            ? `<img class="ft-person-photo" src="${safePhoto}" alt="${safeName}">`
+            : `<div class="ft-person-photo placeholder"></div>`
+        }
+        <div class="ft-person-text">
+          <h3 class="ft-person-name">${safeName}</h3>
+          ${role ? `<p class="ft-person-role">${safeRole}</p>` : ``}
+        </div>
+      </div>
+    `;
+
+    if (safeLink) {
+      return `<a class="ft-person-card ft-card--participant" href="${safeLink}" target="_blank" rel="noopener noreferrer">${inner}</a>`;
+    }
+
+    return `<div class="ft-person-card ft-card--participant">${inner}</div>`;
+  };
 
   return `
     <div class="page-ficha-tecnica">
@@ -37,12 +67,12 @@ async function renderFichaTecnica(p){
 
       <section class="ft-section">
       <div class="ft-logos-grid">
-        <div class="ft-logo-box">
+        <div class="ft-logo-box ft-logo--apresenta">
           <h3>${escapeHtml(realizacaoNome)}</h3>
           <img src="${escapeHtml(realizacaoLogo)}" alt="${escapeHtml(realizacaoNome)}">
         </div>
 
-        <div class="ft-logo-box">
+        <div class="ft-logo-box ft-logo--financiador">
           <h3>${escapeHtml(financiadorNome)}</h3>
           ${
             financiadorLogo
@@ -70,23 +100,7 @@ async function renderFichaTecnica(p){
       <div class="ft-people-grid">
         ${
           equipe.length
-            ? equipe.map(person => {
-                const foto = person.foto || withBase("/public/assets/img/equipe/placeholder.jpg");
-                const nome = person.nome || "";
-                const funcao = person.funcao || "";
-                const link = (person.link || "").trim();
-
-                const inner = `
-                  <img src="${escapeHtml(foto)}" alt="${escapeHtml(nome)}">
-                  <h3>${escapeHtml(nome)}</h3>
-                  <p>${escapeHtml(funcao)}</p>
-                  ${link ? `<span class="ft-person-linkbtn" aria-label="Abrir link do integrante">Link</span>` : ``}
-                `;
-
-                return link
-                  ? `<a class="ft-person-card ft-person-card-link" href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer">${inner}</a>`
-                  : `<div class="ft-person-card">${inner}</div>`;
-              }).join("")
+            ? equipe.map(renderPersonCard).join("")
             : `<div style="color:#666;">Nenhum integrante cadastrado.</div>`
         }
       </div>
