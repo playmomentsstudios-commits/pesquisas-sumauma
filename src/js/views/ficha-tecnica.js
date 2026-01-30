@@ -74,7 +74,6 @@ async function renderFichaTecnica(p){
                 const foto = person.foto || withBase("/public/assets/img/equipe/placeholder.jpg");
                 const nome = person.nome || "";
                 const funcao = person.funcao || "";
-                const link = (person.link || "").trim();
 
                 const inner = `
                   <img src="${escapeHtml(foto)}" alt="${escapeHtml(nome)}">
