@@ -1,4 +1,5 @@
 import { renderAppearanceTab } from "./admin-appearance.js";
+import { renderAppearanceFichaTecnica } from "./admin-appearance-ficha-tecnica.js";
 
 const state = {
   supabase: null,
@@ -112,6 +113,8 @@ const quickSyncFields = new Set([
   "realizacaoLogoUrl",
   "financiadorLogoUrl"
 ]);
+
+let appearanceActiveTab = "geral";
 
 function $(id){
   return document.getElementById(id);
@@ -252,8 +255,43 @@ function setMainTab(tab){
   }
 
   if (t === "aparencia" && els.mainPanelAparencia) {
-    void renderAppearanceTab(els.mainPanelAparencia);
+    renderAppearancePanel();
   }
+}
+
+function renderAppearancePanel(){
+  const panel = els.mainPanelAparencia;
+  if (!panel) return;
+
+  panel.innerHTML = `
+    <div class="adm-subtabs" id="appearanceSubtabs">
+      <button class="adm-subtab ${appearanceActiveTab === "geral" ? "active" : ""}" type="button" data-tab="geral">Geral</button>
+      <button class="adm-subtab ${appearanceActiveTab === "ficha-tecnica" ? "active" : ""}" type="button" data-tab="ficha-tecnica">Ficha Técnica</button>
+    </div>
+    <div id="appearanceView"></div>
+  `;
+
+  const view = panel.querySelector("#appearanceView");
+  const tabs = panel.querySelector("#appearanceSubtabs");
+
+  const renderTab = async (tab) => {
+    appearanceActiveTab = tab;
+    if (tab === "ficha-tecnica") {
+      await renderAppearanceFichaTecnica(view);
+      return;
+    }
+    await renderAppearanceTab(view);
+  };
+
+  tabs?.addEventListener("click", (event) => {
+    const btn = event.target.closest(".adm-subtab");
+    if (!btn) return;
+    tabs.querySelectorAll(".adm-subtab").forEach((item) => item.classList.remove("active"));
+    btn.classList.add("active");
+    void renderTab(btn.dataset.tab);
+  });
+
+  void renderTab(appearanceActiveTab);
 }
 
 function restoreMainTab(){

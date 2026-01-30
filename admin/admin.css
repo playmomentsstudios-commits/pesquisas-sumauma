@@ -915,3 +915,7 @@ textarea {
   .grid-2{ grid-template-columns: 1fr; }
 }
 .preview{ margin-top:10px; }
+
+.adm-subtabs{ display:flex; gap:8px; padding:10px 0; flex-wrap:wrap; }
+.adm-subtab{ padding:8px 12px; border-radius:999px; border:1px solid #ddd; background:#fff; cursor:pointer; }
+.adm-subtab.active{ background:#0f3d2e; color:#fff; border-color:#0f3d2e; }

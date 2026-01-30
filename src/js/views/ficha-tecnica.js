@@ -32,9 +32,10 @@ async function renderFichaTecnica(p){
   const financiadorNome = financiador.nome || "Financiador";
 
   return `
-    ${tabs(p.slug, "ficha-tecnica")}
+    <div class="page-ficha-tecnica">
+      ${tabs(p.slug, "ficha-tecnica")}
 
-    <section class="ft-section">
+      <section class="ft-section">
       <div class="ft-logos-grid">
         <div class="ft-logo-box">
           <h3>${escapeHtml(realizacaoNome)}</h3>
@@ -57,7 +58,7 @@ async function renderFichaTecnica(p){
       }
     </section>
 
-    <section class="ft-section">
+      <section class="ft-section">
       <h2>Equipe da Pesquisa</h2>
 
       ${
@@ -89,7 +90,8 @@ async function renderFichaTecnica(p){
             : `<div style="color:#666;">Nenhum integrante cadastrado.</div>`
         }
       </div>
-    </section>
+      </section>
+    </div>
   `;
 }
 
