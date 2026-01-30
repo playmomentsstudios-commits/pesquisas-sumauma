@@ -135,6 +135,7 @@ function mapPesquisaFromDb(row){
     slug: row.slug,
     capa: fixMaybeLocalUrl(row.capa_url || cfg.capa || ""),
     bannerUrl: fixMaybeLocalUrl(row.banner_url || cfg.bannerUrl || ""),
+    bannerCredito: String(cfg.bannerCredito || ""),
     descricaoCurta: row.descricao_curta || "",
     sinopse: row.sinopse || "",
     relatorioPdf: fixMaybeLocalUrl(row.relatorio_pdf_url || cfg.relatorioPdf || ""),
@@ -154,6 +155,7 @@ function normalizePesquisaPaths(p){
     capa: fixMaybeLocalUrl(p.capa || ""),
     relatorioPdf: fixMaybeLocalUrl(p.relatorioPdf || ""),
     leituraUrl: fixMaybeLocalUrl(p.leituraUrl || ""),
+    bannerCredito: String(p.bannerCredito || ""),
     mapa: {
       ...mapa,
       csvUrl: fixMaybeLocalDataUrl(mapa.csvUrl || "")

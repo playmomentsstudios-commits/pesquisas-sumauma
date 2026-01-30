@@ -384,6 +384,7 @@ function createEmptyPesquisa(){
     leitura_url: "",
     config_json: {
       mapa: {},
+      bannerCredito: "",
       pesquisaResumo: {},
       fichaTecnica: {
         coordenacao: "",
@@ -561,6 +562,7 @@ function fillForm(pesquisa){
   setValue("relatorioLeituraUrl", pesquisa.leitura_url || cfg.relatorioLeituraUrl || "");
   setValue("relatorioUrlConfirm", pesquisa.relatorio_pdf_url || cfg.relatorioPdf || "");
   setValue("relatorioLeituraUrlConfirm", pesquisa.leitura_url || cfg.relatorioLeituraUrl || "");
+  setValue("bannerCredito", cfg.bannerCredito || "");
 
   els.capaPreview.src = pesquisa.capa_url || cfg.capa || "";
   els.capaPreview.classList.toggle("hidden", !els.capaPreview.src);
@@ -570,6 +572,7 @@ function fillForm(pesquisa){
   const openFichaBtn = document.getElementById("btnOpenFicha");
   if (openFichaBtn) openFichaBtn.href = publicUrlFor(pesquisa.slug, "ficha-tecnica");
 
+  setValue("resumo", resumo.resumo || "");
   setValue("introTitulo", resumo.introducao?.titulo || "");
   setValue("introTexto", resumo.introducao?.texto || "");
   setValue("citacaoTexto", resumo.citacao?.texto || "");
@@ -1788,12 +1791,12 @@ function generateBlocosFromResumo(){
   });
 
   if (!blocos.length) {
-    showAlert("err", "Nada para gerar: preencha introdução/citação/tópicos no Resumo primeiro.");
+    showAlert("err", "Nada para gerar: preencha introdução/citação/tópicos na aba Pesquisa primeiro.");
     return;
   }
 
   renderBlocos(blocos);
-  showAlert("ok", "Blocos gerados a partir do Resumo ✅");
+  showAlert("ok", "Blocos gerados a partir da aba Pesquisa ✅");
   updatePesquisaPreview();
 }
 
@@ -1809,6 +1812,7 @@ async function updatePesquisaPreview(){
     const descricaoCurta = String(formData.get("descricaoCurta") || "").trim();
     const sinopse = String(formData.get("sinopse") || "").trim();
     const anoBase = String(formData.get("anoBase") || "").trim();
+    const resumoTexto = String(formData.get("resumo") || "").trim();
 
     const blocos = collectBlocosFromUI();
 
@@ -1820,7 +1824,9 @@ async function updatePesquisaPreview(){
       sinopse,
       capa: capaUrl,
       pesquisaConteudo: { blocos },
-      pesquisaResumo: {}
+      pesquisaResumo: {
+        resumo: resumoTexto
+      }
     };
 
     const mod = await import("../src/js/views/pesquisa.js");
@@ -1930,6 +1936,7 @@ async function readFormToPayload(){
 
 function buildConfigJsonFromTabs({ formData, csvFallback, topicos, equipe, realizacaoLogo, financiadorLogo, blocos }){
   return {
+    bannerCredito: String(formData.get("bannerCredito") || "").trim(),
     mapa: {
       csvUrl: csvFallback
     },
@@ -1937,6 +1944,7 @@ function buildConfigJsonFromTabs({ formData, csvFallback, topicos, equipe, reali
       blocos: Array.isArray(blocos) ? blocos : []
     },
     pesquisaResumo: {
+      resumo: String(formData.get("resumo") || "").trim(),
       introducao: {
         titulo: String(formData.get("introTitulo") || "").trim(),
         texto: String(formData.get("introTexto") || "").trim()

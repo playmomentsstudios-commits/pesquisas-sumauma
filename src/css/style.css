@@ -44,10 +44,29 @@ img{ display:block; max-width:100%; }
   align-items:stretch;
   justify-content:center;
   padding:18px 30px;
+  position:relative;
 }
 .header-logo img{
   height:72px;
   width:auto;
+}
+
+.header-credit{
+  position:absolute;
+  right:16px;
+  bottom:12px;
+  color:#fff;
+  font-size:12px;
+  line-height:1.4;
+  padding:4px 10px;
+  background:rgba(0,0,0,.45);
+  border-radius:12px;
+  max-width:60%;
+  text-align:right;
+}
+
+.header-credit:empty{
+  display:none;
 }
 
 /* MENU */
@@ -969,6 +988,13 @@ img{ display:block; max-width:100%; }
 /* ===========================
    Pesquisa (público) — Tópicos
    =========================== */
+
+.pesquisa-resumo{
+  margin: 8px 0 16px;
+  font-size: 15px;
+  line-height: 1.7;
+  color: #333;
+}
 
 .topic-list{
   margin-top: 12px;

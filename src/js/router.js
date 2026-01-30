@@ -22,6 +22,12 @@ function setHeaderBanner(url){
   }
 }
 
+function setHeaderCredit(text){
+  const credit = document.getElementById("headerCredit");
+  if (!credit) return;
+  const value = String(text || "").trim();
+  credit.textContent = value;
+}
 
 export async function initRouter(){
   const app = document.getElementById("app");
@@ -67,6 +73,7 @@ export async function initRouter(){
         dlog("view=home");
         const homeBanner = await getSiteConfig("home_banner_url");
         setHeaderBanner(homeBanner || null);
+        setHeaderCredit("");
         app.innerHTML = await renderHome();
         return;
       }
@@ -84,6 +91,7 @@ export async function initRouter(){
       }
       dlog("pesquisa encontrada?", true);
       setHeaderBanner(item.bannerUrl || null);
+      setHeaderCredit(item.bannerCredito || "");
 
       const viewNameMap = {
         mapa: "mapa",

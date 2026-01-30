@@ -57,6 +57,7 @@ function topicBlock(t, idx, total) {
 async function renderPesquisa(p) {
   const resumo = p?.pesquisaResumo || {};
   const topicos = Array.isArray(resumo.topicos) ? resumo.topicos : [];
+  const resumoTexto = resumo.resumo || "";
   const descricao = p.descricaoCurta || p.sinopse || "";
 
   return `
@@ -77,6 +78,8 @@ async function renderPesquisa(p) {
       <div class="page-head">
         <h3>Pesquisa</h3>
       </div>
+
+      ${resumoTexto ? `<p class="pesquisa-resumo">${escapeHtml(resumoTexto)}</p>` : ""}
 
       <div class="topic-list">
         ${
