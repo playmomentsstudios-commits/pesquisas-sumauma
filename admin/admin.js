@@ -615,7 +615,7 @@ function addTopicoItem(topico = {}){
       <input type="text" name="topicoImagemUrl" value="${escapeHtml(topico.imagem || "")}" placeholder="URL da imagem" />
     </label>
     <label>Créditos da imagem
-      <input type="text" name="topicoImagemCreditos" value="${escapeHtml(topico.imagem_creditos || "")}" placeholder="Ex: Foto: Nome do autor / Fonte" />
+      <input type="text" name="imagem_creditos" value="${escapeHtml(topico.imagem_creditos || "")}" placeholder="Ex: Foto: Nome do autor / Fonte" />
     </label>
     <button class="btn light" type="button" data-remove="1">Remover</button>
   `;
@@ -1433,7 +1433,7 @@ async function collectTopicos(slug){
     const titulo = item.querySelector("[name=topicoTitulo]").value.trim();
     const texto = item.querySelector("[name=topicoTexto]").value.trim();
     const urlInput = item.querySelector("[name=topicoImagemUrl]");
-    const creditos = item.querySelector("[name=topicoImagemCreditos]")?.value?.trim() || "";
+    const creditos = item.querySelector("[name=imagem_creditos]")?.value?.trim() || "";
     const file = item.querySelector("[name=topicoImagemFile]").files?.[0];
     const imageUrl = await maybeUploadFile(file, `pesquisas/${slug}/topicos/topico-${i + 1}`) || urlInput.value.trim();
     urlInput.value = imageUrl;
@@ -1776,7 +1776,7 @@ function generateBlocosFromResumo(){
     titulo: String(t.querySelector('[name="topicoTitulo"]')?.value || "").trim(),
     texto: String(t.querySelector('[name="topicoTexto"]')?.value || "").trim(),
     imagem: String(t.querySelector('[name="topicoImagemUrl"]')?.value || "").trim(),
-    imagem_creditos: String(t.querySelector('[name="topicoImagemCreditos"]')?.value || "").trim()
+    imagem_creditos: String(t.querySelector('[name="imagem_creditos"]')?.value || "").trim()
   })).filter((x) => x.titulo || x.texto || x.imagem);
 
   const blocos = [];
