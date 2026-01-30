@@ -49,7 +49,7 @@ async function renderResumoPesquisa(p){
     ${
       topicos.length
         ? topicos.map(t => `
-            ${t.imagem ? fullImg(t.imagem) : ""}
+            ${t.imagem ? fullImg(t.imagem, t.imagem_creditos) : ""}
             <section class="suma-section">
               <h2>${escapeHtml(t.titulo || "")}</h2>
               <p>${escapeHtml(t.texto || "")}</p>
@@ -65,9 +65,13 @@ async function renderResumoPesquisa(p){
   `;
 }
 
-function fullImg(src){
+function fullImg(src, creditos = ""){
   const s = escapeHtml(src);
-  return `<div class="suma-full-image" style="background-image:url('${s}')"></div>`;
+  const creditosTexto = escapeHtml(creditos || "");
+  return `
+    <div class="suma-full-image" style="background-image:url('${s}')"></div>
+    ${creditosTexto ? `<small class="credito-imagem">${creditosTexto}</small>` : ""}
+  `;
 }
 
 export default renderResumoPesquisa;

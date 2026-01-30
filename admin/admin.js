@@ -614,6 +614,9 @@ function addTopicoItem(topico = {}){
     <label>Imagem<input type="file" name="topicoImagemFile" accept="image/*" />
       <input type="text" name="topicoImagemUrl" value="${escapeHtml(topico.imagem || "")}" placeholder="URL da imagem" />
     </label>
+    <label>Créditos da imagem
+      <input type="text" name="topicoImagemCreditos" value="${escapeHtml(topico.imagem_creditos || "")}" placeholder="Ex: Foto: Nome do autor / Fonte" />
+    </label>
     <button class="btn light" type="button" data-remove="1">Remover</button>
   `;
   wrapper.querySelector("[data-remove]").addEventListener("click", () => wrapper.remove());
@@ -1430,10 +1433,11 @@ async function collectTopicos(slug){
     const titulo = item.querySelector("[name=topicoTitulo]").value.trim();
     const texto = item.querySelector("[name=topicoTexto]").value.trim();
     const urlInput = item.querySelector("[name=topicoImagemUrl]");
+    const creditos = item.querySelector("[name=topicoImagemCreditos]")?.value?.trim() || "";
     const file = item.querySelector("[name=topicoImagemFile]").files?.[0];
     const imageUrl = await maybeUploadFile(file, `pesquisas/${slug}/topicos/topico-${i + 1}`) || urlInput.value.trim();
     urlInput.value = imageUrl;
-    results.push({ titulo, texto, imagem: imageUrl });
+    results.push({ titulo, texto, imagem: imageUrl, imagem_creditos: creditos });
   }
   return results;
 }
@@ -1771,7 +1775,8 @@ function generateBlocosFromResumo(){
   const topicos = topicoEls.map((t) => ({
     titulo: String(t.querySelector('[name="topicoTitulo"]')?.value || "").trim(),
     texto: String(t.querySelector('[name="topicoTexto"]')?.value || "").trim(),
-    imagem: String(t.querySelector('[name="topicoImagemUrl"]')?.value || "").trim()
+    imagem: String(t.querySelector('[name="topicoImagemUrl"]')?.value || "").trim(),
+    imagem_creditos: String(t.querySelector('[name="topicoImagemCreditos"]')?.value || "").trim()
   })).filter((x) => x.titulo || x.texto || x.imagem);
 
   const blocos = [];

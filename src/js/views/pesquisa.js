@@ -25,6 +25,7 @@ function topicBlock(t, idx, total) {
   const titulo = escapeHtml(t?.titulo || t?.text || t?.texto || "");
   const desc = escapeHtml(t?.descricao || t?.resumo || t?.texto || "");
   const img = t?.imagem ? String(t.imagem) : "";
+  const creditos = escapeHtml(t?.imagem_creditos || "");
 
   const hasImg = Boolean(img);
   const showDividerImg = hasImg;
@@ -44,6 +45,7 @@ function topicBlock(t, idx, total) {
                 loading="lazy"
                 onerror="this.style.display='none'; this.closest('.topic-image-wrap') && (this.closest('.topic-image-wrap').style.display='none');"
               />
+              ${creditos ? `<small class="credito-imagem">${creditos}</small>` : ""}
             </div>
           `
           : ""
