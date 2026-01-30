@@ -1445,3 +1445,90 @@ body.no-scroll{ overflow:hidden; }
     line-height: 1;
   }
 }
+
+.page-ficha-tecnica .ft-section{
+  max-width: var(--ft-section-maxw);
+  background: var(--ft-section-bg);
+  border-radius: var(--ft-section-radius);
+  box-shadow: var(--ft-section-shadow);
+  padding: var(--ft-section-pad-y) var(--ft-section-pad-x);
+  margin: 0 auto;
+}
+.page-ficha-tecnica .ft-section + .ft-section{ margin-top: var(--ft-section-gap); }
+
+.page-ficha-tecnica .ft-section h2{
+  color: var(--ft-h2-color);
+  font-size: var(--ft-h2-size);
+  font-weight: var(--ft-h2-weight);
+  border-bottom: 2px solid var(--ft-h2-border);
+}
+
+.page-ficha-tecnica .ft-logos-grid{ gap: var(--ft-logos-gap); }
+.page-ficha-tecnica .ft-logo-box{ padding: var(--ft-logo-box-pad); }
+.page-ficha-tecnica .ft-logo-box h3{
+  color: var(--ft-logo-h3-color);
+  font-size: var(--ft-logo-h3-size);
+  font-weight: var(--ft-logo-h3-weight);
+}
+.page-ficha-tecnica .ft-logo-box img{ max-width: var(--ft-logo-img-maxw); }
+
+.page-ficha-tecnica .ft-team-text{
+  color: var(--ft-team-color);
+  font-size: var(--ft-team-font);
+  line-height: var(--ft-team-lh);
+}
+
+.page-ficha-tecnica .ft-person-card{
+  background: var(--ft-card-bg);
+  border-radius: var(--ft-card-radius);
+  box-shadow: var(--ft-card-shadow);
+}
+.page-ficha-tecnica .ft-person-card h3{
+  color: var(--ft-name-color);
+  font-size: var(--ft-name-size);
+  font-weight: var(--ft-name-weight);
+}
+.page-ficha-tecnica .ft-person-card p{
+  color: var(--ft-role-color);
+  font-size: var(--ft-role-size);
+  font-weight: var(--ft-role-weight);
+}
+.page-ficha-tecnica .ft-person-card:hover{
+  transform: translateY(calc(var(--ft-hover-lift) * -1));
+  box-shadow: var(--ft-hover-shadow);
+}
+.page-ficha-tecnica .ft-person-card img{
+  width: var(--ft-photo-size);
+  height: var(--ft-photo-size);
+  border-radius: var(--ft-photo-radius);
+  border: var(--ft-photo-border);
+}
+
+.page-ficha-tecnica .ft-person-linkbtn{
+  background: var(--ft-link-bg);
+  border: var(--ft-link-border);
+  color: var(--ft-link-color);
+  border-radius: var(--ft-link-radius);
+  padding: var(--ft-link-pad-y) var(--ft-link-pad-x);
+  font-size: var(--ft-link-font);
+  font-weight: var(--ft-link-weight);
+}
+.page-ficha-tecnica .ft-person-card-link:hover .ft-person-linkbtn{
+  background: var(--ft-link-hover-bg);
+}
+
+@media (max-width: 640px){
+  .page-ficha-tecnica .ft-section{
+    padding: var(--ft-m-pad-y) var(--ft-m-pad-x);
+  }
+  .page-ficha-tecnica .ft-section h2{
+    font-size: var(--ft-m-h2-size);
+  }
+  .page-ficha-tecnica .ft-logo-box img{
+    max-width: var(--ft-m-logo-img-maxw);
+  }
+  .page-ficha-tecnica .ft-person-card img{
+    width: var(--ft-m-photo-size);
+    height: var(--ft-m-photo-size);
+  }
+}
