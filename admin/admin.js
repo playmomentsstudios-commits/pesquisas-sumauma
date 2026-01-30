@@ -468,7 +468,19 @@ async function handleLogin(e){
   const email = formData.get("email");
   const password = formData.get("password");
 
-  const { error } = await state.supabase.auth.signInWithPassword({ email, password });
+  const safeEmail = typeof email === "string" ? email.trim() : "";
+  const safePassword = typeof password === "string" ? password : "";
+
+  if (!safeEmail || !safePassword) {
+    els.loginError.textContent = "Informe e-mail e senha para continuar.";
+    setDiag("Falha login: campos obrigatórios vazios.");
+    return;
+  }
+
+  const { data, error } = await state.supabase.auth.signInWithPassword({
+    email: safeEmail,
+    password: safePassword
+  });
   if (error) {
     console.error("[Login] erro:", error);
     const status = error.status ? ` (status ${error.status})` : "";
@@ -476,9 +488,14 @@ async function handleLogin(e){
     setDiag(`Falha login: ${error.message}`);
     return;
   }
+  if (data?.session) {
+    setSession(data.session);
+  } else {
+    const sess = await state.supabase.auth.getSession();
+    setSession(sess?.data?.session ?? null);
+    console.log("[Session]", sess);
+  }
   setDiag("Login OK: sessão ativa.");
-  const sess = await state.supabase.auth.getSession();
-  console.log("[Session]", sess);
 }
 
 async function handleLogout(){
