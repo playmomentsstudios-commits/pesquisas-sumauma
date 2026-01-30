@@ -1014,6 +1014,14 @@ img{ display:block; max-width:100%; }
   object-fit: cover;
 }
 
+.credito-imagem{
+  display: block;
+  font-size: 12px;
+  color: #666;
+  margin-top: 4px;
+  font-style: italic;
+}
+
 .topic-sep{
   margin-top: 14px;
   height: 1px;
