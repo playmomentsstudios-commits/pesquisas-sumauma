@@ -465,9 +465,15 @@ img{ display:block; max-width:100%; }
   align-items:center;
   text-align:center;
 }
+.ft-logo-box{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:15px;
+}
 .ft-logo-box h3{
   color:var(--green);
-  margin:0 0 15px;
+  margin:0;
 }
 .ft-logo-box img{ max-width:240px; }
 
@@ -496,7 +502,11 @@ img{ display:block; max-width:100%; }
   margin:0 auto 15px;
   border:3px solid rgba(255,255,255,0.25);
 }
-.ft-person-card h3{ margin:10px 0 5px; font-size:18px; }
+.ft-person-card h3{
+  margin:10px 0 5px;
+  font-size:18px;
+  color:#fff;
+}
 .ft-person-card p{ margin:0; font-size:14px; color:var(--gold); }
 
 @media(max-width:768px){
@@ -1363,20 +1373,6 @@ body.no-scroll{ overflow:hidden; }
 
 .ft-person-card-link{
   cursor: pointer;
-}
-
-.ft-person-linkbtn{
-  margin-top: 12px;
-  display: inline-block;
-  padding: 8px 12px;
-  border-radius: 999px;
-  background: rgba(0,0,0,0.06);
-  border: 1px solid rgba(0,0,0,0.10);
-  font-size: 13px;
-}
-
-.ft-person-card-link:hover .ft-person-linkbtn{
-  background: rgba(0,0,0,0.10);
 }
 
 /* ============================================================

@@ -79,7 +79,6 @@ async function renderFichaTecnica(p){
                   <img src="${escapeHtml(foto)}" alt="${escapeHtml(nome)}">
                   <h3>${escapeHtml(nome)}</h3>
                   <p>${escapeHtml(funcao)}</p>
-                  ${link ? `<span class="ft-person-linkbtn" aria-label="Abrir link do integrante">Link</span>` : ``}
                 `;
 
                 return link
