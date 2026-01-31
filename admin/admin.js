@@ -1,3 +1,5 @@
+import { fetchPesquisaConteudoKV, montarPesquisaResumo } from "../src/js/lib/pesquisaConteudoKV.js";
+
 const state = {
   supabase: null,
   session: null,
@@ -359,6 +361,74 @@ function errToObj(error){
   };
 }
 
+async function upsertKV(supabase, pesquisaId, key, value, imagem_creditos = null) {
+  const { data: exist, error: e1 } = await supabase
+    .from("pesquisa_conteudo")
+    .select("id")
+    .eq("pesquisa_id", pesquisaId)
+    .eq("key", key)
+    .limit(1);
+
+  if (e1) throw e1;
+
+  if (exist && exist.length) {
+    const { error: e2 } = await supabase
+      .from("pesquisa_conteudo")
+      .update({ value, imagem_creditos })
+      .eq("id", exist[0].id);
+    if (e2) throw e2;
+  } else {
+    const { error: e3 } = await supabase
+      .from("pesquisa_conteudo")
+      .insert({ pesquisa_id: pesquisaId, key, value, imagem_creditos });
+    if (e3) throw e3;
+  }
+}
+
+async function persistPesquisaResumoKV(supabase, pesquisaId, pesquisaResumo) {
+  if (!supabase || !pesquisaId) return;
+
+  const resumo = String(pesquisaResumo?.resumo || "");
+  const introducao = pesquisaResumo?.introducao || {};
+  const citacao = pesquisaResumo?.citacao || {};
+  const topicos = Array.isArray(pesquisaResumo?.topicos) ? pesquisaResumo.topicos : [];
+
+  const prCompleto = {
+    resumo,
+    introducao: {
+      titulo: String(introducao?.titulo || ""),
+      texto: String(introducao?.texto || "")
+    },
+    citacao: {
+      texto: String(citacao?.texto || ""),
+      autor: String(citacao?.autor || "")
+    },
+    topicos
+  };
+
+  await upsertKV(supabase, pesquisaId, "resumo", resumo);
+  await upsertKV(supabase, pesquisaId, "introducao_titulo", prCompleto.introducao.titulo);
+  await upsertKV(supabase, pesquisaId, "introducao_texto", prCompleto.introducao.texto);
+  await upsertKV(supabase, pesquisaId, "citacao_texto", prCompleto.citacao.texto);
+  await upsertKV(supabase, pesquisaId, "citacao_autor", prCompleto.citacao.autor);
+  await upsertKV(supabase, pesquisaId, "pesquisaResumo.topicos", JSON.stringify(topicos));
+  await upsertKV(supabase, pesquisaId, "pesquisaResumo", JSON.stringify(prCompleto));
+
+  for (let i = 0; i < topicos.length; i++) {
+    const n = String(i + 1).padStart(2, "0");
+    const tp = topicos[i] || {};
+    await upsertKV(supabase, pesquisaId, `topico_${n}_titulo`, String(tp.titulo || ""));
+    await upsertKV(supabase, pesquisaId, `topico_${n}_texto`, String(tp.texto || ""));
+    await upsertKV(
+      supabase,
+      pesquisaId,
+      `topico_${n}_imagem_url`,
+      String(tp.imagem || ""),
+      String(tp.imagem_creditos || "")
+    );
+  }
+}
+
 function isRlsError(error, lowerMsg){
   const lower = lowerMsg ?? String(error?.message || "").toLowerCase();
   return error?.code === "42501" || error?.status === 401 || error?.status === 403 || lower.includes("permission") || lower.includes("rls");
@@ -504,7 +574,7 @@ function clearForm(){
   adminMsg("");
 }
 
-function loadResearchToForm(pesquisa){
+async function loadResearchToForm(pesquisa){
   state.current = pesquisa;
   try { loadPesquisaBannerPreview(); } catch {}
 
@@ -514,6 +584,7 @@ function loadResearchToForm(pesquisa){
   els.formTitle.textContent = pesquisa?.id ? "Editar pesquisa" : "Nova pesquisa";
   els.deleteBtn.classList.toggle("hidden", !pesquisa?.id);
   fillForm(pesquisa);
+  await loadPesquisaResumoFromKV(pesquisa?.id);
   setTab("config", { persist: false });
   loadPontos();
   setSaveMsg(pesquisa?.id ? `Editando: ${pesquisa.slug || ""}` : "", true);
@@ -526,10 +597,10 @@ async function refreshListAndSelect(selectId = null){
     renderResearchList(rows);
     if (selectId) {
       const selected = rows.find((row) => String(row.id) === String(selectId));
-      if (selected) loadResearchToForm(selected);
+      if (selected) await loadResearchToForm(selected);
     } else if (currentResearchId) {
       const selected = rows.find((row) => String(row.id) === String(currentResearchId));
-      if (selected) loadResearchToForm(selected);
+      if (selected) await loadResearchToForm(selected);
     } else {
       els.form.classList.add("hidden");
       els.emptyState.classList.remove("hidden");
@@ -590,6 +661,26 @@ function fillForm(pesquisa){
   renderEquipe(ficha.equipe || []);
   renderBlocos(conteudo.blocos || []);
   if (getActiveTab() === "pesquisa-editorial") updatePesquisaPreview();
+}
+
+async function loadPesquisaResumoFromKV(pesquisaId){
+  if (!state.supabase || !pesquisaId) return;
+  try {
+    const rows = await fetchPesquisaConteudoKV(state.supabase, pesquisaId);
+    if (!rows.length) return;
+    const pr = montarPesquisaResumo(rows);
+
+    setValue("resumo", pr.resumo || "");
+    setValue("introTitulo", pr.introducao?.titulo || "");
+    setValue("introTexto", pr.introducao?.texto || "");
+    setValue("citacaoTexto", pr.citacao?.texto || "");
+    setValue("citacaoAutor", pr.citacao?.autor || "");
+    renderTopicos(Array.isArray(pr.topicos) ? pr.topicos : []);
+
+    if (getActiveTab() === "pesquisa-editorial") updatePesquisaPreview();
+  } catch (e) {
+    console.error("[ADM] Erro ao carregar pesquisa_conteudo:", e);
+  }
 }
 
 function setValue(name, value){
@@ -792,6 +883,13 @@ async function savePesquisa(){
       setSaveDebug({ action: "update", id: currentId, payload, error: res.error });
       return;
     }
+  }
+
+  try {
+    const pesquisaId = window.currentResearchId || currentResearchId;
+    await persistPesquisaResumoKV(client, pesquisaId, payload?.config_json?.pesquisaResumo || {});
+  } catch (error) {
+    console.error("[ADM] Erro ao salvar pesquisa_conteudo:", error);
   }
 
   setSaveMsg(isNew ? "Pesquisa criada ✅" : "Pesquisa atualizada ✅", true);
@@ -1989,7 +2087,7 @@ document.addEventListener("click", async (event) => {
       const selected = researchCache.find((row) => String(row.id) === String(id));
       if (selected) {
         setCurrentResearchId(selected.id);
-        loadResearchToForm(selected);
+        await loadResearchToForm(selected);
         restoreLastTab("config");
       }
     }
