@@ -1,3 +1,5 @@
+import { getPesquisaConteudoKV, buildPesquisaResumoFromKV, upsertKV } from "../src/data/pesquisaConteudoKV.js";
+
 const state = {
   supabase: null,
   session: null,
@@ -504,7 +506,7 @@ function clearForm(){
   adminMsg("");
 }
 
-function loadResearchToForm(pesquisa){
+async function loadResearchToForm(pesquisa){
   state.current = pesquisa;
   try { loadPesquisaBannerPreview(); } catch {}
 
@@ -513,11 +515,25 @@ function loadResearchToForm(pesquisa){
   showForm();
   els.formTitle.textContent = pesquisa?.id ? "Editar pesquisa" : "Nova pesquisa";
   els.deleteBtn.classList.toggle("hidden", !pesquisa?.id);
-  fillForm(pesquisa);
+  const resumoKV = await loadPesquisaResumoKV(pesquisa?.id);
+  fillForm(pesquisa, resumoKV);
   setTab("config", { persist: false });
   loadPontos();
   setSaveMsg(pesquisa?.id ? `Editando: ${pesquisa.slug || ""}` : "", true);
   adminMsg(pesquisa?.id ? `Editando: ${pesquisa.slug || ""}` : "", "muted");
+}
+
+async function loadPesquisaResumoKV(pesquisaId){
+  const client = window.supabaseClient;
+  if (!client || !pesquisaId) return null;
+  try {
+    const rows = await getPesquisaConteudoKV(client, pesquisaId);
+    if (!rows.length) return null;
+    return buildPesquisaResumoFromKV(rows);
+  } catch (error) {
+    console.warn("[ADMIN] Falha ao carregar pesquisa_conteudo:", error?.message || error);
+    return null;
+  }
 }
 
 async function refreshListAndSelect(selectId = null){
@@ -526,10 +542,10 @@ async function refreshListAndSelect(selectId = null){
     renderResearchList(rows);
     if (selectId) {
       const selected = rows.find((row) => String(row.id) === String(selectId));
-      if (selected) loadResearchToForm(selected);
+      if (selected) await loadResearchToForm(selected);
     } else if (currentResearchId) {
       const selected = rows.find((row) => String(row.id) === String(currentResearchId));
-      if (selected) loadResearchToForm(selected);
+      if (selected) await loadResearchToForm(selected);
     } else {
       els.form.classList.add("hidden");
       els.emptyState.classList.remove("hidden");
@@ -542,10 +558,10 @@ async function refreshListAndSelect(selectId = null){
   }
 }
 
-function fillForm(pesquisa){
+function fillForm(pesquisa, resumoKV = null){
   const cfg = pesquisa.config_json || {};
   const ficha = cfg.fichaTecnica || {};
-  const resumo = cfg.pesquisaResumo || {};
+  const resumo = resumoKV || cfg.pesquisaResumo || {};
   const conteudo = cfg.pesquisaConteudo || {};
   const mapa = cfg.mapa || {};
 
@@ -792,6 +808,16 @@ async function savePesquisa(){
       setSaveDebug({ action: "update", id: currentId, payload, error: res.error });
       return;
     }
+  }
+
+  const savedId = window.currentResearchId || currentResearchId;
+  try {
+    await persistPesquisaResumoKV(savedId, payload?.config_json?.pesquisaResumo);
+  } catch (error) {
+    showAlert("err", `Erro ao salvar conteúdo da pesquisa: ${friendlyError(error)}`);
+    setSaveDebug({ step: "pesquisa_conteudo", error: errToObj(error) });
+    adminMsg(`Erro ao salvar conteúdo: ${friendlyError(error)}`, "err");
+    return;
   }
 
   setSaveMsg(isNew ? "Pesquisa criada ✅" : "Pesquisa atualizada ✅", true);
@@ -1977,6 +2003,48 @@ function buildConfigJsonFromTabs({ formData, csvFallback, topicos, equipe, reali
   };
 }
 
+async function persistPesquisaResumoKV(pesquisaId, pesquisaResumo){
+  const client = window.supabaseClient;
+  if (!client || !pesquisaId) return;
+
+  const pr = {
+    resumo: String(pesquisaResumo?.resumo || ""),
+    introducao: {
+      titulo: String(pesquisaResumo?.introducao?.titulo || ""),
+      texto: String(pesquisaResumo?.introducao?.texto || "")
+    },
+    citacao: {
+      texto: String(pesquisaResumo?.citacao?.texto || ""),
+      autor: String(pesquisaResumo?.citacao?.autor || "")
+    },
+    topicos: Array.isArray(pesquisaResumo?.topicos)
+      ? pesquisaResumo.topicos.map((t) => ({
+        titulo: t?.titulo || "",
+        texto: t?.texto || "",
+        imagem: t?.imagem || t?.imagem_url || "",
+        imagem_creditos: t?.imagem_creditos || ""
+      }))
+      : []
+  };
+
+  await upsertKV(client, pesquisaId, "resumo", pr.resumo);
+  await upsertKV(client, pesquisaId, "introducao_titulo", pr.introducao.titulo);
+  await upsertKV(client, pesquisaId, "introducao_texto", pr.introducao.texto);
+  await upsertKV(client, pesquisaId, "citacao_texto", pr.citacao.texto);
+  await upsertKV(client, pesquisaId, "citacao_autor", pr.citacao.autor);
+
+  await upsertKV(client, pesquisaId, "pesquisaResumo.topicos", JSON.stringify(pr.topicos));
+  await upsertKV(client, pesquisaId, "pesquisaResumo", JSON.stringify(pr));
+
+  for (let i = 0; i < pr.topicos.length; i++) {
+    const n = String(i + 1).padStart(2, "0");
+    const topico = pr.topicos[i];
+    await upsertKV(client, pesquisaId, `topico_${n}_titulo`, topico.titulo || "");
+    await upsertKV(client, pesquisaId, `topico_${n}_texto`, topico.texto || "");
+    await upsertKV(client, pesquisaId, `topico_${n}_imagem_url`, topico.imagem || "", topico.imagem_creditos || "");
+  }
+}
+
 document.addEventListener("click", async (event) => {
   const btn = event.target?.closest("[data-act]");
   if (!btn) return;
@@ -1989,7 +2057,7 @@ document.addEventListener("click", async (event) => {
       const selected = researchCache.find((row) => String(row.id) === String(id));
       if (selected) {
         setCurrentResearchId(selected.id);
-        loadResearchToForm(selected);
+        await loadResearchToForm(selected);
         restoreLastTab("config");
       }
     }

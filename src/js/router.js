@@ -5,6 +5,7 @@ import renderPesquisa from "./views/pesquisa.js";
 import renderRelatorio from "./views/relatorio.js";
 import renderFichaTecnica from "./views/ficha-tecnica.js";
 import renderMapaPesquisa from "./views/mapa-pesquisa.js";
+import { getPesquisaConteudoKV, buildPesquisaResumoFromKV } from "../data/pesquisaConteudoKV.js";
 
 const DEBUG_ROUTER = true;
 function dlog(...args){
@@ -27,6 +28,21 @@ function setHeaderCredit(text){
   if (!credit) return;
   const value = String(text || "").trim();
   credit.textContent = value;
+}
+
+async function hydratePesquisaResumoFromKV(item){
+  const client = window?.supabaseClient || null;
+  const pesquisaId = item?.dbId || item?._dbId || item?.id;
+  if (!client || !pesquisaId) return item;
+  try {
+    const rows = await getPesquisaConteudoKV(client, pesquisaId);
+    if (rows.length) {
+      item.pesquisaResumo = buildPesquisaResumoFromKV(rows);
+    }
+  } catch (err) {
+    console.warn("[ROUTER] Falha ao carregar pesquisa_conteudo:", err?.message || err);
+  }
+  return item;
 }
 
 export async function initRouter(){
@@ -104,6 +120,7 @@ export async function initRouter(){
       console.log("[ROUTER] slug=", slug, "sub=", sub, "view=", viewName);
 
       if (sub === "pesquisa"){
+        await hydratePesquisaResumoFromKV(item);
         app.innerHTML = await renderPesquisa(item);
         return;
       }

@@ -30,7 +30,7 @@ async function renderResumoPesquisa(p){
 
     <section class="suma-section">
       <h1>${escapeHtml(intro.titulo || "A Pesquisa")}</h1>
-      <p>${escapeHtml(intro.texto || "Conteúdo da introdução ainda não definido no pesquisas.json.")}</p>
+      <p>${escapeHtml(intro.texto || "Conteúdo da introdução ainda não definido.")}</p>
     </section>
 
     ${
@@ -58,7 +58,7 @@ async function renderResumoPesquisa(p){
         : `
           <section class="suma-section">
             <h2>Conteúdo do resumo</h2>
-            <p>Nenhum tópico cadastrado em <b>pesquisaResumo.topicos</b> no pesquisas.json.</p>
+            <p>Nenhum tópico cadastrado em <b>pesquisaResumo.topicos</b>.</p>
           </section>
         `
     }
