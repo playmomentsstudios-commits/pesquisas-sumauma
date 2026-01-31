@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Painel Administrativo • Sumaúma Pesquisas</title>
     <link rel="stylesheet" href="./admin.css" />
+    <link rel="stylesheet" href="../src/css/responsivo-ui.css" />
   </head>
   <body>
     <div class="admin-shell">
@@ -37,7 +38,7 @@
           <p id="login-error" class="error"></p>
         </section>
 
-        <section id="admin-panel" class="hidden">
+        <section id="admin-panel" class="hidden adm-page">
           <!-- Abas principais (fora do editar pesquisa) -->
           <div class="main-tabs" id="main-tabs">
             <button class="main-tab active" type="button" id="mainTabPesquisas" data-main-tab="pesquisas">Pesquisas</button>
@@ -64,7 +65,7 @@
                 </div>
                 <div class="form-actions">
                   <button id="btn-delete" class="btn danger" type="button">Excluir</button>
-                  <button id="btnSalvar" class="btn primary" type="button">Salvar</button>
+                  <button id="btnSalvar" class="btn primary btn-primary" type="button">Salvar</button>
                 </div>
                 <div id="adminMsg" class="admin-msg"></div>
               </div>
@@ -75,7 +76,7 @@
               </details>
               <div id="saveMsg" class="small muted"></div>
 
-              <div class="tabs" id="editor-tabs">
+              <div class="tabs adm-tabs" id="editor-tabs">
                 <button class="tab active" type="button" data-tab="config">Configuração</button>
                 <button class="tab" type="button" data-tab="resumo">Pesquisa</button>
                 <button class="tab" type="button" data-tab="ficha">Ficha Técnica</button>
@@ -172,27 +173,37 @@
 
               <div class="tab-panel hidden" data-tab-panel="resumo">
                 <h3>Pesquisa</h3>
-                <div class="grid-2">
-                  <label>
-                    Resumo
-                    <textarea name="resumo" rows="3"></textarea>
-                  </label>
-                  <label>
-                    Título da introdução
-                    <input type="text" name="introTitulo" />
-                  </label>
-                  <label>
-                    Texto da introdução
-                    <textarea name="introTexto" rows="3"></textarea>
-                  </label>
-                  <label>
-                    Texto da citação
-                    <textarea name="citacaoTexto" rows="2"></textarea>
-                  </label>
-                  <label>
-                    Autor da citação
-                    <input type="text" name="citacaoAutor" />
-                  </label>
+                <div class="adm-form-grid">
+                  <div class="adm-field">
+                    <label>
+                      Resumo
+                      <textarea name="resumo" rows="3"></textarea>
+                    </label>
+                  </div>
+                  <div class="adm-field">
+                    <label>
+                      Título da introdução
+                      <input type="text" name="introTitulo" />
+                    </label>
+                  </div>
+                  <div class="adm-field">
+                    <label>
+                      Texto da introdução
+                      <textarea name="introTexto" rows="3"></textarea>
+                    </label>
+                  </div>
+                  <div class="adm-field">
+                    <label>
+                      Texto da citação
+                      <textarea name="citacaoTexto" rows="2"></textarea>
+                    </label>
+                  </div>
+                  <div class="adm-field">
+                    <label>
+                      Autor da citação
+                      <input type="text" name="citacaoAutor" />
+                    </label>
+                  </div>
                 </div>
 
                 <div class="repeater">
@@ -200,7 +211,7 @@
                     <h4>Tópicos</h4>
                     <button id="add-topico" class="btn light" type="button">Adicionar tópico</button>
                   </div>
-                  <div id="topicos-list" class="repeater-list"></div>
+                  <div id="topicos-list" class="repeater-list adm-topicos"></div>
                 </div>
               </div>
 

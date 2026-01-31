@@ -5,13 +5,13 @@ function renderTabs(slug, active) {
   const s = escapeHtml(slug);
   const tab = (sub, label) => {
     const isActive = sub === active;
-    return `<a class="tab ${isActive ? "tab-active" : "tab-idle"}" href="${withBase(
+    return `<a class="tab tab-btn ${isActive ? "tab-active active" : "tab-idle"}" href="${withBase(
       `/${s}/${sub}`
     )}" data-link>${label}</a>`;
   };
   return `
     <div class="subbar">
-      <div class="subbar-right">
+      <div class="subbar-right page-tabs">
         ${tab("pesquisa", "Pesquisa")}
         ${tab("relatorio", "Relatório")}
         ${tab("mapa", "Mapa")}
@@ -28,30 +28,14 @@ function topicBlock(t, idx, total) {
   const creditos = escapeHtml(t?.imagem_creditos || "");
 
   const hasImg = Boolean(img);
-  const showDividerImg = hasImg;
-
   return `
-    <article class="topic-block">
-      ${titulo ? `<h4 class="topic-title">${titulo}</h4>` : ""}
-      ${desc ? `<p class="topic-desc">${desc}</p>` : ""}
-
-      ${
-        showDividerImg
-          ? `
-            <div class="topic-image-wrap">
-              <img class="topic-image" src="${escapeHtml(img)}" alt="${
-                titulo ? "Imagem do tópico: " + titulo : "Imagem do tópico"
-              }"
-                loading="lazy"
-                onerror="this.style.display='none'; this.closest('.topic-image-wrap') && (this.closest('.topic-image-wrap').style.display='none');"
-              />
-              ${creditos ? `<small class="credito-imagem">${creditos}</small>` : ""}
-            </div>
-          `
-          : ""
-      }
-
-      ${idx < total - 1 ? `<div class="topic-sep" aria-hidden="true"></div>` : ""}
+    <article class="topic-block topico-card">
+      ${hasImg ? `<div class="topico-media" style="background-image:url('${escapeHtml(img)}')"></div>` : ""}
+      <div class="topico-body">
+        ${titulo ? `<h4 class="topico-title">${titulo}</h4>` : ""}
+        ${desc ? `<p class="topico-text">${desc}</p>` : ""}
+      </div>
+      ${creditos ? `<span class="topico-creditos">${creditos}</span>` : ""}
     </article>
   `;
 }
@@ -65,32 +49,34 @@ async function renderPesquisa(p) {
   return `
     ${renderTabs(p.slug, "pesquisa")}
 
-    <section class="page">
-      <div class="page-head">
-        <div class="kicker">
-          <span class="badge">Ano base: ${escapeHtml(p.anoBase || "")}</span>
+    <div class="pesquisa-page">
+      <section class="page">
+        <div class="page-head">
+          <div class="kicker">
+            <span class="badge">Ano base: ${escapeHtml(p.anoBase || "")}</span>
+          </div>
+
+          <h2 class="pesquisa-title">${escapeHtml(p.titulo || "Pesquisa")}</h2>
+          <p class="pesquisa-subtitle">${escapeHtml(descricao || "Conteúdo ainda não cadastrado.")}</p>
+        </div>
+      </section>
+
+      <section class="page" style="margin-top:16px">
+        <div class="page-head">
+          <h3>Pesquisa</h3>
         </div>
 
-        <h2>${escapeHtml(p.titulo || "Pesquisa")}</h2>
-        <p>${escapeHtml(descricao || "Conteúdo ainda não cadastrado.")}</p>
-      </div>
-    </section>
+        ${resumoTexto ? `<p class="pesquisa-resumo">${escapeHtml(resumoTexto)}</p>` : ""}
 
-    <section class="page" style="margin-top:16px">
-      <div class="page-head">
-        <h3>Pesquisa</h3>
-      </div>
-
-      ${resumoTexto ? `<p class="pesquisa-resumo">${escapeHtml(resumoTexto)}</p>` : ""}
-
-      <div class="topic-list">
-        ${
-          topicos.length
-            ? topicos.map((t, idx) => topicBlock(t, idx, topicos.length)).join("")
-            : `<p>Conteúdo ainda não cadastrado em <b>pesquisaResumo.topicos</b>.</p>`
-        }
-      </div>
-    </section>
+        <div class="topic-list pesquisa-topicos">
+          ${
+            topicos.length
+              ? topicos.map((t, idx) => topicBlock(t, idx, topicos.length)).join("")
+              : `<p>Conteúdo ainda não cadastrado em <b>pesquisaResumo.topicos</b>.</p>`
+          }
+        </div>
+      </section>
+    </div>
   `;
 }
 

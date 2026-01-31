@@ -697,18 +697,22 @@ function renderTopicos(topicos){
 
 function addTopicoItem(topico = {}){
   const wrapper = document.createElement("div");
-  wrapper.className = "repeater-item";
+  wrapper.className = "repeater-item adm-topico-card";
   wrapper.dataset.topic = "1";
   wrapper.innerHTML = `
-    <label>Título<input type="text" name="topicoTitulo" value="${escapeHtml(topico.titulo || "")}" /></label>
-    <label>Texto<textarea name="topicoTexto" rows="2">${escapeHtml(topico.texto || "")}</textarea></label>
-    <label>Imagem<input type="file" name="topicoImagemFile" accept="image/*" />
-      <input type="text" name="topicoImagemUrl" value="${escapeHtml(topico.imagem || "")}" placeholder="URL da imagem" />
-    </label>
-    <label>Créditos da imagem
-      <input type="text" name="imagem_creditos" value="${escapeHtml(topico.imagem_creditos || "")}" placeholder="Ex: Foto: Nome do autor / Fonte" />
-    </label>
-    <button class="btn light" type="button" data-remove="1">Remover</button>
+    <div class="row">
+      <label>Título<input type="text" name="topicoTitulo" value="${escapeHtml(topico.titulo || "")}" /></label>
+      <label class="full">Texto<textarea name="topicoTexto" rows="2">${escapeHtml(topico.texto || "")}</textarea></label>
+      <label>Imagem<input type="file" name="topicoImagemFile" accept="image/*" />
+        <input type="text" name="topicoImagemUrl" value="${escapeHtml(topico.imagem || "")}" placeholder="URL da imagem" />
+      </label>
+      <label class="full">Créditos da imagem
+        <input type="text" name="imagem_creditos" value="${escapeHtml(topico.imagem_creditos || "")}" placeholder="Ex: Foto: Nome do autor / Fonte" />
+      </label>
+      <div class="full">
+        <button class="btn remove-btn" type="button" data-remove="1">Remover</button>
+      </div>
+    </div>
   `;
   wrapper.querySelector("[data-remove]").addEventListener("click", () => wrapper.remove());
   els.topicosList.appendChild(wrapper);
