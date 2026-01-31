@@ -5,6 +5,7 @@ import renderPesquisa from "./views/pesquisa.js";
 import renderRelatorio from "./views/relatorio.js";
 import renderFichaTecnica from "./views/ficha-tecnica.js";
 import renderMapaPesquisa from "./views/mapa-pesquisa.js";
+import { fetchPesquisaConteudoKV, montarPesquisaResumo } from "./lib/pesquisaConteudoKV.js";
 
 const DEBUG_ROUTER = true;
 function dlog(...args){
@@ -90,6 +91,7 @@ export async function initRouter(){
         return;
       }
       dlog("pesquisa encontrada?", true);
+      await hydratePesquisaResumo(item);
       setHeaderBanner(item.bannerUrl || null);
       setHeaderCredit(item.bannerCredito || "");
 
@@ -139,5 +141,26 @@ export async function initRouter(){
         </p>
       </div>
     `;
+  }
+}
+
+async function hydratePesquisaResumo(pesquisa){
+  const supabase = window?.supabaseClient;
+  const pesquisaId = pesquisa?.dbId ?? pesquisa?._dbId ?? (typeof pesquisa?.id === "number" ? pesquisa.id : null);
+  if (!supabase || !pesquisaId) return;
+
+  try {
+    const rows = await fetchPesquisaConteudoKV(supabase, pesquisaId);
+    pesquisa.pesquisaResumo = montarPesquisaResumo(rows);
+  } catch (e) {
+    console.error("[PUBLIC] Erro ao carregar pesquisa_conteudo:", e);
+    pesquisa.pesquisaResumo = pesquisa.pesquisaResumo || { topicos: [] };
+  }
+
+  if (!Array.isArray(pesquisa.pesquisaResumo?.topicos)) {
+    pesquisa.pesquisaResumo = {
+      ...(pesquisa.pesquisaResumo || {}),
+      topicos: []
+    };
   }
 }
