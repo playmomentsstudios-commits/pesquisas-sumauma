@@ -1659,3 +1659,261 @@ body.no-scroll{ overflow:hidden; }
     font-size: 13px;
   }
 }
+
+/* =========================================================
+   RKC - LAYER DE RESET CONTROLADO (COLAR POR ÚLTIMO)
+   Objetivo: corrigir header + busca + menus + abas
+========================================================= */
+
+:root{
+  --rkc-brown: #5a2a12;
+  --rkc-brown-2: #6d3417;
+  --rkc-green: #2f7d32;
+  --rkc-white: #ffffff;
+  --rkc-border: rgba(255,255,255,0.18);
+  --rkc-shadow: 0 10px 25px rgba(0,0,0,0.12);
+}
+
+/* =========================================================
+   HEADER BASE
+========================================================= */
+[data-rkc-header]{
+  position: relative;
+  z-index: 50;
+  background: var(--rkc-brown);
+  color: var(--rkc-white);
+}
+
+/* “inner” do header: controla o alinhamento do topo */
+[data-rkc-header-inner]{
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* =========================================================
+   LOGO (sem distorção)
+========================================================= */
+[data-rkc-logo]{
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+[data-rkc-logo] img{
+  display: block;
+  height: 48px;      /* desktop */
+  width: auto;
+  max-width: 180px;
+  object-fit: contain;
+}
+
+/* =========================================================
+   BUSCA (não some + tamanho “justo”)
+========================================================= */
+[data-rkc-search]{
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center; /* centraliza visualmente a barra */
+  min-width: 220px;
+}
+
+[data-rkc-search] input,
+[data-rkc-search] .search-input,
+[data-rkc-search] input[type="search"]{
+  width: 100%;
+  max-width: 520px; /* “mais justa” no desktop */
+  height: 42px;
+  padding: 0 16px;
+  border-radius: 22px;
+  border: 1px solid rgba(0,0,0,0.15);
+  background: #fff;
+  color: #111;
+  outline: none;
+}
+
+[data-rkc-search] input:focus{
+  border-color: rgba(47,125,50,0.6);
+  box-shadow: 0 0 0 3px rgba(47,125,50,0.18);
+}
+
+/* anti-sumir */
+[data-rkc-search]{
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* =========================================================
+   MENUS (à direita da busca no desktop)
+========================================================= */
+[data-rkc-menu]{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+}
+
+/* Links/botões do menu */
+[data-rkc-menu] a,
+[data-rkc-menu] button{
+  background: transparent;
+  color: var(--rkc-white);
+  border: 1px solid var(--rkc-border);
+  padding: 8px 12px;
+  border-radius: 18px;
+  text-decoration: none;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+[data-rkc-menu] a:hover,
+[data-rkc-menu] button:hover{
+  background: rgba(255,255,255,0.08);
+}
+
+/* Dropdown / submenus - remove transparência */
+[data-rkc-menu] .dropdown,
+[data-rkc-menu] .submenu,
+[data-rkc-menu] ul ul{
+  background: var(--rkc-brown) !important;
+  border: 1px solid var(--rkc-border) !important;
+  box-shadow: var(--rkc-shadow);
+}
+
+[data-rkc-menu] .dropdown a,
+[data-rkc-menu] .submenu a,
+[data-rkc-menu] ul ul a{
+  color: var(--rkc-white) !important;
+}
+
+/* =========================================================
+   ABAS / SUB-ABAS (marrom -> ativo verde, texto branco)
+========================================================= */
+[data-rkc-tabs]{
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 16px 14px 16px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Botões das abas */
+[data-rkc-tabs] a,
+[data-rkc-tabs] button{
+  background: var(--rkc-brown) !important;
+  color: var(--rkc-white) !important;
+  border: 1px solid var(--rkc-border) !important;
+  padding: 8px 14px;
+  border-radius: 18px;
+  text-decoration: none;
+  font-size: 14px;
+  line-height: 1;
+  opacity: 1 !important; /* mata transparência */
+}
+
+/* Hover */
+[data-rkc-tabs] a:hover,
+[data-rkc-tabs] button:hover{
+  background: var(--rkc-brown-2) !important;
+}
+
+/* Estado ativo:
+   - funciona com .active
+   - ou aria-current="page"
+   - ou data-active="true"
+*/
+[data-rkc-tabs] a.active,
+[data-rkc-tabs] button.active,
+[data-rkc-tabs] a[aria-current="page"],
+[data-rkc-tabs] button[aria-current="page"],
+[data-rkc-tabs] a[data-active="true"],
+[data-rkc-tabs] button[data-active="true"]{
+  background: var(--rkc-green) !important;
+  color: var(--rkc-white) !important;
+  border-color: rgba(255,255,255,0.18) !important;
+  font-weight: 600;
+}
+
+/* =========================================================
+   TABLET (organiza sem quebrar)
+========================================================= */
+@media (max-width: 1024px){
+  [data-rkc-logo] img{
+    height: 44px;
+    max-width: 160px;
+  }
+
+  [data-rkc-search] input{
+    max-width: 420px;
+  }
+
+  [data-rkc-header-inner]{
+    gap: 12px;
+  }
+}
+
+/* =========================================================
+   MOBILE (cara de app)
+   - topo em 2 linhas: (logo + menu) em cima, busca abaixo
+========================================================= */
+@media (max-width: 768px){
+  [data-rkc-header-inner]{
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  /* logo fica “limpa” */
+  [data-rkc-logo] img{
+    height: 40px;
+    max-width: 150px;
+  }
+
+  /* menu continua em cima, ao lado/abaixo da logo */
+  [data-rkc-menu]{
+    gap: 8px;
+  }
+
+  [data-rkc-menu] a,
+  [data-rkc-menu] button{
+    padding: 7px 10px;
+    font-size: 13px;
+  }
+
+  /* busca vira a linha de baixo, centralizada */
+  [data-rkc-search]{
+    order: 3;
+    width: 100%;
+    justify-content: center;
+  }
+
+  [data-rkc-search] input{
+    max-width: 92%;
+    height: 40px;
+    font-size: 14px;
+  }
+
+  /* abas com “feel de app”: se tiver muitas, rola suave */
+  [data-rkc-tabs]{
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 12px;
+  }
+
+  [data-rkc-tabs]::-webkit-scrollbar{
+    height: 0px;
+  }
+
+  [data-rkc-tabs] a,
+  [data-rkc-tabs] button{
+    white-space: nowrap;
+    flex: 0 0 auto;
+  }
+}
