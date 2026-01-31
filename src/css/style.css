@@ -1490,8 +1490,8 @@ body.no-scroll{ overflow:hidden; }
   }
 
   /* TROQUE o seletor abaixo pelo botão real das abas */
-  .sub-tabs button, .tabs button,
-  .pesquisa-subtabs a, .pesquisa-tabs a {
+.sub-tabs button, .tabs button,
+.pesquisa-subtabs a, .pesquisa-tabs a {
     flex: 1 1 0;              /* cada botão pega 1/4 da linha */
     min-width: 0;             /* permite encolher sem estourar */
     text-align: center;
@@ -1501,5 +1501,161 @@ body.no-scroll{ overflow:hidden; }
     padding: 10px 8px;        /* diminui pra caber */
     font-size: 14px;          /* ajuste fino */
     border-radius: 14px;
+  }
+}
+
+/* =========================================================
+   HEADER GERAL
+========================================================= */
+
+.site-header,
+.header,
+.topo-site {
+  position: relative;
+  background-color: #5a2a12; /* marrom institucional */
+  z-index: 50;
+}
+
+/* =========================================================
+   LOGO – CORREÇÃO DE PROPORÇÃO
+========================================================= */
+
+.site-logo img,
+.header-logo img {
+  max-height: 48px;     /* ajusta o tamanho */
+  width: auto;          /* mantém proporção */
+  height: auto;
+  object-fit: contain;  /* evita distorção */
+  display: block;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .site-logo img,
+  .header-logo img {
+    max-height: 40px;
+  }
+}
+
+/* =========================================================
+   BARRA DE PESQUISA – AJUSTE DE TAMANHO E CENTRALIZAÇÃO
+========================================================= */
+
+.search-container,
+.search-bar-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 16px 0;
+}
+
+.search-container input,
+.search-bar-wrapper input {
+  width: 100%;
+  max-width: 520px;   /* deixa mais justa */
+  height: 42px;       /* um pouco menor */
+  padding: 0 16px;
+  border-radius: 24px;
+  border: 1px solid #c7b6a6;
+  background: #ffffff;
+  font-size: 15px;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .search-container input,
+  .search-bar-wrapper input {
+    max-width: 90%;
+    height: 40px;
+    font-size: 14px;
+  }
+}
+
+/* Garante que a busca não desapareça */
+.search-container,
+.search-bar-wrapper {
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* =========================================================
+   MENU PRINCIPAL
+========================================================= */
+
+.menu-principal,
+.nav-menu {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+/* =========================================================
+   ABAS / SUB-ABAS (Pesquisa | Relatório | Mapa | Ficha)
+========================================================= */
+
+.tabs,
+.sub-tabs,
+.abas-pesquisa {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* Aba normal */
+.tabs a,
+.sub-tabs a,
+.abas-pesquisa a {
+  background-color: #5a2a12; /* marrom */
+  color: #ffffff;
+  padding: 8px 18px;
+  border-radius: 22px;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  opacity: 1;               /* remove transparência */
+}
+
+/* Hover */
+.tabs a:hover,
+.sub-tabs a:hover,
+.abas-pesquisa a:hover {
+  background-color: #6d3417;
+}
+
+/* Aba ativa / selecionada */
+.tabs a.active,
+.sub-tabs a.active,
+.abas-pesquisa a.active,
+.tabs a[aria-current="page"] {
+  background-color: #2f7d32; /* verde */
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* =========================================================
+   MOBILE – ORGANIZAÇÃO GERAL
+========================================================= */
+
+@media (max-width: 768px) {
+
+  .menu-principal,
+  .nav-menu {
+    justify-content: center;
+  }
+
+  .tabs,
+  .sub-tabs,
+  .abas-pesquisa {
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .tabs a,
+  .sub-tabs a,
+  .abas-pesquisa a {
+    padding: 7px 14px;
+    font-size: 13px;
   }
 }
