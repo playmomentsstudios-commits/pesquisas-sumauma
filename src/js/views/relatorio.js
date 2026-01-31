@@ -5,11 +5,11 @@ function tabs(slug){
   const s = escapeHtml(slug);
   const tab = (sub, label) => {
     const isActive = sub === "relatorio";
-    return `<a class="tab ${isActive ? "tab-active" : "tab-idle"}" href="${withBase(`/${s}/${sub}`)}" data-link>${label}</a>`;
+    return `<a class="tab tab-btn ${isActive ? "tab-active active" : "tab-idle"}" href="${withBase(`/${s}/${sub}`)}" data-link>${label}</a>`;
   };
   return `
     <div class="subbar">
-      <div class="subbar-right">
+      <div class="subbar-right page-tabs">
         ${tab("pesquisa","Pesquisa")}
         ${tab("relatorio","Relatório")}
         ${tab("mapa","Mapa")}

@@ -1,0 +1,360 @@
+/* =========================================================
+   UI/UX Responsivo - Pesquisas Sumaúma (Mobile + Tablet)
+   ========================================================= */
+
+/* 1) Base: respiro e legibilidade */
+:root{
+  --ui-radius: 14px;
+  --ui-gap: 14px;
+  --ui-gap-lg: 18px;
+  --ui-text: #1b1b1b;
+  --ui-muted: rgba(0,0,0,.65);
+  --ui-line: rgba(0,0,0,.10);
+  --ui-card: #ffffff;
+}
+
+*{ box-sizing: border-box; }
+img{ max-width: 100%; height: auto; display: block; }
+
+body{
+  color: var(--ui-text);
+  line-height: 1.45;
+}
+
+/* 2) Containers */
+.container,
+.page-container,
+.main-container{
+  width: 100%;
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+@media (min-width: 768px){
+  .container,
+  .page-container,
+  .main-container{
+    padding: 0 22px;
+  }
+}
+
+/* =========================================================
+   HEADER (PUBLIC) - logo / menus / busca
+   ========================================================= */
+.site-header{
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  backdrop-filter: blur(6px);
+}
+
+.header-inner{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px 0;
+}
+
+.header-top-row{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.header-brand{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 160px;
+}
+
+.header-brand img{
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+}
+
+.header-nav{
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.header-nav::-webkit-scrollbar{ display:none; }
+
+.header-nav a{
+  white-space: nowrap;
+  font-weight: 600;
+  text-decoration: none;
+  padding: 8px 10px;
+  border-radius: 999px;
+}
+
+.header-search-row{
+  width: 100%;
+}
+
+.header-search{
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header-search input{
+  width: 100%;
+  height: 42px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.35);
+  outline: none;
+}
+
+@media (min-width: 992px){
+  .header-inner{
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .header-top-row{
+    width: auto;
+    flex: 0 0 auto;
+  }
+  .header-search-row{
+    flex: 1 1 auto;
+    max-width: 720px;
+  }
+}
+
+/* =========================================================
+   TABS (PUBLIC) - Pesquisa / Relatório / Mapa / Ficha Técnica
+   ========================================================= */
+.page-tabs{
+  display: flex;
+  gap: 10px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: 10px 0 6px;
+}
+.page-tabs::-webkit-scrollbar{ display:none; }
+
+.page-tabs .tab-btn,
+.page-tabs a{
+  white-space: nowrap;
+  padding: 10px 14px;
+  border-radius: 999px;
+  font-weight: 700;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--ui-line);
+  background: rgba(255,255,255,.08);
+}
+
+.page-tabs .active{
+  border-color: rgba(0,0,0,.18);
+  background: rgba(255,255,255,.20);
+}
+
+/* =========================================================
+   PÁGINA PESQUISA (PUBLIC) - tópicos e blocos
+   ========================================================= */
+.pesquisa-page{
+  padding: 18px 0 30px;
+}
+
+.pesquisa-title{
+  font-size: clamp(22px, 4.2vw, 34px);
+  line-height: 1.15;
+  margin: 8px 0 10px;
+}
+
+.pesquisa-subtitle{
+  color: rgba(0,0,0,.70);
+  font-size: clamp(14px, 2.6vw, 16px);
+  margin-bottom: 14px;
+}
+
+/* bloco resumo */
+.pesquisa-resumo{
+  background: var(--ui-card);
+  border: 1px solid var(--ui-line);
+  border-radius: var(--ui-radius);
+  padding: 14px;
+}
+
+/* lista de tópicos */
+.pesquisa-topicos{
+  display: grid;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.topico-card{
+  background: var(--ui-card);
+  border: 1px solid var(--ui-line);
+  border-radius: var(--ui-radius);
+  overflow: hidden;
+}
+
+.topico-body{
+  padding: 14px;
+}
+
+.topico-title{
+  font-size: 18px;
+  margin: 0 0 8px;
+}
+
+.topico-text{
+  margin: 0;
+  color: rgba(0,0,0,.78);
+  font-size: 15px;
+}
+
+/* imagem responsiva */
+.topico-media{
+  width: 100%;
+  aspect-ratio: 16/9;
+  background-size: cover;
+  background-position: center;
+  background-color: rgba(0,0,0,.04);
+}
+
+@media (min-width: 768px){
+  .pesquisa-topicos{
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
+/* crédito */
+.topico-creditos{
+  display: block;
+  padding: 10px 14px 12px;
+  font-size: 12px;
+  color: rgba(0,0,0,.62);
+  border-top: 1px solid rgba(0,0,0,.06);
+}
+
+/* =========================================================
+   ADM - Aba Pesquisa (form)
+   ========================================================= */
+.adm-page{
+  padding: 16px 0 26px;
+}
+
+.adm-tabs{
+  display: flex;
+  gap: 10px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-bottom: 8px;
+}
+.adm-tabs::-webkit-scrollbar{ display:none; }
+
+.adm-form-grid{
+  display: grid;
+  gap: 14px;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px){
+  .adm-form-grid{
+    grid-template-columns: 1.2fr 1fr;
+    align-items: start;
+  }
+}
+
+/* campos */
+.adm-field label{
+  display: block;
+  font-weight: 700;
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+.adm-field input,
+.adm-field textarea{
+  width: 100%;
+  border: 1px solid var(--ui-line);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 14px;
+  outline: none;
+}
+
+.adm-field textarea{
+  min-height: 110px;
+  resize: vertical;
+}
+
+.adm-actions{
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  padding-top: 10px;
+  flex-wrap: wrap;
+}
+
+.btn{
+  border: 1px solid var(--ui-line);
+  border-radius: 999px;
+  padding: 10px 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.btn-primary{
+  border-color: rgba(0,0,0,.18);
+}
+
+/* tópicos ADM */
+.adm-topicos{
+  margin-top: 12px;
+  display: grid;
+  gap: 12px;
+}
+
+.adm-topico-card{
+  border: 1px solid var(--ui-line);
+  border-radius: var(--ui-radius);
+  padding: 12px;
+  background: var(--ui-card);
+}
+
+.adm-topico-card .row{
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px){
+  .adm-topico-card .row{
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.adm-topico-card .full{
+  grid-column: 1/-1;
+}
+
+.adm-topico-card .remove-btn{
+  margin-top: 8px;
+  width: 100%;
+}
+
+@media (min-width: 768px){
+  .adm-topico-card .remove-btn{
+    width: auto;
+    align-self: flex-end;
+  }
+}
