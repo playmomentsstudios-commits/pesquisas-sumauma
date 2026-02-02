@@ -649,11 +649,12 @@ function addEquipeItem(membro = {}){
   wrapper.className = "repeater-item";
   wrapper.dataset.equipe = "1";
   const fotoAtual = String(membro.foto || "").trim();
+  const linkAtual = String(membro.linkedin || membro.link || "").trim();
   wrapper.innerHTML = `
     <label>Nome<input type="text" name="equipeNome" value="${escapeHtml(membro.nome || "")}" /></label>
     <label>Função<input type="text" name="equipeFuncao" value="${escapeHtml(membro.funcao || "")}" /></label>
     <label>Link (WhatsApp / LinkedIn / Portfólio etc.)
-      <input type="url" name="equipeLink" value="${escapeHtml(membro.link || "")}" placeholder="https://..." />
+      <input type="url" name="equipeLink" value="${escapeHtml(linkAtual)}" placeholder="https://..." />
     </label>
     <div style="display:grid; gap:8px;">
       <label>Foto (arquivo)
@@ -1474,13 +1475,13 @@ async function collectEquipe(slug){
   for (const item of items) {
     const nome = item.querySelector("[name=equipeNome]").value.trim();
     const funcao = item.querySelector("[name=equipeFuncao]").value.trim();
-    const link = item.querySelector("[name=equipeLink]")?.value?.trim() || "";
+    const linkedin = item.querySelector("[name=equipeLink]")?.value?.trim() || "";
     const urlInput = item.querySelector("[name=equipeFotoUrl]");
     const file = item.querySelector("[name=equipeFotoFile]").files?.[0];
     const safeName = slugify(nome || `membro-${results.length + 1}`);
     const fotoUrl = await maybeUploadFile(file, `pesquisas/${slug}/equipe/${safeName}`) || urlInput.value.trim();
     urlInput.value = fotoUrl;
-    results.push({ nome, funcao, foto: fotoUrl, link });
+    results.push({ nome, funcao, foto: fotoUrl, linkedin });
   }
   return results;
 }
