@@ -1509,18 +1509,16 @@ body.no-scroll{ overflow:hidden; }
 /* =====================================================
    DESKTOP — BUSCA NA MESMA LINHA DO MENU (COMO ANTES)
    ===================================================== */
-@media (min-width: 769px) {
-
-  /* Container principal do topo (logo + busca + menu) */
-  .site-header .topbar,
-  header .topbar,
-  .header-inner,
-  .header-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 18px;
+@media (min-width: 769px){
+  .header-search{
+    width:auto;               /* não vira faixa */
+    display:flex;
+    justify-content:flex-end;
+    margin-top:0;             /* não desce */
+    padding:0;                /* sem “borda” lateral */
   }
+}
+
 
   /* Área da direita (busca + menu) em uma linha */
   .header-right,
