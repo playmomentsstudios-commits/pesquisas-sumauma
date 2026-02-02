@@ -1,0 +1,207 @@
+/* =========================================================
+   HEADER / TOPO DO SITE (Sama1)
+   Objetivo:
+   - Desktop e Tablet iguais (layout horizontal)
+   - Logo maior (~150px de altura)
+   - Menu no canto direito
+   - Campo de busca à esquerda dos botões do menu
+   ========================================================= */
+
+:root{
+  --header-maxw: 1200px;
+  --header-pad-x: 18px;
+  --header-pad-y: 18px;
+  --header-gap: 14px;
+
+  --logo-h-desktop: 150px; /* pedido: ~150px */
+  --logo-h-mobile: 110px;
+
+  --ui-radius: 12px;
+  --ui-border: rgba(255,255,255,0.18);
+  --ui-bg: rgba(255,255,255,0.10);
+  --ui-bg-2: rgba(255,255,255,0.16);
+
+  --text: #ffffff;
+}
+
+/* Banner do topo (fundo) */
+.site-banner{
+  position: relative;
+  width: 100%;
+  min-height: 210px;
+  color: var(--text);
+
+  /* Se você já tem imagem no banner via CSS do projeto, pode remover esse gradient */
+  background: radial-gradient(1200px 420px at 20% 10%, rgba(255,255,255,0.10), transparent 55%),
+              linear-gradient(180deg, rgba(0,0,0,0.52), rgba(0,0,0,0.62));
+  overflow: hidden;
+}
+
+.site-banner__inner{
+  max-width: var(--header-maxw);
+  margin: 0 auto;
+  padding: var(--header-pad-y) var(--header-pad-x);
+
+  /* Layout principal */
+  display: flex;
+  align-items: center;       /* alinhamento vertical */
+  justify-content: space-between;
+  gap: var(--header-gap);
+}
+
+/* Bloco da logo */
+.site-brand{
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 180px;
+}
+
+.site-brand__logo{
+  height: var(--logo-h-desktop);
+  width: auto;
+  display: block;
+  object-fit: contain;
+  filter: drop-shadow(0 10px 18px rgba(0,0,0,0.35));
+}
+
+/* Lado direito (busca + menu) */
+.site-actions{
+  display: flex;
+  align-items: center;
+  gap: var(--header-gap);
+  margin-left: auto; /* garante que empurra pro canto direito */
+}
+
+/* Busca (fica à esquerda do menu) */
+.site-search{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--ui-radius);
+  border: 1px solid var(--ui-border);
+  background: var(--ui-bg);
+  backdrop-filter: blur(10px);
+}
+
+.site-search input{
+  width: min(340px, 34vw);
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--text);
+  font-size: 15px;
+}
+
+.site-search input::placeholder{
+  color: rgba(255,255,255,0.75);
+}
+
+/* Menu (dropdown Pesquisas + botão Institucional) */
+.site-menu{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn{
+  appearance: none;
+  border: 1px solid var(--ui-border);
+  background: var(--ui-bg-2);
+  color: var(--text);
+  padding: 10px 14px;
+  border-radius: 999px;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  transition: transform .12s ease, background .12s ease;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.btn:hover{ transform: translateY(-1px); background: rgba(255,255,255,0.22); }
+.btn:active{ transform: translateY(0px); }
+
+.btn .chev{
+  display: inline-block;
+  transform: translateY(1px);
+  opacity: 0.9;
+}
+
+/* Dropdown */
+.dropdown{
+  position: relative;
+}
+
+.dropdown__panel{
+  position: absolute;
+  right: 0;
+  top: calc(100% + 10px);
+  min-width: 240px;
+  background: rgba(15,15,15,0.92);
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 14px;
+  padding: 10px;
+  box-shadow: 0 18px 40px rgba(0,0,0,0.45);
+  display: none;
+  z-index: 50;
+}
+
+.dropdown__panel a{
+  display: block;
+  padding: 10px 10px;
+  border-radius: 10px;
+  color: #fff;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.dropdown__panel a:hover{
+  background: rgba(255,255,255,0.10);
+}
+
+.dropdown.is-open .dropdown__panel{
+  display: block;
+}
+
+/* =========================================================
+   BREAKPOINTS
+   - Tablet = Desktop (como você pediu)
+   - Mobile: empilha (sem bagunçar) e reduz a busca
+   ========================================================= */
+
+@media (max-width: 767px){
+  .site-banner{
+    min-height: 240px;
+  }
+
+  .site-banner__inner{
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .site-actions{
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .site-brand__logo{
+    height: var(--logo-h-mobile);
+  }
+
+  .site-search input{
+    width: min(320px, 78vw);
+  }
+
+  .dropdown__panel{
+    right: 50%;
+    transform: translateX(50%);
+  }
+}
