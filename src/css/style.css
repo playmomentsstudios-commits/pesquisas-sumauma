@@ -783,19 +783,18 @@ img{ display:block; max-width:100%; }
 }
 .menu-search input{
   width:100%;
-  height:46px;
-  padding:0 16px;
-  border-radius:12px;
-  border:none;
-  background:rgba(255,255,255,.14);
+  padding:10px 12px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.65);
+  background:transparent;          /* <- remove o “campo escuro” */
   color:#fff;
   outline:none;
   box-shadow:none;
-  backdrop-filter:blur(6px);
 }
-.menu-search input::placeholder{ color: rgba(255,255,255,.75); }
+
 .menu-search input:focus{
-  background: rgba(255,255,255,.22);
+  border-color: rgba(255,255,255,.9);
+  background:transparent;          /* <- mantém transparente no foco */
 }
 
 .search-panel{
