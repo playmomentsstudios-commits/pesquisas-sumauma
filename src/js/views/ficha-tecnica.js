@@ -1,5 +1,6 @@
 import { escapeHtml } from "../utils.js";
 import { withBase } from "../basepath.js";
+import { fetchPesquisaEquipe } from "../fetch-pesquisa-equipe.js";
 
 function tabs(slug, active){
   const s = escapeHtml(slug);
@@ -23,7 +24,20 @@ async function renderFichaTecnica(p){
   const ft = p.fichaTecnica || {};
   const realizacao = ft.realizacao || {};
   const financiador = ft.financiador || {};
-  const equipe = Array.isArray(ft.equipe) ? ft.equipe : [];
+  let equipe = Array.isArray(ft.equipe) ? ft.equipe : [];
+  const pesquisaId = p?.dbId || p?._dbId || "";
+  let equipeError = null;
+
+  if (pesquisaId) {
+    const { data, error } = await fetchPesquisaEquipe(pesquisaId);
+    if (error) {
+      equipeError = error;
+      console.error("[fichaTecnica] erro ao buscar equipe:", error);
+    }
+    if (Array.isArray(data) && data.length) {
+      equipe = data;
+    }
+  }
 
   const realizacaoLogo = realizacao.logo || withBase("/public/assets/logos/sumauma-logo.png");
   const realizacaoNome = realizacao.nome || "Realização";
@@ -73,10 +87,12 @@ async function renderFichaTecnica(p){
                 const foto = person.foto || withBase("/public/assets/img/equipe/placeholder.jpg");
                 const nome = person.nome || "";
                 const funcao = person.funcao || "";
-                const link = (person.link || "").trim();
+                const fotoUrl = person.foto_url || "";
+                const link = (person.linkedin || person.link || "").trim();
+                const finalFoto = fotoUrl || foto;
 
                 const inner = `
-                  <img src="${escapeHtml(foto)}" alt="${escapeHtml(nome)}">
+                  <img src="${escapeHtml(finalFoto)}" alt="${escapeHtml(nome)}">
                   <h3>${escapeHtml(nome)}</h3>
                   <p>${escapeHtml(funcao)}</p>
                 `;
@@ -88,6 +104,11 @@ async function renderFichaTecnica(p){
             : `<div style="color:#666;">Nenhum integrante cadastrado.</div>`
         }
       </div>
+      ${
+        equipe.length === 0 && equipeError
+          ? `<p style="color:#a33;font-size:13px;">Erro ao buscar equipe — confira o Console (query/colunas/pesquisa_id).</p>`
+          : ""
+      }
     </section>
   `;
 }
