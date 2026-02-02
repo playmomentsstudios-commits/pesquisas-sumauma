@@ -38,6 +38,10 @@ img{ display:block; max-width:100%; }
   padding:0 12px;
 }
 
+.header-overlay{
+  background:transparent;
+}
+
 .header-logo img{
   height:72px;
   width:auto;
