@@ -37,16 +37,7 @@ img{ display:block; max-width:100%; }
   margin-top:14px;
   padding:0 12px;
 }
-.header-overlay{
-  height:100%;
-  background:rgba(0,0,0,.35);
-  display:flex;
-  flex-direction:column;
-  align-items:stretch;
-  justify-content:center;
-  padding:18px 30px;
-  position:relative;
-}
+
 .header-logo img{
   height:72px;
   width:auto;
