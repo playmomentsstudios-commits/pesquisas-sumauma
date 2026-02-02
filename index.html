@@ -11,6 +11,7 @@
   <!-- CSS do projeto -->
   <link rel="stylesheet" href="./src/css/style.css" />
   <link rel="stylesheet" href="./src/css/responsivo-ui.css" />
+  <link rel="stylesheet" href="assets/css/header.css" />
 
   <!-- SUMAUMA: FAVICON LINKS (BEGIN) -->
   <!-- Os hrefs são preenchidos pelo app.js (busca no site_config) -->
@@ -20,44 +21,42 @@
 </head>
 
 <body>
-  <!-- HEADER: logo à esquerda + menu à direita -->
-  <header class="header site-header">
-    <div class="header-overlay">
-      <div class="container header-inner">
-        <!-- LINHA 1 (topo): logo + menu -->
-        <div class="header-top header-top-row">
-          <div class="header-brand">
-            <a class="header-logo" href="/" data-link>
-              <!-- ID para trocar via config do site -->
-              <img id="siteLogoImg" src="./public/assets/logos/sumauma-logo.png" alt="Instituto Sumaúma">
-            </a>
-          </div>
-
-          <nav class="menu header-nav">
-            <div class="dropdown" id="pesquisasDropdown">
-              <button type="button" class="menu-btn" aria-haspopup="true" aria-expanded="false">
-                Pesquisas <span class="chev">▾</span>
-              </button>
-              <div class="dropdown-panel" role="menu" aria-label="Pesquisas"></div>
-            </div>
-
-            <a class="menu-link" href="https://sumauma.org" target="_blank" rel="noopener noreferrer">
-              Institucional
-            </a>
-          </nav>
-        </div>
-
-        <!-- LINHA 2 (abaixo): busca -->
-        <div class="header-search-row">
-          <div class="header-search">
-            <div class="menu-search">
-              <input id="pesquisasSearch" type="search" placeholder="Buscar pesquisas..." aria-label="Buscar pesquisas" />
-              <div id="pesquisasSearchPanel" class="search-panel" role="listbox" aria-label="Resultados da busca"></div>
-            </div>
-          </div>
-        </div>
+  <header class="site-banner">
+    <div class="site-banner__inner">
+      <!-- LOGO (maior, ~150px) -->
+      <div class="site-brand">
+        <!-- Troque o caminho da imagem se necessário -->
+        <a href="/" aria-label="Home">
+          <img class="site-brand__logo" src="assets/img/logo.png" alt="Logo do site" />
+        </a>
       </div>
-      <div class="header-credit" id="headerCredit" aria-live="polite"></div>
+
+      <!-- AÇÕES (busca à esquerda do menu, menu no canto direito) -->
+      <div class="site-actions">
+        <!-- BUSCA -->
+        <form class="site-search" action="#" method="GET" role="search">
+          <input name="q" type="search" placeholder="Buscar pesquisas..." aria-label="Buscar pesquisas" />
+        </form>
+
+        <!-- MENU -->
+        <nav class="site-menu" aria-label="Menu principal">
+          <!-- Dropdown Pesquisas -->
+          <div class="dropdown" data-dropdown="pesquisas">
+            <button class="btn" type="button" data-dropdown-toggle>
+              Pesquisas <span class="chev">▾</span>
+            </button>
+            <div class="dropdown__panel" data-dropdown-panel>
+              <!-- Ajuste os links conforme suas rotas reais -->
+              <a href="/pesquisas.html">Ver todas</a>
+              <a href="/mapa.html">Mapa</a>
+              <a href="/categorias.html">Categorias</a>
+            </div>
+          </div>
+
+          <!-- Institucional -->
+          <a class="btn" href="/institucional.html">Institucional</a>
+        </nav>
+      </div>
     </div>
   </header>
 
@@ -78,5 +77,6 @@
 
   <!-- App -->
   <script type="module" src="./src/js/app.js"></script>
+  <script src="assets/js/header.js"></script>
 </body>
 </html>
