@@ -1,0 +1,147 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", sans-serif;
+}
+
+body, html {
+  height: 100%;
+}
+
+/* Background */
+.login-bg {
+  background: url("https://images.unsplash.com/photo-1523741543316-beb7fc7023d8");
+  background-size: cover;
+  background-position: center;
+  height: 100vh;
+  position: relative;
+}
+
+/* Overlay escuro */
+.login-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+}
+
+/* Card */
+.login-card {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #0f2d1f;
+  padding: 40px;
+  width: 100%;
+  max-width: 420px;
+  border-radius: 12px;
+  color: #fff;
+  z-index: 2;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+}
+
+/* Títulos */
+.login-card h1 {
+  text-align: center;
+  font-size: 26px;
+  margin-bottom: 6px;
+}
+
+.login-card p {
+  text-align: center;
+  font-size: 14px;
+  opacity: 0.9;
+  margin-bottom: 30px;
+}
+
+/* Inputs */
+.input-group {
+  position: relative;
+  margin-bottom: 22px;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 12px 10px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid #6fcf97;
+  color: #fff;
+  font-size: 16px;
+  outline: none;
+}
+
+.input-group label {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  color: #a8e6c3;
+  pointer-events: none;
+  transition: 0.3s;
+}
+
+.input-group input:focus + label,
+.input-group input:valid + label {
+  top: -6px;
+  font-size: 12px;
+  color: #fff;
+}
+
+/* Botão */
+button {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 8px;
+  background: #6fcf97;
+  color: #0f2d1f;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+button:hover {
+  background: #58b884;
+}
+
+/* Recuperação */
+.recover {
+  margin-top: 18px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.recover i {
+  margin-right: 6px;
+  color: #6fcf97;
+}
+
+.recover a {
+  color: #6fcf97;
+  text-decoration: none;
+}
+
+.recover a:hover {
+  text-decoration: underline;
+}
+
+/* Rodapé */
+.login-footer {
+  display: block;
+  text-align: center;
+  margin-top: 28px;
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+/* Responsivo */
+@media (max-width: 480px) {
+  .login-card {
+    margin: 0 16px;
+    padding: 30px 24px;
+  }
+}

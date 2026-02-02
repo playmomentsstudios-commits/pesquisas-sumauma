@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Redirecionando…</title>
+  <!-- SUMAUMA: FAVICON LINKS (BEGIN) -->
+  <!-- Os hrefs são preenchidos pelo app.js (busca no site_config) -->
+  <link id="sumauma-favicon" rel="icon" type="image/png" href="" />
+  <link id="sumauma-apple-icon" rel="apple-touch-icon" href="" />
+  <!-- SUMAUMA: FAVICON LINKS (END) -->
+</head>
+<body>
+<script>
+  // GH Pages SPA redirect
+  sessionStorage.setItem("spa_redirect", location.pathname + location.search + location.hash);
+  (function () {
+    const host = location.hostname;
+    if (host.endsWith("github.io")) {
+      const seg = location.pathname.split("/").filter(Boolean)[0];
+      const base = seg ? "/" + seg : "";
+      location.replace(base + "/");
+      return;
+    }
+    location.replace("/");
+  })();
+</script>
+</body>
+</html>
