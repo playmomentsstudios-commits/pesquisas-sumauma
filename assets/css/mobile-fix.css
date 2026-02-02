@@ -1,0 +1,39 @@
+
+/* ======================================================
+   AJUSTE MOBILE — CENTRALIZAR CAMPO DE BUSCA
+   Afeta SOMENTE mobile
+   ====================================================== */
+
+@media (max-width: 768px) {
+
+  /* Container do campo de busca */
+  .search-container,
+  .search-wrapper,
+  .search-box {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding: 0 12px;
+    box-sizing: border-box;
+  }
+
+  /* Campo de input */
+  .search-container input,
+  .search-wrapper input,
+  .search-box input {
+    width: 100%;
+    max-width: 420px; /* controla o tamanho no mobile */
+    margin: 0 auto;
+    text-align: left;
+  }
+
+  /* Caso exista botão de busca */
+  .search-container button,
+  .search-wrapper button,
+  .search-box button {
+    margin-left: 6px;
+  }
+
+}
+
