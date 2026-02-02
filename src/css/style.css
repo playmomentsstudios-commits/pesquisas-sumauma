@@ -1463,35 +1463,44 @@ body.no-scroll{ overflow:hidden; }
    ========================================= */
 @media (max-width: 768px) {
 
+  /* Container dos botões */
+  .pesquisa-submenu,
   .submenus,
   .tabs,
-  .subnav,
   .pesquisa-tabs {
     display: flex;
-    flex-wrap: nowrap;              /* não quebra linha */
+    flex-wrap: nowrap;              /* NÃO quebra linha */
     gap: 8px;
-    overflow-x: auto;               /* rolagem horizontal */
+    overflow-x: auto;               /* scroll horizontal */
+    padding: 6px 4px;
+    margin-bottom: 12px;
+
     -webkit-overflow-scrolling: touch;
-    padding: 6px 2px;
     scrollbar-width: none;          /* Firefox */
   }
+
+  /* Remove scrollbar visual */
+  .pesquisa-submenu::-webkit-scrollbar,
   .submenus::-webkit-scrollbar,
   .tabs::-webkit-scrollbar,
-  .subnav::-webkit-scrollbar,
   .pesquisa-tabs::-webkit-scrollbar {
-    display: none;                  /* Chrome/Safari */
+    display: none;
   }
 
+  /* Botões */
+  .pesquisa-submenu a,
+  .pesquisa-submenu button,
   .submenus a,
   .tabs a,
-  .subnav a,
-  .pesquisa-tabs a,
-  .submenus button,
-  .tabs button {
+  .pesquisa-tabs a {
+    flex: 0 0 auto;                 /* impede esticar */
     white-space: nowrap;            /* texto em 1 linha */
-    flex: 0 0 auto;
-    font-size: 13px;
-    padding: 8px 10px;
-    border-radius: 999px;           /* pill */
+
+    font-size: 13px;                /* MENOR */
+    padding: 7px 10px;              /* MENOR */
+    border-radius: 999px;           /* formato pill */
+    line-height: 1.2;
+
+    min-height: 34px;               /* toque confortável */
   }
 }
