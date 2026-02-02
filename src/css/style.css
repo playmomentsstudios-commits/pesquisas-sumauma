@@ -1506,3 +1506,71 @@ body.no-scroll{ overflow:hidden; }
     min-height: 34px;               /* toque confortável */
   }
 }
+
+/* =====================================================
+   DESKTOP — BUSCA NA MESMA LINHA DO MENU (COMO ANTES)
+   ===================================================== */
+@media (min-width: 769px) {
+
+  /* Container principal do topo (logo + busca + menu) */
+  .site-header .topbar,
+  header .topbar,
+  .header-inner,
+  .header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+  }
+
+  /* Área da direita (busca + menu) em uma linha */
+  .header-right,
+  .topbar-right,
+  .menu-area {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+
+  /* Wrapper da busca (remove caixa/fundo do desktop atual) */
+  .header-search,
+  .search-wrap,
+  .search-bar,
+  .pesquisa-busca {
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: 0 !important;
+    box-shadow: none !important;
+
+    display: flex;
+    align-items: center;
+  }
+
+  /* Input com tamanho controlado, só borda (leve) */
+  .header-search input,
+  .search-wrap input,
+  .search-bar input,
+  .pesquisa-busca input {
+    width: 340px;              /* ajuste fino: 300~420 */
+    max-width: 38vw;
+    height: 40px;
+
+    background: transparent !important;
+    border: 1px solid rgba(255,255,255,0.65) !important;
+    border-radius: 999px !important;
+
+    padding: 0 16px;
+    color: #fff;
+    outline: none;
+    box-shadow: none !important;
+  }
+
+  /* Placeholder */
+  .header-search input::placeholder,
+  .search-wrap input::placeholder,
+  .search-bar input::placeholder,
+  .pesquisa-busca input::placeholder {
+    color: rgba(255,255,255,0.85);
+  }
+}
