@@ -1409,97 +1409,98 @@ body.no-scroll{ overflow:hidden; }
   cursor: pointer;
 }
 
-/* ============================================================
-   MOBILE FIX — Busca centralizada + Subabas menores 1 linha
-   Cole no FINAL do CSS
-   ============================================================ */
-@media (max-width: 640px){
+/* =========================================
+   MOBILE HEADER: busca central e responsiva
+   ========================================= */
+@media (max-width: 768px) {
 
-  /* === 1) BUSCA centralizada no banner === */
-  .header-overlay{
-    position: relative;
-    padding-bottom: 70px; /* espaço pra busca dentro do banner */
-  }
-
-  .header-search{
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 12px;               /* ajuste fino: 8px mais baixo / 18px mais alto */
-    margin: 0;
+  /* 1) Container do topo (logo + menu + busca) */
+  .site-header,
+  header,
+  .topbar {
     display: flex;
-    justify-content: center;     /* centraliza */
-    padding: 0 16px;             /* respiro lateral */
+    flex-direction: column;
+    align-items: stretch;  /* ocupa a largura */
+    gap: 10px;
+    padding: 10px 12px;
   }
 
-  .header-search .menu-search{
+  /* 2) Linha da busca */
+  .search-wrap,
+  .header-search,
+  .pesquisa-busca,
+  .search-bar {
     width: 100%;
-    max-width: 520px;            /* controla a “largura visual” no centro */
     margin: 0 auto;
   }
 
-  .menu-search input{
+  /* 3) Input e botão */
+  .search-wrap input[type="search"],
+  .search-wrap input[type="text"],
+  .header-search input,
+  .pesquisa-busca input,
+  .search-bar input {
     width: 100%;
-    height: 42px;
-    padding: 11px 14px;
+    max-width: 680px; /* limita em tablets */
+    margin: 0 auto;
+    display: block;
+    box-sizing: border-box;
+    height: 44px;          /* confortável no toque */
+    border-radius: 12px;
   }
 
-  /* === 2) SUBABAS (Pesquisa/Relatório/Mapa/Ficha Técnica) menores e 1 linha === */
-  .subbar{
-    padding: 0 16px;
-    margin: 12px auto 10px;
-    justify-content: center;     /* centraliza o bloco das abas */
-  }
-
-  .subbar-right{
-    gap: 8px;
-    flex-wrap: nowrap;           /* não quebra linha */
-    overflow-x: auto;            /* se precisar, vira “rolagem lateral” */
-    -webkit-overflow-scrolling: touch;
-    padding-bottom: 6px;
-  }
-
-  .subbar-right::-webkit-scrollbar{ height: 0; } /* esconde scrollbar no iOS */
-
-  .tab{
-    padding: 8px 10px;           /* menor */
-    font-size: 13px;             /* menor */
-    border-radius: 10px;
-    white-space: nowrap;         /* nunca quebra “Ficha Técnica” */
-    line-height: 1;
+  .search-wrap button,
+  .header-search button,
+  .pesquisa-busca button,
+  .search-bar button {
+    height: 44px;
+    border-radius: 12px;
   }
 }
 
+/* =====================================================
+   SUBMENU MOBILE – UMA ÚNICA LINHA (CHIPS)
+   ===================================================== */
 @media (max-width: 768px) {
 
-  /* TROQUE o seletor abaixo pelo container real das 4 sub-abas */
-  .sub-tabs, .tabs, .pesquisa-subtabs, .pesquisa-tabs {
+  /* Container dos botões */
+  .pesquisa-submenu,
+  .submenus,
+  .tabs,
+  .pesquisa-tabs {
     display: flex;
-    flex-wrap: nowrap;        /* garante UMA fileira */
-    justify-content: center;  /* centraliza a fileira */
-    align-items: center;
+    flex-wrap: nowrap;              /* NÃO quebra linha */
     gap: 8px;
-    width: 100%;
-    overflow: visible;        /* evita cortar */
-    padding: 10px 12px;
-    box-sizing: border-box;
-    background: #fff;         /* evita “sumir atrás” */
-    position: sticky;         /* fica bonitinho ao rolar */
-    top: 0;                   /* ajuste se tiver header fixo */
-    z-index: 50;
+    overflow-x: auto;               /* scroll horizontal */
+    padding: 6px 4px;
+    margin-bottom: 12px;
+
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;          /* Firefox */
   }
 
-  /* TROQUE o seletor abaixo pelo botão real das abas */
-  .sub-tabs button, .tabs button,
-  .pesquisa-subtabs a, .pesquisa-tabs a {
-    flex: 1 1 0;              /* cada botão pega 1/4 da linha */
-    min-width: 0;             /* permite encolher sem estourar */
-    text-align: center;
-    white-space: nowrap;      /* mantém em 1 linha */
-    overflow: hidden;
-    text-overflow: ellipsis;  /* se ainda apertar, põe “...” ao invés de cortar feio */
-    padding: 10px 8px;        /* diminui pra caber */
-    font-size: 14px;          /* ajuste fino */
-    border-radius: 14px;
+  /* Remove scrollbar visual */
+  .pesquisa-submenu::-webkit-scrollbar,
+  .submenus::-webkit-scrollbar,
+  .tabs::-webkit-scrollbar,
+  .pesquisa-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Botões */
+  .pesquisa-submenu a,
+  .pesquisa-submenu button,
+  .submenus a,
+  .tabs a,
+  .pesquisa-tabs a {
+    flex: 0 0 auto;                 /* impede esticar */
+    white-space: nowrap;            /* texto em 1 linha */
+
+    font-size: 13px;                /* MENOR */
+    padding: 7px 10px;              /* MENOR */
+    border-radius: 999px;           /* formato pill */
+    line-height: 1.2;
+
+    min-height: 34px;               /* toque confortável */
   }
 }
