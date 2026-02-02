@@ -517,6 +517,14 @@ async function loadResearchToForm(pesquisa){
   els.deleteBtn.classList.toggle("hidden", !pesquisa?.id);
   const resumoKV = await loadPesquisaResumoKV(pesquisa?.id);
   fillForm(pesquisa, resumoKV);
+  const equipeDb = await loadPesquisaEquipeDb(pesquisa?.id);
+  if (equipeDb !== null) {
+    renderEquipe(equipeDb.map((membro) => ({
+      ...membro,
+      foto: membro.foto_url || membro.foto || "",
+      link: membro.linkedin || membro.link || ""
+    })));
+  }
   setTab("config", { persist: false });
   loadPontos();
   setSaveMsg(pesquisa?.id ? `Editando: ${pesquisa.slug || ""}` : "", true);
@@ -534,6 +542,23 @@ async function loadPesquisaResumoKV(pesquisaId){
     console.warn("[ADMIN] Falha ao carregar pesquisa_conteudo:", error?.message || error);
     return null;
   }
+}
+
+async function loadPesquisaEquipeDb(pesquisaId){
+  const client = window.supabaseClient;
+  if (!client || !pesquisaId) return null;
+  const { data, error } = await client
+    .from("pesquisa_equipe")
+    .select("id,pesquisa_id,ordem,nome,funcao,bio,foto_url,linkedin")
+    .eq("pesquisa_id", pesquisaId)
+    .order("ordem", { ascending: true });
+
+  if (error) {
+    console.warn("[ADMIN] Falha ao carregar pesquisa_equipe:", error?.message || error);
+    return null;
+  }
+
+  return data || [];
 }
 
 async function refreshListAndSelect(selectId = null){
@@ -818,6 +843,14 @@ async function savePesquisa(){
     showAlert("err", `Erro ao salvar conteúdo da pesquisa: ${friendlyError(error)}`);
     setSaveDebug({ step: "pesquisa_conteudo", error: errToObj(error) });
     adminMsg(`Erro ao salvar conteúdo: ${friendlyError(error)}`, "err");
+    return;
+  }
+  try {
+    await persistPesquisaEquipe(savedId, payload?.config_json?.fichaTecnica?.equipe);
+  } catch (error) {
+    showAlert("err", `Erro ao salvar equipe: ${friendlyError(error)}`);
+    setSaveDebug({ step: "pesquisa_equipe", error: errToObj(error) });
+    adminMsg(`Erro ao salvar equipe: ${friendlyError(error)}`, "err");
     return;
   }
 
@@ -2044,6 +2077,38 @@ async function persistPesquisaResumoKV(pesquisaId, pesquisaResumo){
     await upsertKV(client, pesquisaId, `topico_${n}_texto`, topico.texto || "");
     await upsertKV(client, pesquisaId, `topico_${n}_imagem_url`, topico.imagem || "", topico.imagem_creditos || "");
   }
+}
+
+async function persistPesquisaEquipe(pesquisaId, equipe){
+  const client = window.supabaseClient;
+  if (!client || !pesquisaId) return;
+
+  const normalized = Array.isArray(equipe)
+    ? equipe.map((membro, index) => ({
+        pesquisa_id: pesquisaId,
+        ordem: index,
+        nome: membro?.nome || null,
+        funcao: membro?.funcao || null,
+        bio: membro?.bio || null,
+        foto_url: membro?.foto || membro?.foto_url || null,
+        linkedin: membro?.linkedin || membro?.link || null
+      }))
+    : [];
+
+  const { error: deleteError } = await client
+    .from("pesquisa_equipe")
+    .delete()
+    .eq("pesquisa_id", pesquisaId);
+
+  if (deleteError) throw deleteError;
+
+  if (!normalized.length) return;
+
+  const { error: insertError } = await client
+    .from("pesquisa_equipe")
+    .insert(normalized);
+
+  if (insertError) throw insertError;
 }
 
 document.addEventListener("click", async (event) => {
