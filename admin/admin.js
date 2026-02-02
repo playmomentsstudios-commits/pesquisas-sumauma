@@ -517,6 +517,14 @@ async function loadResearchToForm(pesquisa){
   els.deleteBtn.classList.toggle("hidden", !pesquisa?.id);
   const resumoKV = await loadPesquisaResumoKV(pesquisa?.id);
   fillForm(pesquisa, resumoKV);
+  const equipeDb = await loadPesquisaEquipeDb(pesquisa?.id);
+  if (equipeDb !== null) {
+    renderEquipe(equipeDb.map((membro) => ({
+      ...membro,
+      foto: membro.foto_url || membro.foto || "",
+      link: membro.linkedin || membro.link || ""
+    })));
+  }
   setTab("config", { persist: false });
   loadPontos();
   setSaveMsg(pesquisa?.id ? `Editando: ${pesquisa.slug || ""}` : "", true);
@@ -534,6 +542,23 @@ async function loadPesquisaResumoKV(pesquisaId){
     console.warn("[ADMIN] Falha ao carregar pesquisa_conteudo:", error?.message || error);
     return null;
   }
+}
+
+async function loadPesquisaEquipeDb(pesquisaId){
+  const client = window.supabaseClient;
+  if (!client || !pesquisaId) return null;
+  const { data, error } = await client
+    .from("pesquisa_equipe")
+    .select("id,pesquisa_id,ordem,nome,funcao,bio,foto_url,linkedin")
+    .eq("pesquisa_id", pesquisaId)
+    .order("ordem", { ascending: true });
+
+  if (error) {
+    console.warn("[ADMIN] Falha ao carregar pesquisa_equipe:", error?.message || error);
+    return null;
+  }
+
+  return data || [];
 }
 
 async function refreshListAndSelect(selectId = null){
@@ -649,11 +674,12 @@ function addEquipeItem(membro = {}){
   wrapper.className = "repeater-item";
   wrapper.dataset.equipe = "1";
   const fotoAtual = String(membro.foto || "").trim();
+  const linkAtual = String(membro.linkedin || membro.link || "").trim();
   wrapper.innerHTML = `
     <label>Nome<input type="text" name="equipeNome" value="${escapeHtml(membro.nome || "")}" /></label>
     <label>Função<input type="text" name="equipeFuncao" value="${escapeHtml(membro.funcao || "")}" /></label>
     <label>Link (WhatsApp / LinkedIn / Portfólio etc.)
-      <input type="url" name="equipeLink" value="${escapeHtml(membro.link || "")}" placeholder="https://..." />
+      <input type="url" name="equipeLink" value="${escapeHtml(linkAtual)}" placeholder="https://..." />
     </label>
     <div style="display:grid; gap:8px;">
       <label>Foto (arquivo)
@@ -817,6 +843,14 @@ async function savePesquisa(){
     showAlert("err", `Erro ao salvar conteúdo da pesquisa: ${friendlyError(error)}`);
     setSaveDebug({ step: "pesquisa_conteudo", error: errToObj(error) });
     adminMsg(`Erro ao salvar conteúdo: ${friendlyError(error)}`, "err");
+    return;
+  }
+  try {
+    await persistPesquisaEquipe(savedId, payload?.config_json?.fichaTecnica?.equipe);
+  } catch (error) {
+    showAlert("err", `Erro ao salvar equipe: ${friendlyError(error)}`);
+    setSaveDebug({ step: "pesquisa_equipe", error: errToObj(error) });
+    adminMsg(`Erro ao salvar equipe: ${friendlyError(error)}`, "err");
     return;
   }
 
@@ -1474,13 +1508,13 @@ async function collectEquipe(slug){
   for (const item of items) {
     const nome = item.querySelector("[name=equipeNome]").value.trim();
     const funcao = item.querySelector("[name=equipeFuncao]").value.trim();
-    const link = item.querySelector("[name=equipeLink]")?.value?.trim() || "";
+    const linkedin = item.querySelector("[name=equipeLink]")?.value?.trim() || "";
     const urlInput = item.querySelector("[name=equipeFotoUrl]");
     const file = item.querySelector("[name=equipeFotoFile]").files?.[0];
     const safeName = slugify(nome || `membro-${results.length + 1}`);
     const fotoUrl = await maybeUploadFile(file, `pesquisas/${slug}/equipe/${safeName}`) || urlInput.value.trim();
     urlInput.value = fotoUrl;
-    results.push({ nome, funcao, foto: fotoUrl, link });
+    results.push({ nome, funcao, foto: fotoUrl, linkedin });
   }
   return results;
 }
@@ -2043,6 +2077,38 @@ async function persistPesquisaResumoKV(pesquisaId, pesquisaResumo){
     await upsertKV(client, pesquisaId, `topico_${n}_texto`, topico.texto || "");
     await upsertKV(client, pesquisaId, `topico_${n}_imagem_url`, topico.imagem || "", topico.imagem_creditos || "");
   }
+}
+
+async function persistPesquisaEquipe(pesquisaId, equipe){
+  const client = window.supabaseClient;
+  if (!client || !pesquisaId) return;
+
+  const normalized = Array.isArray(equipe)
+    ? equipe.map((membro, index) => ({
+        pesquisa_id: pesquisaId,
+        ordem: index,
+        nome: membro?.nome || null,
+        funcao: membro?.funcao || null,
+        bio: membro?.bio || null,
+        foto_url: membro?.foto || membro?.foto_url || null,
+        linkedin: membro?.linkedin || membro?.link || null
+      }))
+    : [];
+
+  const { error: deleteError } = await client
+    .from("pesquisa_equipe")
+    .delete()
+    .eq("pesquisa_id", pesquisaId);
+
+  if (deleteError) throw deleteError;
+
+  if (!normalized.length) return;
+
+  const { error: insertError } = await client
+    .from("pesquisa_equipe")
+    .insert(normalized);
+
+  if (insertError) throw insertError;
 }
 
 document.addEventListener("click", async (event) => {
