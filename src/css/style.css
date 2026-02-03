@@ -1524,6 +1524,7 @@ body.no-scroll{ overflow:hidden; }
 
   /* Área da direita (busca + menu) em uma linha */
   .header-right,
+  .header-actions,
   .topbar-right,
   .menu-area {
     display: flex;
