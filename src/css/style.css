@@ -1064,8 +1064,9 @@ img{ display:block; max-width:100%; }
 .credito-imagem{
   display: block;
   font-size: 12px;
+  largewidth:
   color: #666;
-  margin-top: 4px;
+  margin: 5px;
   font-style: italic;
 }
 
