@@ -37,10 +37,10 @@ img{ display:block; max-width:100%; }
   gap:18px;
 }
 .header-search{
+  width:100%;
   display:flex;
   justify-content:flex-end;
-  margin-top:0;
-  padding:0 12px;
+  margin-top:10px;
 }
 .header-overlay{
   height:100%;
