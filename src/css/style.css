@@ -1580,4 +1580,51 @@ body.no-scroll{ overflow:hidden; }
   .pesquisa-busca input::placeholder {
     color: rgba(255,255,255,0.85);
   }
+
+/* ============================================================
+   TABLET (até 1024px) — usar o mesmo modo “mobile aprovado”
+   Mapa escondido; só aparece quando o usuário pedir
+   ============================================================ */
+
+@media (max-width: 1024px){
+
+  /* Em tablet, queremos lista/filters primeiro e mapa sob demanda */
+  .map-shell{
+    grid-template-columns: 1fr;
+  }
+
+  /* Esconde o mapa por padrão */
+  .map-main{
+    display:none;
+  }
+
+  /* Quando ativar o mapa (via JS), mostra o mapa e esconde a lista */
+  body.map-show .map-main{
+    display:block;
+    height: 62vh;         /* ajuste fino */
+    min-height: 62vh;
+  }
+
+  body.map-show .leaflet-map{
+    height: 62vh;
+  }
+
+  body.map-show .map-side{
+    display:none;
+  }
+
+  /* Botão “Ver mapa” / “Voltar” (se você usar) */
+  .map-toggle{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding:10px 12px;
+    border-radius:12px;
+    border:1px solid rgba(0,0,0,.12);
+    background:#fff;
+    font-weight:900;
+    cursor:pointer;
+  }
+}
+
 }
