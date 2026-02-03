@@ -257,9 +257,9 @@ img{ display:block; max-width:100%; }
 
 /* SUBBAR (abaixo do header): abas marrom/verde */
 .subbar{
-  max-width:1200px;
+  max-width:1100px;   /* 🔑 igual ao header e conteúdo */
   margin:18px auto 14px;
-  padding: 0 12px;
+  padding:0 30px;     /* 🔑 mesmo padding */
   display:flex;
   justify-content:flex-end;
 }
