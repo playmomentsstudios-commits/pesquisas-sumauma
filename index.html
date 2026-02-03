@@ -22,34 +22,38 @@
   <!-- HEADER: logo à esquerda + menu à direita -->
   <header class="header">
     <div class="header-overlay">
-      <!-- LINHA 1 (topo): logo + menu -->
+      <!-- LINHA 1 (topo): logo + menu + busca (no desktop) -->
       <div class="header-top">
         <a class="header-logo" href="/" data-link>
           <!-- ID para trocar via config do site -->
           <img id="siteLogoImg" src="./public/assets/logos/sumauma-logo.png" alt="Instituto Sumaúma">
         </a>
 
-        <nav class="menu">
-          <div class="dropdown" id="pesquisasDropdown">
-            <button type="button" class="menu-btn" aria-haspopup="true" aria-expanded="false">
-              Pesquisas <span class="chev">▾</span>
-            </button>
-            <div class="dropdown-panel" role="menu" aria-label="Pesquisas"></div>
+        <!-- Ações à direita (menu + busca) -->
+        <div class="header-actions">
+          <nav class="menu">
+            <div class="dropdown" id="pesquisasDropdown">
+              <button type="button" class="menu-btn" aria-haspopup="true" aria-expanded="false">
+                Pesquisas <span class="chev">▾</span>
+              </button>
+              <div class="dropdown-panel" role="menu" aria-label="Pesquisas"></div>
+            </div>
+
+            <a class="menu-link" href="https://sumauma.org" target="_blank" rel="noopener noreferrer">
+              Institucional
+            </a>
+          </nav>
+
+          <!-- Busca (desktop: mesma linha; mobile/tablet: desce via CSS) -->
+          <div class="header-search">
+            <div class="menu-search">
+              <input id="pesquisasSearch" type="search" placeholder="Buscar pesquisas..." aria-label="Buscar pesquisas" />
+              <div id="pesquisasSearchPanel" class="search-panel" role="listbox" aria-label="Resultados da busca"></div>
+            </div>
           </div>
-
-          <a class="menu-link" href="https://sumauma.org" target="_blank" rel="noopener noreferrer">
-            Institucional
-          </a>
-        </nav>
-      </div>
-
-      <!-- LINHA 2 (abaixo): busca -->
-      <div class="header-search">
-        <div class="menu-search">
-          <input id="pesquisasSearch" type="search" placeholder="Buscar pesquisas..." aria-label="Buscar pesquisas" />
-          <div id="pesquisasSearchPanel" class="search-panel" role="listbox" aria-label="Resultados da busca"></div>
         </div>
       </div>
+
       <div class="header-credit" id="headerCredit" aria-live="polite"></div>
     </div>
   </header>
