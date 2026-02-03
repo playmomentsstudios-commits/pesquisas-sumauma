@@ -841,7 +841,6 @@ img{ display:block; max-width:100%; }
   .header-logo img{ height:60px; }
   .menu{ gap:14px; }
   .menu-btn, .menu-link{ font-size:15px; }
-  .header-actions{ width:100%; flex-wrap:wrap; gap:12px; }
   .menu{ order:1; }
   .header-search{ order:2; width:100%; justify-content:center; margin-top:12px; }
   .header-search .menu-search{ width:100%; max-width:680px; }
