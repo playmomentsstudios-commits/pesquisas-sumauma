@@ -1536,21 +1536,6 @@ body.no-scroll{ overflow:hidden; }
     gap: 18px;
   }
 
-  /* Wrapper da busca (remove caixa/fundo do desktop atual) */
-  .header-search,
-  .search-wrap,
-  .search-bar,
-  .pesquisa-busca {
-    background: transparent !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    border: 0 !important;
-    box-shadow: none !important;
-
-    display: flex;
-    align-items: center;
-  }
-
   /* Input com tamanho controlado, só borda (leve) */
   .header-search input,
   .search-wrap input,
