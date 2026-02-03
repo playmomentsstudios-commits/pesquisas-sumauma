@@ -261,20 +261,35 @@ img{ display:block; max-width:100%; }
   display:flex;
   justify-content:flex-end;
 }
+
+/* container dos botões */
 .subbar-right{
   display:flex;
-  gap:10px;
-  flex-wrap:wrap;
+  gap:6px;
+  flex-wrap:nowrap;          /* NÃO quebra linha */
+  width:center;
+  max-width:342px;           /* ajuste se quiser mais largo */
 }
+
+/* botões */
 .tab{
-  display:inline-block;
-  padding:10px 14px;
-  border-radius:6px;
+  flex:1;                    /* todos com mesma largura */
+  text-align:center;         /* texto centralizado */
+  padding:10px 10px;
+  border-radius:5px;
   font-weight:bold;
   color:#fff;
+  white-space:nowrap;        /* evita quebra de texto */
 }
-.tab-idle{ background:var(--brown); }
-.tab-active{ background:var(--green); }
+
+/* estados */
+.tab-idle{ 
+  background:var(--brown); 
+}
+
+.tab-active{ 
+  background:var(--green); 
+}
 
 /* Layout mapa */
 .layout-mapa{
