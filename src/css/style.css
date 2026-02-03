@@ -855,7 +855,7 @@ img{ display:block; max-width:100%; }
   .header-top{ gap:12px; }
   .header-logo img{ height:60px; }
   .menu{ gap:14px; }
-  .menu-btn, .menu-link{ font-size:15px; }
+  .menu-btn, .menu-link{ font-size:13px; }
   .menu{ order:1; }
   .header-search{ order:2; width:100%; justify-content:center; margin-top:12px; }
   .header-search .menu-search{ width:100%; max-width:680px; }
