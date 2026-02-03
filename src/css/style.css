@@ -42,9 +42,14 @@ img{ display:block; max-width:100%; }
   margin-top:0;
   padding:0 12px;
 }
-
 .header-overlay{
-  background:transparent;
+  height:100%;
+  background:rgba(0, 0, 0, 0);
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  justify-content:center;
+  padding:18px 30px;
 }
 
 .header-logo img{
