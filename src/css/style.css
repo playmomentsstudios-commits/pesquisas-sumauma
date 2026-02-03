@@ -1537,7 +1537,7 @@ body.no-scroll{ overflow:hidden; }
   }
 
   /* Input com tamanho controlado, só borda (leve) */
-  .header-search input,
+ 
   .search-wrap input,
   .search-bar input,
   .pesquisa-busca input {
