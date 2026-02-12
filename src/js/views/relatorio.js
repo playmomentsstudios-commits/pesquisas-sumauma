@@ -32,8 +32,27 @@ async function renderRelatorio(p){
         <p>${escapeHtml(p.sinopse || "Relatório ainda não disponível.")}</p>
 
         <div style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap">
-          ${pdf ? `<a class="btn primary" href="${escapeHtml(pdf)}" target="_blank" rel="noopener noreferrer">Download PDF</a>` : ""}
-          ${leitura ? `<a class="btn" href="${escapeHtml(leitura)}" target="_blank" rel="noopener noreferrer">Abrir leitura</a>` : ""}
+          ${
+            pdf
+              ? `<a class="btn primary"
+                   href="${escapeHtml(pdf)}"
+                   download
+                   rel="noopener noreferrer">
+                   Download PDF
+                 </a>`
+              : ""
+          }
+
+          ${
+            leitura
+              ? `<a class="btn"
+                   href="${escapeHtml(leitura)}"
+                   target="_blank"
+                   rel="noopener noreferrer">
+                   Abrir leitura
+                 </a>`
+              : ""
+          }
         </div>
 
         ${
