@@ -90,7 +90,7 @@ img{ display:block; max-width:100%; }
   border:0;
   cursor:pointer;
   padding:0;
-  text-decoration:underline;
+  text-decoration:none; /* ✅ alterado: removido sublinhado do menu */
 }
 .chev{ opacity:.9; }
 
