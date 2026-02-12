@@ -107,25 +107,53 @@ async function renderRelatorio(p){
   `.trim();
 }
 
+/**
+ * ✅ Clique sempre responde:
+ * - Abre uma aba "about:blank" NO CLIQUE (não é bloqueado).
+ * - Tenta baixar via blob.
+ * - Se falhar (CORS etc.), usa o link direto (download=1) nessa aba.
+ */
 function bindRelatorioDownload(){
   const link = document.querySelector("[data-download-pdf]");
   if (!link) return;
 
   link.addEventListener("click", async (e) => {
-    // Mantém o link como fallback (target=_blank) CASO o fetch falhe.
-    // Se o fetch der certo, a gente cancela a navegação e baixa direto.
     const url = link.getAttribute("data-pdf") || "";
     const filename = link.getAttribute("data-fn") || "relatorio.pdf";
+    const href = link.getAttribute("href") || url;
+
     if (!url) return;
 
+    // abre ABA imediatamente (popup blocker não bloqueia)
+    const w = window.open("about:blank", "_blank", "noopener,noreferrer");
+
     try{
-      e.preventDefault(); // vamos tentar baixar sem abrir visualizador
-      await forceDownload(url, filename);
+      // tenta baixar sem abrir visualizador
+      const res = await fetch(url, { mode: "cors" });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const blob = await res.blob();
+
+      const objectUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = objectUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(objectUrl);
+
+      // fecha a aba em branco se abriu
+      if (w && !w.closed) w.close();
+
+      e.preventDefault();
     }catch(err){
-      // Se falhar (CORS etc.), deixa o link fazer o trabalho em nova aba.
-      // Re-dispara a navegação do jeito nativo:
-      const href = link.getAttribute("href");
-      if (href) window.open(href, "_blank", "noopener,noreferrer");
+      // se falhar (CORS etc.), manda pro link direto na aba já aberta
+      if (w && !w.closed) {
+        w.location.href = href;
+      } else {
+        window.open(href, "_blank", "noopener,noreferrer");
+      }
+      e.preventDefault();
     }
   });
 }
