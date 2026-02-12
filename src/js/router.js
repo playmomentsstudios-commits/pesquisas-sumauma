@@ -2,7 +2,7 @@ import { loadPesquisas, getPesquisaBySlug, wireDropdown, spaLinkHandler, getSpaR
 import { getBasePath, stripBase, withBase } from "./basepath.js";
 import renderHome from "./views/home.js";
 import renderPesquisa from "./views/pesquisa.js";
-import renderRelatorio from "./views/relatorio.js";
+import renderRelatorio, { bindRelatorioDownload } from "./views/relatorio.js";
 import renderFichaTecnica from "./views/ficha-tecnica.js";
 import renderMapaPesquisa from "./views/mapa-pesquisa.js";
 import { getPesquisaConteudoKV, buildPesquisaResumoFromKV } from "../data/pesquisaConteudoKV.js";
@@ -134,8 +134,10 @@ export async function initRouter(){
       }
       if (sub === "relatorio"){
         app.innerHTML = await renderRelatorio(item);
+        bindRelatorioDownload();
         return;
       }
+
 
       dlog("view=notFound");
       notFound(slug, pesquisas.map(p => p.slug));
