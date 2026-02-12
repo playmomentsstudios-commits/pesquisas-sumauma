@@ -19,9 +19,41 @@ function tabs(slug){
   `;
 }
 
+/**
+ * Força download do PDF (sem abrir visualizador)
+ * Funciona mesmo quando o arquivo está em Supabase/CDN (outra origem).
+ */
+async function forceDownload(url, filename = "relatorio.pdf"){
+  try{
+    const res = await fetch(url, { mode: "cors" });
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const blob = await res.blob();
+    const objectUrl = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = objectUrl;
+    a.download = filename;
+    a.rel = "noopener noreferrer";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    URL.revokeObjectURL(objectUrl);
+  }catch(err){
+    // fallback: se falhar, abre em nova aba (pelo menos não quebra)
+    window.open(url, "_blank", "noopener,noreferrer");
+  }
+}
+
 async function renderRelatorio(p){
   const pdf = p.relatorioPdf || "";
   const leitura = p.leituraUrl || "";
+
+  const safeSlug = String(p.slug || "pesquisa").replace(/[^\w-]+/g, "-");
+  const safeAno = String(p.anoBase || "").replace(/[^\d]+/g, "");
+  const filename = `relatorio-${safeSlug}${safeAno ? `-${safeAno}` : ""}.pdf`;
+
   return `
     ${tabs(p.slug)}
 
@@ -34,12 +66,9 @@ async function renderRelatorio(p){
         <div style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap">
           ${
             pdf
-              ? `<a class="btn primary"
-                   href="${escapeHtml(pdf)}"
-                   download
-                   rel="noopener noreferrer">
+              ? `<button class="btn primary" type="button" data-download-pdf data-pdf="${escapeHtml(pdf)}" data-fn="${escapeHtml(filename)}">
                    Download PDF
-                 </a>`
+                 </button>`
               : ""
           }
 
@@ -71,5 +100,21 @@ async function renderRelatorio(p){
   `;
 }
 
+/**
+ * Chame isso depois de inserir o HTML do relatório no DOM.
+ * Ex: app.innerHTML = await renderRelatorio(p); bindRelatorioDownload();
+ */
+function bindRelatorioDownload(){
+  const btn = document.querySelector("[data-download-pdf]");
+  if(!btn) return;
+
+  btn.addEventListener("click", () => {
+    const url = btn.getAttribute("data-pdf") || "";
+    const filename = btn.getAttribute("data-fn") || "relatorio.pdf";
+    if(!url) return;
+    forceDownload(url, filename);
+  });
+}
+
 export default renderRelatorio;
-export { renderRelatorio };
+export { renderRelatorio, bindRelatorioDownload };
