@@ -19,31 +19,27 @@ function tabs(slug){
   `;
 }
 
-/**
- * Força download do PDF (sem abrir visualizador)
- * Funciona mesmo quando o arquivo está em Supabase/CDN (outra origem).
- */
+function withDownloadParam(url){
+  if (!url) return "";
+  // Supabase geralmente suporta ?download=1
+  const hasQ = url.includes("?");
+  return url + (hasQ ? "&" : "?") + "download=1";
+}
+
 async function forceDownload(url, filename = "relatorio.pdf"){
-  try{
-    const res = await fetch(url, { mode: "cors" });
-    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+  // Tenta forçar download via blob (não abre visualizador)
+  const res = await fetch(url, { mode: "cors" });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const blob = await res.blob();
 
-    const blob = await res.blob();
-    const objectUrl = URL.createObjectURL(blob);
-
-    const a = document.createElement("a");
-    a.href = objectUrl;
-    a.download = filename;
-    a.rel = "noopener noreferrer";
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-
-    URL.revokeObjectURL(objectUrl);
-  }catch(err){
-    // fallback: se falhar, abre em nova aba (pelo menos não quebra)
-    window.open(url, "_blank", "noopener,noreferrer");
-  }
+  const objectUrl = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = objectUrl;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(objectUrl);
 }
 
 async function renderRelatorio(p){
@@ -53,6 +49,9 @@ async function renderRelatorio(p){
   const safeSlug = String(p.slug || "pesquisa").replace(/[^\w-]+/g, "-");
   const safeAno = String(p.anoBase || "").replace(/[^\d]+/g, "");
   const filename = `relatorio-${safeSlug}${safeAno ? `-${safeAno}` : ""}.pdf`;
+
+  // link direto (fallback) em nova aba
+  const direct = pdf ? withDownloadParam(pdf) : "";
 
   return `
     ${tabs(p.slug)}
@@ -66,9 +65,17 @@ async function renderRelatorio(p){
         <div style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap">
           ${
             pdf
-              ? `<button class="btn primary" type="button" data-download-pdf data-pdf="${escapeHtml(pdf)}" data-fn="${escapeHtml(filename)}">
-                   Download PDF
-                 </button>`
+              ? `
+                <a class="btn primary"
+                   href="${escapeHtml(direct)}"
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   data-download-pdf
+                   data-pdf="${escapeHtml(pdf)}"
+                   data-fn="${escapeHtml(filename)}">
+                  Download PDF
+                </a>
+              `
               : ""
           }
 
@@ -97,22 +104,29 @@ async function renderRelatorio(p){
         }
       </div>
     </section>
-  `;
+  `.trim();
 }
 
-/**
- * Chame isso depois de inserir o HTML do relatório no DOM.
- * Ex: app.innerHTML = await renderRelatorio(p); bindRelatorioDownload();
- */
 function bindRelatorioDownload(){
-  const btn = document.querySelector("[data-download-pdf]");
-  if(!btn) return;
+  const link = document.querySelector("[data-download-pdf]");
+  if (!link) return;
 
-  btn.addEventListener("click", () => {
-    const url = btn.getAttribute("data-pdf") || "";
-    const filename = btn.getAttribute("data-fn") || "relatorio.pdf";
-    if(!url) return;
-    forceDownload(url, filename);
+  link.addEventListener("click", async (e) => {
+    // Mantém o link como fallback (target=_blank) CASO o fetch falhe.
+    // Se o fetch der certo, a gente cancela a navegação e baixa direto.
+    const url = link.getAttribute("data-pdf") || "";
+    const filename = link.getAttribute("data-fn") || "relatorio.pdf";
+    if (!url) return;
+
+    try{
+      e.preventDefault(); // vamos tentar baixar sem abrir visualizador
+      await forceDownload(url, filename);
+    }catch(err){
+      // Se falhar (CORS etc.), deixa o link fazer o trabalho em nova aba.
+      // Re-dispara a navegação do jeito nativo:
+      const href = link.getAttribute("href");
+      if (href) window.open(href, "_blank", "noopener,noreferrer");
+    }
   });
 }
 
