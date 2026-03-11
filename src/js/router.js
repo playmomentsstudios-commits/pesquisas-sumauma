@@ -2,7 +2,7 @@ import { loadPesquisas, getPesquisaBySlug, wireDropdown, spaLinkHandler, getSpaR
 import { getBasePath, stripBase, withBase } from "./basepath.js";
 import renderHome from "./views/home.js";
 import renderPesquisa from "./views/pesquisa.js";
-import renderRelatorio, { bindRelatorioDownload } from "./views/relatorio.js";
+import renderRelatorio from "./views/relatorio.js";
 import renderFichaTecnica from "./views/ficha-tecnica.js";
 import renderMapaPesquisa from "./views/mapa-pesquisa.js";
 import { getPesquisaConteudoKV, buildPesquisaResumoFromKV } from "../data/pesquisaConteudoKV.js";
