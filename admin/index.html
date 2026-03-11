@@ -46,7 +46,7 @@
 
           <!-- PAINEL: PESQUISAS -->
           <section id="mainPanelPesquisas" class="admin-grid" data-main-panel="pesquisas">
-            <aside class="admin-sidebar">
+            <aside class="admin-sidebar aurora-panel">
             <div class="sidebar-head">
               <button id="btn-new" class="btn primary" type="button">Nova pesquisa</button>
               <div class="side-title">Pesquisas cadastradas</div>
@@ -55,8 +55,8 @@
             <div id="researchListMsg" class="small muted"></div>
             </aside>
 
-            <section class="admin-editor">
-            <form id="pesquisa-form" class="card hidden">
+            <section class="admin-editor aurora-editor">
+            <form id="pesquisa-form" class="card hidden glass-card">
               <div class="form-head">
                 <div>
                   <h2 id="form-title">Nova pesquisa</h2>
@@ -83,7 +83,7 @@
               </div>
 
               <div class="tab-panel" data-tab-panel="config">
-                <h3>Configuração</h3>
+                <div class="section-head"><h3>Configuração</h3><button class="btn primary section-save" type="button" data-save-section="config">Salvar configuração</button></div>
                 <div class="grid-2">
                   <label>
                     Slug
@@ -171,7 +171,7 @@
               </div>
 
               <div class="tab-panel hidden" data-tab-panel="resumo">
-                <h3>Pesquisa</h3>
+                <div class="section-head"><h3>Pesquisa</h3><button class="btn primary section-save" type="button" data-save-section="resumo">Salvar conteúdo</button></div>
                 <div class="grid-2">
                   <label>
                     Resumo
@@ -205,7 +205,7 @@
               </div>
 
               <div class="tab-panel hidden" data-tab-panel="ficha">
-                <h3>Ficha técnica</h3>
+                <div class="section-head"><h3>Ficha técnica</h3><button class="btn primary section-save" type="button" data-save-section="ficha">Salvar ficha</button></div>
                 <div class="grid-2">
                   <label>
                     Realização
@@ -255,7 +255,7 @@
 
               <div class="tab-panel hidden" data-tab-panel="mapa">
                 <div class="pontos-head">
-                  <h3>Mapa</h3>
+                  <div class="section-head"><h3>Mapa</h3><span class="section-kicker">CSV e pontos são salvos separadamente nesta aba.</span></div>
                 </div>
                 <div id="mapa-update-card" class="card" style="margin:12px 0; padding:12px;">
                   <div style="display:flex; gap:12px; align-items:flex-start; justify-content:space-between; flex-wrap:wrap;">
