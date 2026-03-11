@@ -9,7 +9,7 @@ const isActive = sub === "relatorio";
 const url = withBase("/" + s + "/" + sub);
 
 ```
-return '<a class="tab ' + (isActive ? "tab-active" : "tab-idle") + '" href="' + url + '" data-link>' + label + '</a>';
+return `<a class="tab ${isActive ? "tab-active" : "tab-idle"}" href="${url}" data-link>${label}</a>`;
 ```
 
 };
@@ -30,11 +30,31 @@ const leitura = p.leituraUrl || "";
 const safeSlug = String(p.slug || "pesquisa").replace(/[^\w-]+/g,"-");
 const safeAno = String(p.anoBase || "").replace(/[^\d]+/g,"");
 
-const filename = "relatorio-" + safeSlug + (safeAno ? "-" + safeAno : "") + ".pdf";
+const filename = `relatorio-${safeSlug}${safeAno ? "-" + safeAno : ""}.pdf`;
 
 const downloadUrl = pdf
 ? pdf + (pdf.includes("?") ? "&download=1" : "?download=1")
 : "";
+
+const downloadBtn = pdf
+? `<a class="btn primary"
+         href="${escapeHtml(downloadUrl)}"
+         download="${escapeHtml(filename)}"
+         rel="noopener noreferrer">
+         Baixar PDF        </a>`
+: "";
+
+const leituraBtn = leitura
+? `<a class="btn"
+         href="${escapeHtml(leitura)}"
+         target="_blank"
+         rel="noopener noreferrer">
+         Abrir leitura        </a>`
+: "";
+
+const viewer = pdf
+? `<div style="margin-top:16px;border-radius:16px;overflow:hidden;border:1px solid #e6e6e6;">          <iframe src="${escapeHtml(pdf)}" title="Relatório PDF" style="width:100%;height:80vh;border:0;"></iframe>        </div>`
+: `<p style="margin-top:12px;color:#666;">Relatório ainda não disponível.</p>`;
 
 return `
 ${tabs(p.slug)}
@@ -53,46 +73,11 @@ ${tabs(p.slug)}
     <p>${escapeHtml(p.sinopse || "Relatório ainda não disponível.")}</p>
 
     <div style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap">
-
-      ${
-        pdf
-        ? `
-        <a class="btn primary"
-           href="${escapeHtml(downloadUrl)}"
-           download="${escapeHtml(filename)}"
-           rel="noopener noreferrer">
-           Baixar PDF
-        </a>
-        `
-        : ""
-      }
-
-      ${
-        leitura
-        ? `
-        <a class="btn"
-           href="${escapeHtml(leitura)}"
-           target="_blank"
-           rel="noopener noreferrer">
-           Abrir leitura
-        </a>
-        `
-        : ""
-      }
-
+      ${downloadBtn}
+      ${leituraBtn}
     </div>
 
-    ${
-      pdf
-      ? `
-      <div style="margin-top:16px;border-radius:16px;overflow:hidden;border:1px solid #e6e6e6;">
-        <iframe src="${escapeHtml(pdf)}" title="Relatório PDF" style="width:100%;height:80vh;border:0;"></iframe>
-      </div>
-      `
-      : leitura
-      ? ""
-      : `<p style="margin-top:12px;color:#666;">Relatório ainda não disponível.</p>`
-    }
+    ${viewer}
 
   </div>
 </section>
