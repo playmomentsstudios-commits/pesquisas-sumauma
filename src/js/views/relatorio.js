@@ -23,18 +23,17 @@ function tabs(slug) {
 }
 
 async function renderRelatorio(p) {
-
   const pdf = p.relatorioPdf || "";
   const leitura = p.leituraUrl || "";
 
-  const safeSlug = String(p.slug || "pesquisa").replace(/[^\w-]+/g,"-");
-  const safeAno = String(p.anoBase || "").replace(/[^\d]+/g,"");
-
+  const safeSlug = String(p.slug || "pesquisa").replace(/[^\w-]+/g, "-");
+  const safeAno = String(p.anoBase || "").replace(/[^\d]+/g, "");
   const filename = "relatorio-" + safeSlug + (safeAno ? "-" + safeAno : "") + ".pdf";
 
   let downloadUrl = "";
   if (pdf) {
-    downloadUrl = pdf + (pdf.indexOf("?") > -1 ? "&download=1" : "?download=1");
+    downloadUrl =
+      pdf + (pdf.includes("?") ? "&" : "?") + "download=" + encodeURIComponent(filename);
   }
 
   let html = "";
@@ -53,7 +52,7 @@ async function renderRelatorio(p) {
   html += '<div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">';
 
   if (pdf) {
-    html += '<a class="btn primary" href="' + escapeHtml(downloadUrl) + '" download="' + escapeHtml(filename) + '">Baixar PDF</a>';
+    html += '<a class="btn primary" href="' + escapeHtml(downloadUrl) + '" target="_blank" rel="noopener noreferrer">Baixar PDF</a>';
   }
 
   if (leitura) {
