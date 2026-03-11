@@ -6,7 +6,8 @@ const state = {
   pesquisas: [],
   current: null,
   pontos: [],
-  editingPonto: null
+  editingPonto: null,
+  dirty: false
 };
 
 let currentResearchId = null;
@@ -113,6 +114,31 @@ const quickSyncFields = new Set([
 
 function $(id){
   return document.getElementById(id);
+}
+
+function setDirty(flag = true){
+  state.dirty = !!flag;
+  document.body.classList.toggle("is-dirty", state.dirty);
+  const badge = document.getElementById("dirtyBadge");
+  if (badge) badge.textContent = state.dirty ? "Alterações não salvas" : "Tudo salvo";
+}
+
+function syncCurrentResearchFromPayload(payload){
+  const existing = state.current && typeof state.current === "object" ? state.current : {};
+  const merged = {
+    ...existing,
+    ...payload,
+    id: window.currentResearchId || currentResearchId || existing.id || null,
+    updated_at: new Date().toISOString()
+  };
+  state.current = merged;
+  const idx = researchCache.findIndex((row) => String(row.id) === String(merged.id));
+  if (idx >= 0) {
+    researchCache[idx] = { ...researchCache[idx], ...merged };
+  } else if (merged.id) {
+    researchCache.unshift(merged);
+  }
+  renderResearchList(researchCache);
 }
 
 function setSaveMsg(text, ok = false){
@@ -227,6 +253,12 @@ diag.style.color = "#95a4c4";
 diag.id = "sbDiag";
 els.loginPanel?.appendChild(diag);
 
+const dirtyBadge = document.createElement("div");
+dirtyBadge.id = "dirtyBadge";
+dirtyBadge.className = "dirty-badge";
+dirtyBadge.textContent = "Tudo salvo";
+document.querySelector(".form-head")?.appendChild(dirtyBadge);
+
 init();
 
 function setMainTab(tab){
@@ -310,6 +342,24 @@ async function init(){
     nodes.forEach((node) => {
       if (node !== target) node.value = target.value;
     });
+  });
+
+  els.form?.addEventListener("input", (event) => {
+    if (event.target?.closest("#pesquisa-form")) setDirty(true);
+  });
+
+  els.form?.addEventListener("change", (event) => {
+    if (event.target?.closest("#pesquisa-form")) setDirty(true);
+  });
+
+  document.querySelectorAll("[data-save-section]").forEach((btn) => {
+    btn.addEventListener("click", () => savePesquisa(btn.dataset.saveSection || "all"));
+  });
+
+  window.addEventListener("beforeunload", (event) => {
+    if (!state.dirty) return;
+    event.preventDefault();
+    event.returnValue = "";
   });
 
   els.form?.addEventListener("input", debounce(() => {
@@ -406,6 +456,7 @@ function setSession(session){
   if (loggedIn) {
     refreshListAndSelect(null);
     restoreMainTab();
+    setDirty(false);
   } else {
     setMainTab("pesquisas");
   }
@@ -504,6 +555,7 @@ function clearForm(){
   loadPontos();
   setSaveMsg("");
   adminMsg("");
+  setDirty(false);
 }
 
 async function loadResearchToForm(pesquisa){
@@ -529,6 +581,7 @@ async function loadResearchToForm(pesquisa){
   loadPontos();
   setSaveMsg(pesquisa?.id ? `Editando: ${pesquisa.slug || ""}` : "", true);
   adminMsg(pesquisa?.id ? `Editando: ${pesquisa.slug || ""}` : "", "muted");
+  setDirty(false);
 }
 
 async function loadPesquisaResumoKV(pesquisaId){
@@ -765,10 +818,10 @@ async function persistCsvUrlOnResearch(csvUrl){
 
 async function handleSavePesquisa(e){
   e.preventDefault();
-  await savePesquisa();
+  await savePesquisa("all");
 }
 
-async function savePesquisa(){
+async function savePesquisa(section = "all"){
   const client = window.supabaseClient;
   if (!client) {
     hideAlert();
@@ -804,9 +857,10 @@ async function savePesquisa(){
   const isNew = !currentId;
   hideAlert();
   setSaveDebug(null);
-  showAlert("muted", "Salvando...");
-  setSaveMsg("Salvando...");
-  adminMsg("Salvando...", "muted");
+  const sectionLabel = section === "config" ? "configuração" : section === "resumo" ? "conteúdo da pesquisa" : section === "ficha" ? "ficha técnica" : "pesquisa";
+  showAlert("muted", `Salvando ${sectionLabel}...`);
+  setSaveMsg(`Salvando ${sectionLabel}...`);
+  adminMsg(`Salvando ${sectionLabel}...`, "muted");
 
   if (isNew) {
     const res = await client
@@ -854,17 +908,15 @@ async function savePesquisa(){
     return;
   }
 
-  setSaveMsg(isNew ? "Pesquisa criada ✅" : "Pesquisa atualizada ✅", true);
-  adminMsg(isNew ? "Criada ✅" : "Atualizada ✅", "ok");
-  showAlert("ok", isNew ? "Pesquisa cadastrada com sucesso ✅" : "Pesquisa atualizada com sucesso ✅");
+  syncCurrentResearchFromPayload(payload);
+  setDirty(false);
+  setSaveMsg(isNew ? "Pesquisa criada ✅" : `Seção salva: ${sectionLabel} ✅`, true);
+  adminMsg(isNew ? "Criada ✅" : `Seção salva: ${sectionLabel} ✅`, "ok");
+  showAlert("ok", isNew ? "Pesquisa cadastrada com sucesso ✅" : `Alterações salvas em ${sectionLabel} ✅`);
   setSaveDebug(null);
   setTimeout(() => {
     hideAlert();
-  }, 4000);
-
-  if (typeof refreshListAndSelect === "function") {
-    await refreshListAndSelect(window.currentResearchId || currentResearchId);
-  }
+  }, 3000);
 }
 
 async function handleDeletePesquisa(){
