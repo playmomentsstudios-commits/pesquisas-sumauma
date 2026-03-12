@@ -30,7 +30,7 @@ const state = {
   points: [],
   editingPoint: null,
   activePanel: 'pesquisas',
-  activeEditorTab: 'config',
+  activeEditorTab: 'general',
   isLoading: false,
   filters: {
     search: '',
@@ -937,6 +937,10 @@ const ui = {
       const isActive = btn.dataset.tab === panelName;
       btn.setAttribute('aria-selected', isActive);
     });
+
+    document.querySelectorAll('.panel[data-panel]').forEach(panel => {
+      panel.hidden = panel.dataset.panel !== panelName;
+    });
     
     // Carrega dados do site se necessario
     if (panelName === 'site') {
@@ -1147,6 +1151,23 @@ const handlers = {
     document.querySelectorAll('.editor-tab').forEach(btn => {
       btn.addEventListener('click', (e) => {
         ui.setEditorTab(e.currentTarget.dataset.tab);
+      });
+    });
+
+    // Ações locais por bloco/seção
+    document.querySelectorAll('.btn-section-save').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const form = document.getElementById('researchForm');
+        if (!form) return;
+        form.requestSubmit();
+      });
+    });
+
+    document.querySelectorAll('.btn-section-cancel').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (!state.currentResearch) return;
+        ui.fillResearchForm(state.currentResearch);
+        utils.showAlert(document.getElementById('editorAlert'), 'Mudanças locais canceladas.', 'info', 2200);
       });
     });
     
@@ -1406,10 +1427,13 @@ const handlers = {
       await this.loadPoints(research.id);
       
       // Reseta para primeira aba
-      ui.setEditorTab('config');
+      ui.setEditorTab('general');
       
       // Re-renderiza lista para destacar ativo
       ui.renderResearchList(state.researches);
+
+      // Abre editor modular
+      ui.setMainPanel('editor');
       
     } catch (err) {
       console.error('[SelectResearch] Error:', err);
@@ -1464,10 +1488,13 @@ const handlers = {
     if (editorTitle) editorTitle.textContent = 'Nova pesquisa';
     
     // Reseta aba
-    ui.setEditorTab('config');
+    ui.setEditorTab('general');
     
     // Remove destaque da lista
     ui.renderResearchList(state.researches);
+
+    // Foca no editor
+    ui.setMainPanel('editor');
   },
 
   /**

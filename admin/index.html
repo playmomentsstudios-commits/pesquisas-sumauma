@@ -21,27 +21,20 @@
           </div>
         </div>
         <nav class="nav-tabs" aria-label="Seções do painel">
-          <button class="nav-tab" data-tab="pesquisas" aria-selected="true" role="tab" type="button">
-            <span class="nav-tab__icon" aria-hidden="true">📊</span>
-            <span class="nav-tab__label">Pesquisas</span>
-          </button>
-          <button class="nav-tab" data-tab="site" aria-selected="false" role="tab" type="button">
-            <span class="nav-tab__icon" aria-hidden="true">🎨</span>
-            <span class="nav-tab__label">Site</span>
-          </button>
+          <button class="nav-tab" data-tab="pesquisas" aria-selected="true" role="tab" type="button">Researches</button>
+          <button class="nav-tab" data-tab="editor" aria-selected="false" role="tab" type="button">Research Editor</button>
+          <button class="nav-tab" data-tab="mapa" aria-selected="false" role="tab" type="button">Map &amp; Points</button>
+          <button class="nav-tab" data-tab="site" aria-selected="false" role="tab" type="button">Site Settings</button>
         </nav>
         <div class="nav-footer">
           <div class="nav-user">
             <span class="nav-user__label">Sessão</span>
             <span id="userEmail" class="nav-user__email">Não autenticado</span>
           </div>
-          <button id="btnLogout" class="btn btn--icon btn--danger-outline" type="button" aria-label="Sair do sistema" title="Sair">
-            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-              <path d="M16 17l5-5-5-5M21 12H9M13 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-            </svg>
-          </button>
+          <button id="btnLogout" class="btn btn--icon btn--danger-outline" type="button" aria-label="Sair do sistema" title="Sair">⎋</button>
         </div>
       </aside>
+
       <main class="workspace">
         <section id="loginStage" class="login-stage" aria-labelledby="loginTitle">
           <div class="login-stage__bg" id="loginBg"></div>
@@ -64,17 +57,13 @@
               <div id="loginError" class="alert alert--error" role="alert" hidden></div>
               <div id="loginHelp" class="login-form__help"></div>
               <div class="login-form__actions">
-                <button class="btn btn--primary btn--block" type="submit">
-                  <span class="btn__text">Entrar</span>
-                  <span class="btn__loader" hidden>
-                    <span class="spinner spinner--sm"></span>
-                  </span>
-                </button>
+                <button class="btn btn--primary btn--block" type="submit"><span class="btn__text">Entrar</span><span class="btn__loader" hidden><span class="spinner spinner--sm"></span></span></button>
                 <button id="btnRequestAccess" class="btn btn--ghost btn--block" type="button">Solicitar acesso</button>
               </div>
             </form>
           </div>
         </section>
+
         <section id="adminDashboard" class="dashboard" hidden>
           <header class="dashboard__hero" id="dashboardHero">
             <div class="dashboard__hero-bg" id="dashboardBg"></div>
@@ -82,457 +71,250 @@
             <div class="dashboard__hero-content">
               <img id="dashboardLogo" class="dashboard__hero-logo" alt="" hidden />
               <span class="dashboard__hero-kicker">Painel de pesquisas</span>
-              <h2 class="dashboard__hero-title">Gerencie pesquisas e conteúdo</h2>
-              <p class="dashboard__hero-desc">Cadastre novas pesquisas, edite pontos no mapa e configure o site.</p>
+              <h2 class="dashboard__hero-title">Workspace de gestão editorial</h2>
+              <p class="dashboard__hero-desc">Edite pesquisas por seções, mantenha o mapa atualizado e publique configurações do site.</p>
             </div>
           </header>
-          <section id="panelPesquisas" class="panel" data-panel="pesquisas">
-            <div class="panel__layout">
-              <aside class="panel__sidebar">
-                <div class="panel__sidebar-header">
-                  <div>
-                    <span class="kicker">Acervo</span>
-                    <h3 class="panel__sidebar-title">Pesquisas</h3>
-                  </div>
-                  <button id="btnNewResearch" class="btn btn--primary btn--sm" type="button">
-                    <span aria-hidden="true">+</span> Nova
-                  </button>
+
+          <section class="panel" data-panel="pesquisas">
+            <div class="panel-card panel-card--list">
+              <div class="panel__sidebar-header">
+                <div>
+                  <span class="kicker">Acervo</span>
+                  <h3 class="panel__sidebar-title">Researches</h3>
                 </div>
-                <div class="panel__toolbar">
-                  <div class="search-box">
-                    <input id="researchSearch" class="search-box__input" type="search" placeholder="Buscar pesquisa..." autocomplete="off" />
-                    <span class="search-box__icon" aria-hidden="true">🔍</span>
-                  </div>
-                  <select id="researchFilter" class="form-select form-select--sm">
-                    <option value="all">Todos</option>
-                    <option value="published">Publicados</option>
-                    <option value="draft">Rascunhos</option>
-                  </select>
+                <button id="btnNewResearch" class="btn btn--primary btn--sm" type="button">+ Nova</button>
+              </div>
+              <div class="panel__toolbar">
+                <div class="search-box">
+                  <input id="researchSearch" class="search-box__input" type="search" placeholder="Buscar pesquisa..." autocomplete="off" />
                 </div>
-                <div id="researchList" class="research-list">
-                  <div class="skeleton-list">
-                    <div class="skeleton skeleton--item"></div>
-                    <div class="skeleton skeleton--item"></div>
-                    <div class="skeleton skeleton--item"></div>
-                  </div>
-                </div>
-                <div id="researchEmpty" class="empty-state" hidden>
-                  <p class="empty-state__text">Nenhuma pesquisa encontrada</p>
-                </div>
-              </aside>
-              <div class="panel__main">
-                <div id="editorEmpty" class="empty-state empty-state--large">
-                  <div class="empty-state__icon">📋</div>
-                  <h3 class="empty-state__title">Nenhuma pesquisa selecionada</h3>
-                  <p class="empty-state__text">Escolha uma pesquisa na lista ao lado ou crie uma nova.</p>
-                </div>
-                <form id="researchForm" class="editor" hidden>
-                  <header class="editor__header">
-                    <div class="editor__header-main">
-                      <span class="kicker">Editor</span>
-                      <h3 id="editorTitle" class="editor__title">Nova pesquisa</h3>
-                      <p class="editor__subtitle">Configure os dados da pesquisa e seu conteúdo editorial.</p>
-                    </div>
-                    <div class="editor__actions">
-                      <button id="btnPreviewPublic" class="btn btn--secondary" type="button">
-                        <span aria-hidden="true">👁</span> Visualizar
-                      </button>
-                      <button id="btnDeleteResearch" class="btn btn--danger-outline" type="button" hidden>Excluir</button>
-                      <button id="btnSaveResearch" class="btn btn--primary" type="submit">
-                        <span class="btn__text">Salvar</span>
-                        <span class="btn__loader" hidden>
-                          <span class="spinner spinner--sm"></span>
-                        </span>
-                      </button>
-                    </div>
-                  </header>
-                  <div id="editorAlert" class="alert" role="alert" hidden></div>
-                  <nav class="editor__tabs" aria-label="Abas do editor">
-                    <button class="editor-tab" data-tab="config" aria-selected="true" role="tab" type="button">Configuração</button>
-                    <button class="editor-tab" data-tab="content" aria-selected="false" role="tab" type="button">Conteúdo</button>
-                    <button class="editor-tab" data-tab="team" aria-selected="false" role="tab" type="button">Equipe</button>
-                    <button class="editor-tab" data-tab="map" aria-selected="false" role="tab" type="button">Mapa</button>
-                  </nav>
-                  <div class="editor__panel" data-tab-panel="config">
-                    <div class="form-grid form-grid--2">
-                      <div class="form-group">
-                        <label class="form-label" for="cfgSlug">Slug <span class="required">*</span></label>
-                        <input id="cfgSlug" class="form-input" type="text" name="slug" required placeholder="nome-da-pesquisa" pattern="[a-z0-9-]+" />
-                        <span class="form-hint">Usado na URL: /nome-da-pesquisa</span>
-                      </div>
-                      <div class="form-group">
-                        <label class="form-label" for="cfgTitle">Título <span class="required">*</span></label>
-                        <input id="cfgTitle" class="form-input" type="text" name="titulo" required />
-                      </div>
-                      <div class="form-group">
-                        <label class="form-label" for="cfgYear">Ano base</label>
-                        <input id="cfgYear" class="form-input" type="text" name="anoBase" placeholder="2024" />
-                      </div>
-                      <div class="form-group">
-                        <label class="form-label" for="cfgOrder">Ordem</label>
-                        <input id="cfgOrder" class="form-input" type="number" name="ordem" min="0" value="0" />
-                      </div>
-                      <div class="form-group">
-                        <label class="form-label" for="cfgStatus">Status</label>
-                        <select id="cfgStatus" class="form-select" name="status">
-                          <option value="true">Publicado</option>
-                          <option value="false">Rascunho</option>
-                        </select>
-                      </div>
-                    </div>
-                    <div class="form-group">
-                      <label class="form-label" for="cfgShortDesc">Descrição curta</label>
-                      <textarea id="cfgShortDesc" class="form-input" name="descricaoCurta" rows="2"></textarea>
-                    </div>
-                    <div class="form-group">
-                      <label class="form-label" for="cfgSynopsis">Sinopse do relatório</label>
-                      <textarea id="cfgSynopsis" class="form-input" name="sinopse" rows="3"></textarea>
-                    </div>
-                    <div class="upload-grid">
-                      <div class="upload-card">
-                        <h4 class="upload-card__title">Capa da pesquisa</h4>
-                        <div class="upload-zone" data-upload="cover">
-                          <input type="file" name="capaFile" accept="image/*" hidden />
-                          <div class="upload-zone__prompt">
-                            <span class="upload-zone__icon">🖼</span>
-                            <span class="upload-zone__text">Arraste ou clique para upload</span>
-                          </div>
-                          <img class="upload-zone__preview" hidden />
-                        </div>
-                        <input type="hidden" name="capaUrl" />
-                      </div>
-                      <div class="upload-card">
-                        <h4 class="upload-card__title">Relatório PDF</h4>
-                        <div class="upload-zone" data-upload="report">
-                          <input type="file" name="relatorioFile" accept="application/pdf" hidden />
-                          <div class="upload-zone__prompt">
-                            <span class="upload-zone__icon">📄</span>
-                            <span class="upload-zone__text">Arraste ou clique para upload</span>
-                          </div>
-                        </div>
-                        <div class="form-group" style="margin-top: 12px;">
-                          <label class="form-label">URL de leitura (opcional)</label>
-                          <input type="url" class="form-input" name="relatorioLeituraUrl" placeholder="https://..." />
-                        </div>
-                        <input type="hidden" name="relatorioUrl" />
-                      </div>
-                    </div>
-                    <div class="card card--inset">
-                      <h4 class="card__title">Banner do topo</h4>
-                      <div class="form-grid form-grid--2">
-                        <div class="upload-zone upload-zone--sm" data-upload="banner">
-                          <input type="file" id="bannerFile" accept="image/*" hidden />
-                          <div class="upload-zone__prompt">
-                            <span class="upload-zone__icon">🏞</span>
-                            <span class="upload-zone__text">Upload banner</span>
-                          </div>
-                          <img class="upload-zone__preview" hidden />
-                        </div>
-                        <div>
-                          <div class="form-group">
-                            <label class="form-label">URL do banner</label>
-                            <input id="bannerUrl" type="url" class="form-input" placeholder="https://..." />
-                          </div>
-                          <div class="form-group">
-                            <label class="form-label">Crédito da imagem</label>
-                            <input type="text" class="form-input" name="bannerCredito" placeholder="Foto: Nome do autor" />
-                          </div>
-                          <button id="btnSaveBanner" class="btn btn--secondary btn--sm" type="button">Salvar banner</button>
-                        </div>
-                      </div>
-                      <div id="bannerMsg" class="form-hint" style="margin-top: 8px;"></div>
-                    </div>
-                  </div>
-                  <div class="editor__panel" data-tab-panel="content" hidden>
-                    <div class="form-group">
-                      <label class="form-label">Resumo geral</label>
-                      <textarea class="form-input" name="resumo" rows="4"></textarea>
-                    </div>
-                    <div class="form-grid form-grid--2">
-                      <div class="form-group">
-                        <label class="form-label">Título da introdução</label>
-                        <input type="text" class="form-input" name="introTitulo" />
-                      </div>
-                      <div class="form-group form-group--full">
-                        <label class="form-label">Texto da introdução</label>
-                        <textarea class="form-input" name="introTexto" rows="4"></textarea>
-                      </div>
-                    </div>
-                    <div class="form-grid form-grid--2">
-                      <div class="form-group">
-                        <label class="form-label">Citação</label>
-                        <textarea class="form-input" name="citacaoTexto" rows="3" placeholder="Texto da citação..."></textarea>
-                      </div>
-                      <div class="form-group">
-                        <label class="form-label">Autor da citação</label>
-                        <input type="text" class="form-input" name="citacaoAutor" />
-                      </div>
-                    </div>
-                    <div class="repeater">
-                      <div class="repeater__header">
-                        <h4 class="repeater__title">Tópicos</h4>
-                        <button id="btnAddTopico" class="btn btn--secondary btn--sm" type="button">+ Adicionar</button>
-                      </div>
-                      <div id="topicosList" class="repeater__list"></div>
-                    </div>
-                  </div>
-                  <div class="editor__panel" data-tab-panel="team" hidden>
-                    <div class="form-grid form-grid--2">
-                      <div class="form-group">
-                        <label class="form-label">Realização</label>
-                        <input type="text" class="form-input" name="realizacaoNome" />
-                      </div>
-                      <div class="form-group">
-                        <label class="form-label">Financiamento</label>
-                        <input type="text" class="form-input" name="financiadorNome" />
-                      </div>
-                    </div>
-                    <div class="upload-grid upload-grid--sm">
-                      <div class="upload-zone upload-zone--sm" data-upload="logoRealizacao">
-                        <input type="file" name="realizacaoLogoFile" accept="image/*" hidden />
-                        <div class="upload-zone__prompt">
-                          <span class="upload-zone__icon">🏛</span>
-                          <span class="upload-zone__text">Logo realização</span>
-                        </div>
-                        <img class="upload-zone__preview" hidden />
-                      </div>
-                      <div class="upload-zone upload-zone--sm" data-upload="logoFinanciador">
-                        <input type="file" name="financiadorLogoFile" accept="image/*" hidden />
-                        <div class="upload-zone__prompt">
-                          <span class="upload-zone__icon">💰</span>
-                          <span class="upload-zone__text">Logo financiador</span>
-                        </div>
-                        <img class="upload-zone__preview" hidden />
-                      </div>
-                    </div>
-                    <input type="hidden" name="realizacaoLogoUrl" />
-                    <input type="hidden" name="financiadorLogoUrl" />
-                    <div class="form-grid form-grid--2">
-                      <div class="form-group">
-                        <label class="form-label">Coordenação</label>
-                        <textarea class="form-input" name="coordenacao" rows="2"></textarea>
-                      </div>
-                      <div class="form-group">
-                        <label class="form-label">Parceiros / apoiadores</label>
-                        <textarea class="form-input" name="parceirosApoiadores" rows="2"></textarea>
-                      </div>
-                    </div>
-                    <div class="form-group">
-                      <label class="form-label">Texto sobre a equipe</label>
-                      <textarea class="form-input" name="equipeTexto" rows="2" placeholder="Breve descrição da equipe..."></textarea>
-                    </div>
-                    <div class="repeater">
-                      <div class="repeater__header">
-                        <h4 class="repeater__title">Membros da equipe</h4>
-                        <button id="btnAddEquipe" class="btn btn--secondary btn--sm" type="button">+ Adicionar</button>
-                      </div>
-                      <div id="equipeList" class="repeater__list"></div>
-                    </div>
-                  </div>
-                  <div class="editor__panel" data-tab-panel="map" hidden>
-                    <div class="map-section">
-                      <div class="map-section__header">
-                        <div>
-                          <h4 class="map-section__title">Pontos do mapa</h4>
-                          <p class="map-section__desc">Importe dados via CSV ou cadastre manualmente.</p>
-                        </div>
-                        <label class="btn btn--primary btn--file">
-                          <span>📁 Importar CSV</span>
-                          <input id="csvImport" type="file" accept=".csv" hidden />
-                        </label>
-                      </div>
-                      <div id="csvPreview" class="csv-preview" hidden>
-                        <div class="csv-preview__header">
-                          <span id="csvPreviewMeta" class="csv-preview__meta"></span>
-                        </div>
-                        <div id="csvPreviewList" class="csv-preview__list"></div>
-                      </div>
-                      <div class="map-preview">
-                        <div id="mapSurface" class="map-preview__surface">
-                          <div class="map-preview__empty">
-                            <span class="map-preview__empty-icon">🗺</span>
-                            <p>Selecione uma pesquisa para visualizar o mapa</p>
-                          </div>
-                        </div>
-                        <div class="map-preview__caption">
-                          <strong id="mapTitle">Mapa</strong>
-                          <span id="mapMeta" class="muted">0 pontos</span>
-                        </div>
-                      </div>
-                      <div class="points-section">
-                        <div class="points-section__toolbar">
-                          <button id="btnNewPoint" class="btn btn--primary btn--sm" type="button">+ Novo ponto</button>
-                          <div class="search-box search-box--sm">
-                            <input id="pointsSearch" class="search-box__input" type="search" placeholder="Buscar pontos..." />
-                          </div>
-                          <span id="pointsCounter" class="points-counter">0 pontos</span>
-                        </div>
-                        <div id="pointsList" class="points-list"></div>
-                      </div>
-                    </div>
-                  </div>
-                </form>
+                <select id="researchFilter" class="form-select form-select--sm">
+                  <option value="all">Todos</option>
+                  <option value="published">Publicados</option>
+                  <option value="draft">Rascunhos</option>
+                </select>
+              </div>
+              <div id="researchList" class="research-list"></div>
+              <div id="researchEmpty" class="empty-state" hidden>
+                <h4>Nenhuma pesquisa encontrada</h4>
+                <p>Crie uma nova pesquisa para começar.</p>
               </div>
             </div>
           </section>
-          <section id="panelSite" class="panel" data-panel="site" hidden>
-            <div class="panel__header">
-              <span class="kicker">Configurações globais</span>
-              <h2 class="panel__title">Elementos visuais</h2>
-              <p class="panel__desc">Configure banners, logos e ícones do site.</p>
+
+          <section class="panel" data-panel="editor" hidden>
+            <div class="panel-card editor-shell">
+              <header class="editor-head">
+                <div>
+                  <span class="kicker">Edição modular</span>
+                  <h3 id="editorTitle">Research Editor</h3>
+                </div>
+                <div class="editor-head__actions">
+                  <button id="btnPreviewPublic" class="btn btn--secondary" type="button">Pré-visualizar</button>
+                  <button id="btnDeleteResearch" class="btn btn--danger-outline" type="button" hidden>Excluir</button>
+                  <button id="btnSaveResearch" class="btn btn--primary" type="submit" form="researchForm"><span class="btn__text">Salvar pesquisa</span><span class="btn__loader" hidden><span class="spinner spinner--sm"></span></span></button>
+                </div>
+              </header>
+              <div id="editorAlert" class="alert" hidden></div>
+              <div id="editorEmpty" class="empty-state">
+                <h4>Selecione uma pesquisa</h4>
+                <p>Abra uma pesquisa existente em <strong>Researches</strong> ou crie uma nova para começar a edição.</p>
+              </div>
+
+              <form id="researchForm" hidden>
+                <nav class="editor-tabs" aria-label="Seções do editor">
+                  <button class="editor-tab active" data-tab="general" aria-selected="true" type="button">General</button>
+                  <button class="editor-tab" data-tab="content" aria-selected="false" type="button">Content</button>
+                  <button class="editor-tab" data-tab="media" aria-selected="false" type="button">Media</button>
+                  <button class="editor-tab" data-tab="team" aria-selected="false" type="button">Team</button>
+                  <button class="editor-tab" data-tab="publishing" aria-selected="false" type="button">Publishing</button>
+                </nav>
+
+                <section class="editor__panel" data-tab-panel="general">
+                  <article class="settings-block">
+                    <header><h4>Basic Information</h4><p>Campos essenciais da pesquisa.</p></header>
+                    <div class="form-grid form-grid--2">
+                      <div class="form-group"><label class="form-label" for="cfgSlug">Slug</label><input id="cfgSlug" class="form-input" type="text" name="slug" required /></div>
+                      <div class="form-group"><label class="form-label" for="cfgTitle">Título <span class="required">*</span></label><input id="cfgTitle" class="form-input" type="text" name="titulo" required /></div>
+                      <div class="form-group"><label class="form-label" for="cfgYear">Ano base</label><input id="cfgYear" class="form-input" type="text" name="anoBase" placeholder="2024" /></div>
+                      <div class="form-group"><label class="form-label" for="cfgOrder">Ordem</label><input id="cfgOrder" class="form-input" type="number" name="ordem" min="0" value="0" /></div>
+                    </div>
+                    <footer class="block-actions"><button class="btn btn--secondary btn-section-cancel" type="button">Cancelar mudanças</button><button class="btn btn--primary btn-section-save" type="button">Salvar seção</button></footer>
+                  </article>
+
+                  <article class="settings-block">
+                    <header><h4>Summary</h4><p>Descrição curta da pesquisa para listagens.</p></header>
+                    <div class="form-group"><label class="form-label" for="cfgShortDesc">Descrição curta</label><textarea id="cfgShortDesc" class="form-input" name="descricaoCurta" rows="3"></textarea></div>
+                    <footer class="block-actions"><button class="btn btn--secondary btn-section-cancel" type="button">Cancelar mudanças</button><button class="btn btn--primary btn-section-save" type="button">Salvar seção</button></footer>
+                  </article>
+                </section>
+
+                <section class="editor__panel" data-tab-panel="content" hidden>
+                  <article class="settings-block">
+                    <header><h4>Introduction</h4><p>Resumo e introdução principal da pesquisa.</p></header>
+                    <div class="form-group"><label class="form-label">Resumo geral</label><textarea class="form-input" name="resumo" rows="4"></textarea></div>
+                    <div class="form-grid form-grid--2">
+                      <div class="form-group"><label class="form-label">Título da introdução</label><input type="text" class="form-input" name="introTitulo" /></div>
+                      <div class="form-group form-group--full"><label class="form-label">Texto da introdução</label><textarea class="form-input" name="introTexto" rows="4"></textarea></div>
+                    </div>
+                  </article>
+
+                  <article class="settings-block">
+                    <header><h4>Quote</h4><p>Destaque editorial em formato de citação.</p></header>
+                    <div class="form-grid form-grid--2">
+                      <div class="form-group"><label class="form-label">Citação</label><textarea class="form-input" name="citacaoTexto" rows="3"></textarea></div>
+                      <div class="form-group"><label class="form-label">Autor da citação</label><input type="text" class="form-input" name="citacaoAutor" /></div>
+                    </div>
+                    <footer class="block-actions"><button class="btn btn--secondary btn-section-cancel" type="button">Cancelar mudanças</button><button class="btn btn--primary btn-section-save" type="button">Salvar seção</button></footer>
+                  </article>
+
+                  <article class="settings-block">
+                    <header><h4>Tópicos</h4><p>Estrutura de tópicos do conteúdo.</p></header>
+                    <div class="repeater"><div class="repeater__header"><button id="btnAddTopico" class="btn btn--secondary btn--sm" type="button">+ Adicionar tópico</button></div><div id="topicosList" class="repeater__list"></div></div>
+                    <footer class="block-actions"><button class="btn btn--secondary btn-section-cancel" type="button">Cancelar mudanças</button><button class="btn btn--primary btn-section-save" type="button">Salvar seção</button></footer>
+                  </article>
+                </section>
+
+                <section class="editor__panel" data-tab-panel="media" hidden>
+                  <article class="settings-block">
+                    <header><h4>Cover</h4><p>Imagem principal e arquivos do relatório.</p></header>
+                    <div class="upload-grid">
+                      <div class="upload-card">
+                        <h4 class="upload-card__title">Capa da pesquisa</h4>
+                        <div class="upload-zone" data-upload="cover"><input type="file" name="capaFile" accept="image/*" hidden /><div class="upload-zone__prompt"><span class="upload-zone__text">Arraste ou clique para upload</span></div><img class="upload-zone__preview" hidden /></div>
+                        <input type="hidden" name="capaUrl" />
+                      </div>
+                      <div class="upload-card">
+                        <h4 class="upload-card__title">Report</h4>
+                        <div class="upload-zone" data-upload="report"><input type="file" name="relatorioFile" accept="application/pdf" hidden /><div class="upload-zone__prompt"><span class="upload-zone__text">Arraste ou clique para upload</span></div></div>
+                        <div class="form-group"><label class="form-label">URL de leitura (opcional)</label><input type="url" class="form-input" name="relatorioLeituraUrl" placeholder="https://..." /></div>
+                        <input type="hidden" name="relatorioUrl" />
+                      </div>
+                    </div>
+                    <footer class="block-actions"><button class="btn btn--secondary btn-section-cancel" type="button">Cancelar mudanças</button><button class="btn btn--primary btn-section-save" type="button">Salvar seção</button></footer>
+                  </article>
+
+                  <article class="settings-block">
+                    <header><h4>Banner</h4><p>Banner de topo da página da pesquisa.</p></header>
+                    <div class="form-grid form-grid--2">
+                      <div class="upload-zone upload-zone--sm" data-upload="banner"><input type="file" id="bannerFile" accept="image/*" hidden /><div class="upload-zone__prompt"><span class="upload-zone__text">Upload banner</span></div><img class="upload-zone__preview" hidden /></div>
+                      <div>
+                        <div class="form-group"><label class="form-label">URL do banner</label><input id="bannerUrl" type="url" class="form-input" placeholder="https://..." /></div>
+                        <div class="form-group"><label class="form-label">Crédito da imagem</label><input type="text" class="form-input" name="bannerCredito" /></div>
+                        <button id="btnSaveBanner" class="btn btn--secondary btn--sm" type="button">Salvar banner</button>
+                        <div id="bannerMsg" class="form-hint"></div>
+                      </div>
+                    </div>
+                  </article>
+                </section>
+
+                <section class="editor__panel" data-tab-panel="team" hidden>
+                  <article class="settings-block">
+                    <header><h4>Institutional Logos</h4><p>Logos e informações institucionais vinculadas.</p></header>
+                    <div class="form-grid form-grid--2">
+                      <div class="form-group"><label class="form-label">Realização</label><input type="text" class="form-input" name="realizacaoNome" /></div>
+                      <div class="form-group"><label class="form-label">Financiamento</label><input type="text" class="form-input" name="financiadorNome" /></div>
+                    </div>
+                    <div class="upload-grid upload-grid--sm">
+                      <div class="upload-zone upload-zone--sm" data-upload="logoRealizacao"><input type="file" name="realizacaoLogoFile" accept="image/*" hidden /><div class="upload-zone__prompt"><span class="upload-zone__text">Logo realização</span></div><img class="upload-zone__preview" hidden /></div>
+                      <div class="upload-zone upload-zone--sm" data-upload="logoFinanciador"><input type="file" name="financiadorLogoFile" accept="image/*" hidden /><div class="upload-zone__prompt"><span class="upload-zone__text">Logo financiador</span></div><img class="upload-zone__preview" hidden /></div>
+                    </div>
+                    <input type="hidden" name="realizacaoLogoUrl" /><input type="hidden" name="financiadorLogoUrl" />
+                  </article>
+                  <article class="settings-block">
+                    <header><h4>Team Members</h4><p>Equipe técnica e colaboradores.</p></header>
+                    <div class="form-grid form-grid--2"><div class="form-group"><label class="form-label">Coordenação</label><textarea class="form-input" name="coordenacao" rows="2"></textarea></div><div class="form-group"><label class="form-label">Parceiros / apoiadores</label><textarea class="form-input" name="parceirosApoiadores" rows="2"></textarea></div></div>
+                    <div class="form-group"><label class="form-label">Texto sobre a equipe</label><textarea class="form-input" name="equipeTexto" rows="2"></textarea></div>
+                    <div class="repeater"><div class="repeater__header"><button id="btnAddEquipe" class="btn btn--secondary btn--sm" type="button">+ Adicionar membro</button></div><div id="equipeList" class="repeater__list"></div></div>
+                    <footer class="block-actions"><button class="btn btn--secondary btn-section-cancel" type="button">Cancelar mudanças</button><button class="btn btn--primary btn-section-save" type="button">Salvar seção</button></footer>
+                  </article>
+                </section>
+
+                <section class="editor__panel" data-tab-panel="publishing" hidden>
+                  <article class="settings-block">
+                    <header><h4>Publication Settings</h4><p>Controle de status e metadados de publicação.</p></header>
+                    <div class="form-grid form-grid--2">
+                      <div class="form-group"><label class="form-label" for="cfgStatus">Status</label><select id="cfgStatus" class="form-select" name="status"><option value="true">Publicado</option><option value="false">Rascunho</option></select></div>
+                      <div class="form-group"><label class="form-label" for="cfgSynopsis">Sinopse do relatório</label><textarea id="cfgSynopsis" class="form-input" name="sinopse" rows="2"></textarea></div>
+                    </div>
+                    <footer class="block-actions"><button class="btn btn--secondary btn-section-cancel" type="button">Cancelar mudanças</button><button class="btn btn--primary btn-section-save" type="button">Salvar seção</button></footer>
+                  </article>
+                </section>
+              </form>
             </div>
-            <div class="site-grid">
+          </section>
+
+          <section class="panel" data-panel="mapa" hidden>
+            <div class="panel-card">
+              <div class="map-section__header">
+                <div><h4 class="map-section__title">Pontos do mapa</h4><p class="map-section__desc">Importe via CSV ou edite manualmente por pesquisa.</p></div>
+                <label class="btn btn--secondary btn--file"><span>Importar CSV</span><input id="csvImport" type="file" accept=".csv" hidden /></label>
+              </div>
+              <div id="csvPreview" class="csv-preview" hidden><div class="csv-preview__header"><span id="csvPreviewMeta" class="csv-preview__meta"></span></div><div id="csvPreviewList" class="csv-preview__list"></div></div>
+              <div class="map-preview"><div id="mapSurface" class="map-preview__surface"><div class="map-preview__empty"><p>Selecione uma pesquisa para visualizar o mapa</p></div></div><div class="map-preview__caption"><strong id="mapTitle">Mapa</strong><span id="mapMeta" class="muted">0 pontos</span></div></div>
+            </div>
+            <div class="panel-card">
+              <div class="panel__sidebar-header"><h4>Lista de pontos</h4><button id="btnNewPoint" class="btn btn--primary btn--sm" type="button">+ Novo ponto</button></div>
+              <div class="panel__toolbar"><input id="pointsSearch" class="form-input" type="search" placeholder="Buscar ponto..." /><span id="pointsCounter" class="muted">0 pontos</span></div>
+              <div id="pointsList" class="points-list"></div>
+            </div>
+          </section>
+
+          <section class="panel" data-panel="site" hidden>
+            <div class="site-config-grid">
               <div class="card card--config">
-                <div class="card__header">
-                  <h4 class="card__title">🏠 Banner da Home</h4>
-                  <p class="card__desc">Imagem de destaque na página inicial.</p>
-                </div>
-                <div class="upload-zone" data-upload="homeBanner">
-                  <input id="homeBannerFile" type="file" accept="image/*" hidden />
-                  <div class="upload-zone__prompt">
-                    <span class="upload-zone__icon">🏞</span>
-                    <span class="upload-zone__text">Upload do banner</span>
-                  </div>
-                  <img class="upload-zone__preview" hidden />
-                </div>
-                <div class="form-group" style="margin-top: 12px;">
-                  <label class="form-label">Ou URL direta</label>
-                  <input id="homeBannerUrl" type="url" class="form-input" placeholder="https://..." />
-                </div>
+                <div class="card__header"><h4 class="card__title">Banner da home</h4><p class="card__desc">Imagem de fundo da página inicial pública.</p></div>
+                <div class="upload-zone" data-upload="homeBanner"><input id="homeBannerFile" type="file" accept="image/*" hidden /><div class="upload-zone__prompt"><span class="upload-zone__text">Upload do banner</span></div><img class="upload-zone__preview" hidden /></div>
+                <div class="form-group"><label class="form-label">Ou URL direta</label><input id="homeBannerUrl" type="url" class="form-input" placeholder="https://..." /></div>
                 <button id="btnSaveHomeBanner" class="btn btn--primary btn--block" type="button">Salvar banner</button>
-                <div id="homeBannerMsg" class="form-hint" style="margin-top: 8px;"></div>
+                <div id="homeBannerMsg" class="form-hint"></div>
               </div>
               <div class="card card--config">
-                <div class="card__header">
-                  <h4 class="card__title">🎨 Logo do site</h4>
-                  <p class="card__desc">Exibido no cabeçalho público.</p>
-                </div>
-                <div class="upload-zone" data-upload="siteLogo">
-                  <input id="siteLogoFile" type="file" accept="image/*" hidden />
-                  <div class="upload-zone__prompt">
-                    <span class="upload-zone__icon">🎭</span>
-                    <span class="upload-zone__text">Upload do logo</span>
-                  </div>
-                  <img class="upload-zone__preview" hidden />
-                </div>
-                <div class="form-group" style="margin-top: 12px;">
-                  <label class="form-label">Ou URL direta</label>
-                  <input id="siteLogoUrl" type="url" class="form-input" placeholder="https://..." />
-                </div>
+                <div class="card__header"><h4 class="card__title">Logo do site</h4><p class="card__desc">Exibido no cabeçalho público.</p></div>
+                <div class="upload-zone" data-upload="siteLogo"><input id="siteLogoFile" type="file" accept="image/*" hidden /><div class="upload-zone__prompt"><span class="upload-zone__text">Upload do logo</span></div><img class="upload-zone__preview" hidden /></div>
+                <div class="form-group"><label class="form-label">Ou URL direta</label><input id="siteLogoUrl" type="url" class="form-input" placeholder="https://..." /></div>
                 <button id="btnSaveSiteLogo" class="btn btn--primary btn--block" type="button">Salvar logo</button>
-                <div id="siteLogoMsg" class="form-hint" style="margin-top: 8px;"></div>
+                <div id="siteLogoMsg" class="form-hint"></div>
               </div>
               <div class="card card--config">
-                <div class="card__header">
-                  <h4 class="card__title">🔖 Favicon</h4>
-                  <p class="card__desc">Ícone exibido na aba do navegador.</p>
-                </div>
-                <div class="upload-zone upload-zone--sm" data-upload="favicon">
-                  <input id="faviconFile" type="file" accept="image/png,image/x-icon,image/svg+xml" hidden />
-                  <div class="upload-zone__prompt">
-                    <span class="upload-zone__icon">🔖</span>
-                    <span class="upload-zone__text">Upload favicon</span>
-                  </div>
-                  <img class="upload-zone__preview" hidden />
-                </div>
-                <div class="form-group" style="margin-top: 12px;">
-                  <label class="form-label">Ou URL direta</label>
-                  <input id="faviconUrl" type="url" class="form-input" placeholder="https://..." />
-                </div>
+                <div class="card__header"><h4 class="card__title">Favicon</h4><p class="card__desc">Ícone exibido na aba do navegador.</p></div>
+                <div class="upload-zone upload-zone--sm" data-upload="favicon"><input id="faviconFile" type="file" accept="image/png,image/x-icon,image/svg+xml" hidden /><div class="upload-zone__prompt"><span class="upload-zone__text">Upload favicon</span></div><img class="upload-zone__preview" hidden /></div>
+                <div class="form-group"><label class="form-label">Ou URL direta</label><input id="faviconUrl" type="url" class="form-input" placeholder="https://..." /></div>
                 <button id="btnSaveFavicon" class="btn btn--primary btn--block" type="button">Salvar favicon</button>
-                <div id="faviconMsg" class="form-hint" style="margin-top: 8px;"></div>
+                <div id="faviconMsg" class="form-hint"></div>
               </div>
             </div>
           </section>
         </section>
       </main>
     </div>
+
     <div id="pointModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="pointModalTitle" hidden>
       <div class="modal__backdrop"></div>
       <div class="modal__content">
-        <header class="modal__header">
-          <div>
-            <h3 id="pointModalTitle" class="modal__title">Editar ponto</h3>
-            <p class="modal__subtitle">Atualize as informações do ponto no mapa.</p>
-          </div>
-          <button id="btnCloseModal" class="btn btn--icon btn--ghost" type="button" aria-label="Fechar">
-            <span aria-hidden="true">✕</span>
-          </button>
-        </header>
+        <header class="modal__header"><div><h3 id="pointModalTitle" class="modal__title">Editar ponto</h3><p class="modal__subtitle">Atualize as informações do ponto no mapa.</p></div><button id="btnCloseModal" class="btn btn--icon btn--ghost" type="button" aria-label="Fechar">✕</button></header>
         <form id="pointForm" class="modal__body form-grid form-grid--2">
           <input type="hidden" id="pointId" />
-          <div class="form-group">
-            <label class="form-label">Nome <span class="required">*</span></label>
-            <input id="ptNome" class="form-input" type="text" required />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Categoria</label>
-            <input id="ptCategoria" class="form-input" type="text" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Cidade</label>
-            <input id="ptCidade" class="form-input" type="text" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">UF</label>
-            <input id="ptUf" class="form-input" type="text" maxlength="2" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Latitude</label>
-            <input id="ptLat" class="form-input" type="number" step="any" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Longitude</label>
-            <input id="ptLng" class="form-input" type="number" step="any" />
-          </div>
-          <div class="form-group form-group--full">
-            <label class="form-label">Descrição</label>
-            <textarea id="ptDescricao" class="form-input" rows="3"></textarea>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Site</label>
-            <input id="ptSite" class="form-input" type="url" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Instagram</label>
-            <input id="ptInstagram" class="form-input" type="text" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">WhatsApp</label>
-            <input id="ptWhatsapp" class="form-input" type="text" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">E-mail</label>
-            <input id="ptEmail" class="form-input" type="email" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Ativo</label>
-            <select id="ptAtivo" class="form-select">
-              <option value="true">Sim</option>
-              <option value="false">Não</option>
-            </select>
-          </div>
+          <div class="form-group"><label class="form-label">Nome <span class="required">*</span></label><input id="ptNome" class="form-input" type="text" required /></div>
+          <div class="form-group"><label class="form-label">Categoria</label><input id="ptCategoria" class="form-input" type="text" /></div>
+          <div class="form-group"><label class="form-label">Cidade</label><input id="ptCidade" class="form-input" type="text" /></div>
+          <div class="form-group"><label class="form-label">UF</label><input id="ptUf" class="form-input" type="text" maxlength="2" /></div>
+          <div class="form-group"><label class="form-label">Latitude</label><input id="ptLat" class="form-input" type="number" step="any" /></div>
+          <div class="form-group"><label class="form-label">Longitude</label><input id="ptLng" class="form-input" type="number" step="any" /></div>
+          <div class="form-group form-group--full"><label class="form-label">Descrição</label><textarea id="ptDescricao" class="form-input" rows="3"></textarea></div>
+          <div class="form-group"><label class="form-label">Site</label><input id="ptSite" class="form-input" type="url" /></div>
+          <div class="form-group"><label class="form-label">Instagram</label><input id="ptInstagram" class="form-input" type="text" /></div>
+          <div class="form-group"><label class="form-label">WhatsApp</label><input id="ptWhatsapp" class="form-input" type="text" /></div>
+          <div class="form-group"><label class="form-label">E-mail</label><input id="ptEmail" class="form-input" type="email" /></div>
+          <div class="form-group"><label class="form-label">Ativo</label><select id="ptAtivo" class="form-select"><option value="true">Sim</option><option value="false">Não</option></select></div>
         </form>
-        <footer class="modal__footer">
-          <div id="modalMsg" class="form-hint"></div>
-          <div class="modal__actions">
-            <button id="btnCancelModal" class="btn btn--secondary" type="button">Cancelar</button>
-            <button id="btnSavePoint" class="btn btn--primary" type="button">
-              <span class="btn__text">Salvar</span>
-              <span class="btn__loader" hidden>
-                <span class="spinner spinner--sm"></span>
-              </span>
-            </button>
-          </div>
-        </footer>
+        <footer class="modal__footer"><div id="modalMsg" class="form-hint"></div><div class="modal__actions"><button id="btnCancelModal" class="btn btn--secondary" type="button">Cancelar</button><button id="btnSavePoint" class="btn btn--primary" type="button"><span class="btn__text">Salvar</span><span class="btn__loader" hidden><span class="spinner spinner--sm"></span></span></button></div></footer>
       </div>
     </div>
-    <div id="loadingOverlay" class="loading-overlay" hidden>
-      <div class="loading-overlay__content">
-        <span class="spinner spinner--lg"></span>
-        <p class="loading-overlay__text">Processando...</p>
-      </div>
-    </div>
+
+    <div id="loadingOverlay" class="loading-overlay" hidden><div class="loading-overlay__content"><span class="spinner spinner--lg"></span><p class="loading-overlay__text">Processando...</p></div></div>
+
     <script>
       (function() {
         const paths = ['../js/supabase-config.js', '/js/supabase-config.js', '../src/js/supabase-config.js'];
