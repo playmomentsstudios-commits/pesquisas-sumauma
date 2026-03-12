@@ -2041,4 +2041,191 @@ const handlers = {
       ativo: document.getElementById('ptAtivo')?.value === 'true'
     };
     
-    if (!
+    if (!data.nome) {
+      utils.setText(msg, 'Nome é obrigatório');
+      return;
+    }
+    
+    utils.setButtonLoading(btn, true);
+    utils.setText(msg, '');
+    
+    try {
+      if (state.editingPoint?.id) {
+        // Update
+        await api.points.update(state.editingPoint.id, data);
+      } else {
+        // Create
+        await api.points.create({
+          ...data,
+          pesquisa_id: state.currentResearch.id
+        });
+      }
+      
+      // Recarrega pontos
+      await this.loadPoints(state.currentResearch.id);
+      
+      ui.togglePointModal(false);
+      
+    } catch (err) {
+      console.error('[SavePoint] Error:', err);
+      utils.setText(msg, 'Erro: ' + utils.formatError(err));
+    } finally {
+      utils.setButtonLoading(btn, false);
+    }
+  },
+
+  /**
+   * Exclui ponto
+   */
+  async handleDeletePoint(id) {
+    if (!confirm('Excluir este ponto?')) return;
+    
+    try {
+      await api.points.delete(id);
+      
+      // Remove do estado local
+      state.points = state.points.filter(p => p.id !== id);
+      ui.renderPointsList(state.points);
+      ui.renderMap(state.points, state.currentResearch?.slug || '');
+      
+    } catch (err) {
+      console.error('[DeletePoint] Error:', err);
+      alert('Erro ao excluir ponto: ' + utils.formatError(err));
+    }
+  },
+
+  /**
+   * Carrega configuracoes do site
+   */
+  async loadSiteConfig() {
+    try {
+      const [logoUrl, bannerUrl, faviconUrl] = await Promise.all([
+        api.site.getConfig('site_logo_url'),
+        api.site.getConfig('home_banner_url'),
+        api.site.getConfig('favicon_url')
+      ]);
+      
+      // Preenche campos
+      const logoInput = document.getElementById('siteLogoUrl');
+      const bannerInput = document.getElementById('homeBannerUrl');
+      const faviconInput = document.getElementById('faviconUrl');
+      
+      if (logoInput) logoInput.value = logoUrl;
+      if (bannerInput) bannerInput.value = bannerUrl;
+      if (faviconInput) faviconInput.value = faviconUrl;
+      
+      // Previews
+      if (logoUrl) {
+        const logoZone = document.querySelector('[data-upload="siteLogo"]');
+        ui.setUploadPreview(logoZone, logoUrl);
+      }
+      
+      if (bannerUrl) {
+        const bannerZone = document.querySelector('[data-upload="homeBanner"]');
+        ui.setUploadPreview(bannerZone, bannerUrl);
+      }
+      
+      if (faviconUrl) {
+        const faviconZone = document.querySelector('[data-upload="favicon"]');
+        ui.setUploadPreview(faviconZone, faviconUrl);
+      }
+      
+      // Atualiza logos na interface
+      this.updateBrandLogos(logoUrl, bannerUrl);
+      
+    } catch (err) {
+      console.error('[LoadSiteConfig] Error:', err);
+    }
+  },
+
+  /**
+   * Salva configuracao do site
+   */
+  async handleSaveSiteConfig(key, fileInputId, urlInputId, msgId) {
+    const fileInput = document.getElementById(fileInputId);
+    const urlInput = document.getElementById(urlInputId);
+    const msgEl = document.getElementById(msgId);
+    
+    const file = fileInput?.files?.[0];
+    const url = urlInput?.value?.trim();
+    
+    if (!file && !url) {
+      utils.setText(msgEl, 'Selecione um arquivo ou informe uma URL');
+      return;
+    }
+    
+    try {
+      let finalUrl = url;
+      
+      if (file) {
+        const path = key.replace(/_url$/, '').replace(/_/g, '-');
+        finalUrl = await api.storage.upload(file, `site/${path}`);
+      }
+      
+      await api.site.setConfig(key, finalUrl);
+      
+      utils.setText(msgEl, 'Salvo com sucesso!');
+      setTimeout(() => utils.setText(msgEl, ''), 3000);
+      
+      // Recarrega para atualizar previews
+      await this.loadSiteConfig();
+      
+      // Limpa input de arquivo
+      if (fileInput) fileInput.value = '';
+      
+    } catch (err) {
+      console.error(`[SaveSiteConfig] Error for ${key}:`, err);
+      utils.setText(msgEl, 'Erro: ' + utils.formatError(err));
+    }
+  },
+
+  /**
+   * Atualiza logos na marca da interface
+   */
+  updateBrandLogos(logoUrl, bannerUrl) {
+    // Login
+    const loginLogo = document.getElementById('loginLogo');
+    if (loginLogo && logoUrl) {
+      loginLogo.src = logoUrl;
+      loginLogo.hidden = false;
+    }
+    
+    // Dashboard
+    const dashboardLogo = document.getElementById('dashboardLogo');
+    if (dashboardLogo && logoUrl) {
+      dashboardLogo.src = logoUrl;
+      dashboardLogo.hidden = false;
+    }
+    
+    const navLogo = document.getElementById('navLogo');
+    if (navLogo && logoUrl) {
+      navLogo.src = logoUrl;
+      navLogo.hidden = false;
+    }
+    
+    // Backgrounds
+    const loginBg = document.getElementById('loginBg');
+    if (loginBg && bannerUrl) {
+      loginBg.style.backgroundImage = `url("${bannerUrl}")`;
+    }
+    
+    const dashboardBg = document.getElementById('dashboardBg');
+    if (dashboardBg && bannerUrl) {
+      dashboardBg.style.backgroundImage = `url("${bannerUrl}")`;
+    }
+  }
+};
+
+// ==========================================
+// SECAO 6: INICIALIZACAO
+// ==========================================
+
+// Inicia aplicacao quando DOM estiver pronto
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => handlers.init());
+} else {
+  handlers.init();
+}
+
+// Expoe para debug (remover em producao)
+window.AdminV6 = { state, api, ui, utils, handlers };
