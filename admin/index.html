@@ -6,6 +6,91 @@
     <meta name="description" content="Painel administrativo do Instituto Sumaúma - Gestão de pesquisas e mapas" />
     <title>Painel Sumaúma • Admin V6</title>
     <link rel="stylesheet" href="./admin.css" />
+  
+    <style>
+      body[data-auth-state="logged-out"] .app-shell {
+        display: block;
+        min-height: 100vh;
+      }
+      body[data-auth-state="logged-out"] .nav-sidebar,
+      body[data-auth-state="logged-out"] #adminDashboard {
+        display: none !important;
+      }
+      .login-stage--minimal {
+        position: relative;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        overflow: hidden;
+        padding: 24px;
+      }
+      .login-stage--minimal .login-stage__bg,
+      .login-stage--minimal .login-stage__overlay {
+        position: absolute;
+        inset: 0;
+      }
+      .login-stage--minimal .login-stage__bg {
+        background-position: center;
+        background-size: cover;
+        background-repeat: no-repeat;
+        transform: scale(1.02);
+      }
+      .login-stage--minimal .login-stage__overlay {
+        background: linear-gradient(180deg, rgba(8,14,12,.38), rgba(8,14,12,.62));
+        backdrop-filter: blur(2px);
+      }
+      .login-card--minimal {
+        position: relative;
+        z-index: 1;
+        width: min(100%, 420px);
+        padding: 32px;
+        border-radius: 24px;
+        background: rgba(255,255,255,.88);
+        border: 1px solid rgba(255,255,255,.55);
+        box-shadow: 0 30px 80px rgba(0,0,0,.22);
+      }
+      .login-card__brand--minimal {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+      .login-card__brand--minimal .login-card__logo {
+        max-width: 220px;
+        max-height: 72px;
+        width: auto;
+        height: auto;
+        object-fit: contain;
+      }
+      .login-card__brand--minimal .login-card__fallback {
+        font-size: 1.4rem;
+        font-weight: 700;
+        letter-spacing: .04em;
+      }
+      .login-form--minimal {
+        display: grid;
+        gap: 14px;
+      }
+      .login-form__title {
+        margin: 0;
+        text-align: center;
+      }
+      .login-form__subtitle {
+        margin: -4px 0 8px;
+        text-align: center;
+        opacity: .78;
+      }
+      .login-form--minimal .form-input {
+        min-height: 48px;
+      }
+      .login-form--minimal .login-form__actions {
+        margin-top: 8px;
+      }
+      .login-form__help:empty {
+        display: none;
+      }
+    </style>
+
   </head>
   <body data-auth-state="logged-out" data-active-panel="pesquisas">
     <div class="app-shell">
@@ -21,10 +106,10 @@
           </div>
         </div>
         <nav class="nav-tabs" aria-label="Seções do painel">
-          <button class="nav-tab" data-tab="pesquisas" aria-selected="true" role="tab" type="button">Pesquisas</button>
-          <button class="nav-tab" data-tab="editor" aria-selected="false" role="tab" type="button">Editor de Pesquisas</button>
-          <button class="nav-tab" data-tab="mapa" aria-selected="false" role="tab" type="button">Mapa e Pontos</button>
-          <button class="nav-tab" data-tab="site" aria-selected="false" role="tab" type="button">Configurações do Site</button>
+          <button class="nav-tab" data-tab="pesquisas" aria-selected="true" role="tab" type="button">Researches</button>
+          <button class="nav-tab" data-tab="editor" aria-selected="false" role="tab" type="button">Research Editor</button>
+          <button class="nav-tab" data-tab="mapa" aria-selected="false" role="tab" type="button">Map &amp; Points</button>
+          <button class="nav-tab" data-tab="site" aria-selected="false" role="tab" type="button">Site Settings</button>
         </nav>
         <div class="nav-footer">
           <div class="nav-user">
@@ -36,16 +121,17 @@
       </aside>
 
       <main class="workspace">
-        <section id="loginStage" class="login-stage" aria-labelledby="loginTitle">
+        <section id="loginStage" class="login-stage login-stage--minimal" aria-labelledby="loginTitle">
           <div class="login-stage__bg" id="loginBg"></div>
           <div class="login-stage__overlay"></div>
-          <div class="login-card">
-            <div class="login-card__brand">
+          <div class="login-card login-card--minimal">
+            <div class="login-card__brand login-card__brand--minimal">
               <img id="loginLogo" class="login-card__logo" alt="Instituto Sumaúma" hidden />
               <div class="login-card__fallback">Sumaúma</div>
             </div>
-            <form id="loginForm" class="login-form" novalidate>
-              <h2 id="loginTitle" class="login-form__title">Acesso restrito</h2>
+            <form id="loginForm" class="login-form login-form--minimal" novalidate>
+              <h2 id="loginTitle" class="login-form__title">Entrar no painel</h2>
+              <p class="login-form__subtitle">Acesse com seu e-mail e senha.</p>
               <div class="form-group">
                 <label class="form-label" for="loginEmail">E-mail</label>
                 <input id="loginEmail" class="form-input" type="email" name="email" required autocomplete="email" placeholder="seu@email.com" />
@@ -55,10 +141,9 @@
                 <input id="loginPassword" class="form-input" type="password" name="password" required autocomplete="current-password" placeholder="••••••••" />
               </div>
               <div id="loginError" class="alert alert--error" role="alert" hidden></div>
-              <div id="loginHelp" class="login-form__help"></div>
+              <div id="loginHelp" class="login-form__help" hidden></div>
               <div class="login-form__actions">
                 <button class="btn btn--primary btn--block" type="submit"><span class="btn__text">Entrar</span><span class="btn__loader" hidden><span class="spinner spinner--sm"></span></span></button>
-                <button id="btnRequestAccess" class="btn btn--ghost btn--block" type="button">Solicitar acesso</button>
               </div>
             </form>
           </div>
@@ -81,7 +166,7 @@
               <div class="panel__sidebar-header">
                 <div>
                   <span class="kicker">Acervo</span>
-                  <h3 class="panel__sidebar-title">Pesquisas</h3>
+                  <h3 class="panel__sidebar-title">Researches</h3>
                 </div>
                 <button id="btnNewResearch" class="btn btn--primary btn--sm" type="button">+ Nova</button>
               </div>
@@ -108,7 +193,7 @@
               <header class="editor-head">
                 <div>
                   <span class="kicker">Edição modular</span>
-                  <h3 id="editorTitle">Editor de Pesquisas</h3>
+                  <h3 id="editorTitle">Research Editor</h3>
                 </div>
                 <div class="editor-head__actions">
                   <button id="btnPreviewPublic" class="btn btn--secondary" type="button">Pré-visualizar</button>
@@ -119,7 +204,7 @@
               <div id="editorAlert" class="alert" hidden></div>
               <div id="editorEmpty" class="empty-state">
                 <h4>Selecione uma pesquisa</h4>
-                <p>Abra uma pesquisa existente em <strong>Pesquisas</strong> ou crie uma nova para começar a edição.</p>
+                <p>Abra uma pesquisa existente em <strong>Researches</strong> ou crie uma nova para começar a edição.</p>
               </div>
 
               <form id="researchForm" hidden>
@@ -333,6 +418,6 @@
     </script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../js/supabase-client.js"></script>
-    <script type="module" src="./admin_fixed.js"></script>
+    <script src="./admin_login_fixed.js" defer></script>
   </body>
 </html>
