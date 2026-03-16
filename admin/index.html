@@ -1,1229 +1,338 @@
-/* ============================================
-   Admin V6 — Instituto Sumaúma
-   CSS melhorado: transições, feedback visual,
-   upload zones, nav ativa, badges, mobile
-   ============================================ */
-
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=DM+Mono:wght@400;500&display=swap');
-
-:root {
-  --bg: #f4f5f7;
-  --surface: #ffffff;
-  --surface-soft: #f8fafc;
-  --surface-hover: #f1f3f6;
-  --text: #1a2235;
-  --muted: #64748b;
-  --muted-light: #94a3b8;
-  --border: #e2e8f0;
-  --border-focus: #94a3b8;
-  --primary: #111827;
-  --primary-hover: #1f2d3d;
-  --primary-contrast: #fff;
-  --danger: #b42318;
-  --danger-bg: #fef2f2;
-  --danger-border: #fecaca;
-  --success: #166534;
-  --success-bg: #f0fdf4;
-  --success-border: #bbf7d0;
-  --accent: #2563eb;
-  --accent-soft: #eff6ff;
-  --radius: 12px;
-  --radius-sm: 8px;
-  --radius-md: 10px;
-  --shadow-sm: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
-  --shadow-md: 0 4px 12px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
-  --transition: 150ms cubic-bezier(.4,0,.2,1);
-  --transition-slow: 250ms cubic-bezier(.4,0,.2,1);
-  --font: 'DM Sans', system-ui, sans-serif;
-  --font-mono: 'DM Mono', monospace;
-}
-
-* { box-sizing: border-box; }
-
-body {
-  margin: 0;
-  font-family: var(--font);
-  font-size: 14px;
-  line-height: 1.6;
-  color: var(--text);
-  background: var(--bg);
-  -webkit-font-smoothing: antialiased;
-}
-
-[hidden] { display: none !important; }
-
-/* ==========================================
-   LAYOUT
-   ========================================== */
-
-.app-shell {
-  display: grid;
-  grid-template-columns: 248px 1fr;
-  min-height: 100vh;
-}
-
-/* ==========================================
-   SIDEBAR
-   ========================================== */
-
-.nav-sidebar {
-  background: var(--surface);
-  border-right: 1px solid var(--border);
-  padding: 20px 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  overflow-y: auto;
-}
-
-.nav-brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 4px 4px 8px;
-  border-bottom: 1px solid var(--border);
-}
-
-.nav-brand__mark {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  background: var(--primary);
-  color: #fff;
-  display: grid;
-  place-items: center;
-  font-weight: 600;
-  font-size: 16px;
-  flex-shrink: 0;
-  overflow: hidden;
-}
-
-.nav-brand__logo { width: 100%; height: 100%; object-fit: cover; }
-
-.nav-brand__kicker {
-  font-size: 10px;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: .08em;
-  font-weight: 500;
-}
-
-.nav-brand__title {
-  margin: 1px 0 0;
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--text);
-}
-
-.nav-tabs {
-  display: grid;
-  gap: 2px;
-}
-
-.nav-tab {
-  border: none;
-  background: transparent;
-  padding: 9px 12px;
-  border-radius: var(--radius-sm);
-  text-align: left;
-  cursor: pointer;
-  font: inherit;
-  font-size: 14px;
-  color: var(--muted);
-  font-weight: 500;
-  transition: background var(--transition), color var(--transition);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  position: relative;
-}
-
-.nav-tab::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 20%;
-  height: 60%;
-  width: 3px;
-  border-radius: 0 2px 2px 0;
-  background: var(--accent);
-  opacity: 0;
-  transition: opacity var(--transition);
-}
-
-.nav-tab:hover {
-  background: var(--surface-hover);
-  color: var(--text);
-}
-
-.nav-tab[aria-selected="true"] {
-  background: var(--accent-soft);
-  color: var(--accent);
-  font-weight: 600;
-}
-
-.nav-tab[aria-selected="true"]::before {
-  opacity: 1;
-}
-
-.nav-footer {
-  margin-top: auto;
-  padding-top: 16px;
-  border-top: 1px solid var(--border);
-  display: grid;
-  gap: 10px;
-}
-
-.nav-user__label {
-  font-size: 11px;
-  color: var(--muted-light);
-  text-transform: uppercase;
-  letter-spacing: .05em;
-  display: block;
-  font-weight: 500;
-}
-
-.nav-user__email {
-  font-size: 13px;
-  color: var(--text);
-  font-weight: 500;
-  display: block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* ==========================================
-   WORKSPACE
-   ========================================== */
-
-.workspace {
-  padding: 28px;
-  max-width: 1160px;
-  width: 100%;
-  margin: 0 auto;
-}
-
-/* ==========================================
-   LOGIN
-   ========================================== */
-
-.login-stage {
-  min-height: calc(100vh - 48px);
-  display: grid;
-  place-items: center;
-  position: relative;
-  background: var(--primary);
-}
-
-.login-stage__bg,
-.login-stage__overlay,
-.dashboard__hero-bg,
-.dashboard__hero-overlay {
-  position: absolute;
-  inset: 0;
-}
-
-.login-stage__bg { background-size: cover; background-position: center; }
-.login-stage__overlay { background: rgba(10, 15, 28, .65); backdrop-filter: blur(2px); }
-
-.login-card {
-  position: relative;
-  z-index: 1;
-  width: min(400px, 100%);
-  background: #fff;
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 32px;
-  box-shadow: var(--shadow-md);
-}
-
-.login-card__fallback {
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--text);
-  margin-bottom: 4px;
-}
-
-.login-form__title {
-  font-size: 20px;
-  font-weight: 600;
-  margin: 0 0 20px;
-  color: var(--text);
-}
-
-.login-form__actions {
-  display: grid;
-  gap: 8px;
-  margin-top: 16px;
-}
-
-/* ==========================================
-   DASHBOARD
-   ========================================== */
-
-.dashboard {
-  display: grid;
-  gap: 20px;
-}
-
-.dashboard__hero {
-  border-radius: var(--radius);
-  padding: 32px 36px;
-  background: var(--primary);
-  color: #fff;
-  position: relative;
-  overflow: hidden;
-}
-
-.dashboard__hero-bg {
-  background-size: cover;
-  background-position: center;
-  opacity: .35;
-}
-
-.dashboard__hero-overlay {
-  background: linear-gradient(135deg, rgba(17,24,39,.9) 0%, rgba(17,24,39,.5) 100%);
-}
-
-.dashboard__hero-content {
-  position: relative;
-  z-index: 1;
-  max-width: 680px;
-}
-
-.dashboard__hero-kicker {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: .1em;
-  opacity: .7;
-  font-weight: 500;
-}
-
-.dashboard__hero-title {
-  margin: 6px 0 6px;
-  font-size: 26px;
-  font-weight: 600;
-  line-height: 1.3;
-}
-
-.dashboard__hero-desc {
-  margin: 0;
-  opacity: .8;
-  font-size: 14px;
-  line-height: 1.6;
-}
-
-/* ==========================================
-   PANELS
-   ========================================== */
-
-.panel { display: grid; gap: 16px; }
-
-.panel-card,
-.card,
-.settings-block,
-.modal__content {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-sm);
-}
-
-.panel-card { padding: 20px; }
-.panel-card--list { min-height: 58vh; }
-
-.panel__sidebar-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.panel__sidebar-title {
-  margin: 2px 0 0;
-  font-size: 17px;
-  font-weight: 600;
-}
-
-.panel__toolbar {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 14px;
-  align-items: center;
-}
-
-.kicker {
-  font-size: 10px;
-  text-transform: uppercase;
-  color: var(--muted-light);
-  letter-spacing: .08em;
-  font-weight: 600;
-  display: block;
-}
-
-/* ==========================================
-   EDITOR
-   ========================================== */
-
-.editor-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.editor-head__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.editor-tabs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 16px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--border);
-}
-
-.editor-tab {
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  background: #fff;
-  padding: 6px 14px;
-  cursor: pointer;
-  font: inherit;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--muted);
-  transition: all var(--transition);
-}
-
-.editor-tab:hover {
-  border-color: var(--border-focus);
-  color: var(--text);
-}
-
-.editor-tab.active {
-  background: var(--primary);
-  color: #fff;
-  border-color: var(--primary);
-}
-
-.editor__panel { display: grid; gap: 14px; }
-
-.settings-block {
-  padding: 18px 20px;
-}
-
-.settings-block header h4 {
-  margin: 0;
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--text);
-}
-
-.settings-block header p {
-  margin: 4px 0 14px;
-  color: var(--muted);
-  font-size: 13px;
-  line-height: 1.5;
-}
-
-.block-actions {
-  margin-top: 14px;
-  padding-top: 14px;
-  border-top: 1px solid var(--border);
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-}
-
-/* ==========================================
-   FORMS
-   ========================================== */
-
-.search-box { flex: 1; }
-.search-box__input { width: 100%; }
-
-.form-group {
-  display: grid;
-  gap: 6px;
-  margin-bottom: 12px;
-}
-
-.form-label {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text);
-  letter-spacing: .01em;
-}
-
-.form-input,
-.form-select,
-textarea {
-  width: 100%;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 9px 12px;
-  font: inherit;
-  font-size: 14px;
-  background: #fff;
-  color: var(--text);
-  transition: border-color var(--transition), box-shadow var(--transition);
-  outline: none;
-  appearance: none;
-}
-
-.form-input:hover,
-.form-select:hover,
-textarea:hover {
-  border-color: var(--border-focus);
-}
-
-.form-input:focus,
-.form-select:focus,
-textarea:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(37,99,235,.12);
-}
-
-textarea { resize: vertical; }
-
-.form-grid { display: grid; gap: 12px; }
-.form-grid--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.form-group--full { grid-column: 1 / -1; }
-
-/* ==========================================
-   BUTTONS
-   ========================================== */
-
-.btn {
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 8px 14px;
-  font: inherit;
-  font-size: 14px;
-  font-weight: 500;
-  background: #fff;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  transition: all var(--transition);
-  white-space: nowrap;
-  user-select: none;
-  text-decoration: none;
-}
-
-.btn:hover {
-  background: var(--surface-hover);
-  border-color: var(--border-focus);
-}
-
-.btn:active {
-  transform: translateY(1px);
-}
-
-.btn:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
-.btn:disabled {
-  opacity: .55;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.btn--primary {
-  background: var(--primary);
-  border-color: var(--primary);
-  color: #fff;
-}
-
-.btn--primary:hover {
-  background: var(--primary-hover);
-  border-color: var(--primary-hover);
-}
-
-.btn--secondary {
-  background: #fff;
-  color: var(--text);
-}
-
-.btn--danger-outline {
-  color: var(--danger);
-  border-color: #fecaca;
-  background: #fff;
-}
-
-.btn--danger-outline:hover {
-  background: var(--danger-bg);
-  border-color: #fca5a5;
-}
-
-.btn--ghost {
-  background: transparent;
-  border-color: transparent;
-  color: var(--muted);
-}
-
-.btn--ghost:hover {
-  background: var(--surface-hover);
-  border-color: var(--border);
-  color: var(--text);
-}
-
-.btn--sm {
-  padding: 5px 10px;
-  font-size: 12px;
-  border-radius: var(--radius-sm);
-}
-
-.btn--block { width: 100%; }
-
-.btn--icon {
-  width: 36px;
-  height: 36px;
-  padding: 0;
-  display: grid;
-  place-items: center;
-  border-radius: var(--radius-sm);
-  font-size: 16px;
-}
-
-/* ==========================================
-   RESEARCH LIST ITEMS
-   ========================================== */
-
-.research-list,
-.points-list,
-.repeater__list {
-  display: grid;
-  gap: 8px;
-}
-
-.research-item {
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 12px 14px;
-  background: var(--surface-soft);
-  cursor: pointer;
-  transition: all var(--transition);
-}
-
-.research-item:hover {
-  border-color: var(--border-focus);
-  background: #fff;
-  box-shadow: var(--shadow-sm);
-  transform: translateY(-1px);
-}
-
-.research-item--active {
-  border-color: var(--accent);
-  background: var(--accent-soft);
-  box-shadow: 0 0 0 1px var(--accent);
-}
-
-.research-item--active:hover {
-  transform: none;
-}
-
-.research-item__header {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  align-items: flex-start;
-}
-
-.research-item__title {
-  font-weight: 600;
-  font-size: 14px;
-  color: var(--text);
-  line-height: 1.4;
-}
-
-.research-item__slug {
-  color: var(--muted);
-  font-size: 12px;
-  font-family: var(--font-mono);
-  margin-top: 2px;
-}
-
-.research-item__actions {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-  margin-top: 10px;
-  padding-top: 10px;
-  border-top: 1px solid var(--border);
-}
-
-/* Status badges */
-.research-item__badge {
-  font-size: 11px;
-  font-weight: 600;
-  padding: 3px 8px;
-  border-radius: 999px;
-  white-space: nowrap;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  flex-shrink: 0;
-}
-
-.research-item__badge::before {
-  content: '';
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: currentColor;
-  display: inline-block;
-}
-
-.research-item__badge {
-  background: #dcfce7;
-  color: #15803d;
-}
-
-.research-item__badge--draft {
-  background: #fef9c3;
-  color: #a16207;
-}
-
-/* ==========================================
-   POINT ITEMS
-   ========================================== */
-
-.point-item {
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 10px 14px;
-  background: var(--surface-soft);
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  align-items: center;
-  transition: all var(--transition);
-}
-
-.point-item:hover {
-  background: #fff;
-  border-color: var(--border-focus);
-}
-
-.point-item__name {
-  font-weight: 600;
-  font-size: 13px;
-  color: var(--text);
-}
-
-.point-item__meta {
-  color: var(--muted);
-  font-size: 12px;
-  margin-top: 1px;
-}
-
-.point-item__actions { display: flex; gap: 6px; flex-shrink: 0; }
-
-/* ==========================================
-   UPLOAD ZONES
-   ========================================== */
-
-.upload-grid {
-  display: grid;
-  gap: 12px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.upload-card {
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 14px;
-  background: var(--surface-soft);
-}
-
-.upload-card__title {
-  margin: 0 0 10px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text);
-}
-
-.upload-zone {
-  border: 2px dashed var(--border);
-  border-radius: var(--radius-md);
-  padding: 22px 16px;
-  text-align: center;
-  cursor: pointer;
-  background: #fff;
-  transition: all var(--transition);
-  position: relative;
-}
-
-.upload-zone:hover {
-  border-color: var(--accent);
-  background: var(--accent-soft);
-}
-
-.upload-zone.dragover {
-  border-color: var(--accent);
-  background: var(--accent-soft);
-  box-shadow: 0 0 0 3px rgba(37,99,235,.1);
-}
-
-.upload-zone__prompt {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-}
-
-.upload-zone__icon {
-  font-size: 24px;
-  opacity: .5;
-  line-height: 1;
-}
-
-.upload-zone__text {
-  font-size: 13px;
-  color: var(--muted);
-  font-weight: 500;
-}
-
-.upload-zone__sub {
-  font-size: 11px;
-  color: var(--muted-light);
-}
-
-.upload-zone__preview {
-  max-width: 100%;
-  max-height: 160px;
-  margin-top: 8px;
-  border-radius: var(--radius-sm);
-  display: block;
-}
-
-/* ==========================================
-   MAP
-   ========================================== */
-
-.map-section__header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.map-section__title {
-  margin: 0 0 4px;
-  font-size: 15px;
-  font-weight: 600;
-}
-
-.map-section__desc {
-  margin: 0;
-  font-size: 13px;
-  color: var(--muted);
-}
-
-.map-preview__surface {
-  min-height: 260px;
-  position: relative;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  background: #f1f5f9;
-  overflow: hidden;
-}
-
-.map-preview__caption {
-  margin-top: 8px;
-  display: flex;
-  justify-content: space-between;
-  font-size: 13px;
-}
-
-.map-node {
-  position: absolute;
-  width: 10px;
-  height: 10px;
-  border-radius: 999px;
-  background: var(--primary);
-  box-shadow: 0 0 0 2px #fff, 0 0 0 3px var(--primary);
-  transition: transform var(--transition);
-}
-
-.map-node:hover { transform: scale(1.5); }
-.map-node--featured { background: var(--accent); box-shadow: 0 0 0 2px #fff, 0 0 0 3px var(--accent); }
-
-.map-node__label {
-  position: absolute;
-  left: 14px;
-  top: -8px;
-  background: rgba(255,255,255,.97);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 2px 7px;
-  font-size: 11px;
-  white-space: nowrap;
-  box-shadow: var(--shadow-sm);
-  font-weight: 500;
-  pointer-events: none;
-}
-
-/* ==========================================
-   EMPTY STATES & ALERTS
-   ========================================== */
-
-.empty-state {
-  border: 2px dashed var(--border);
-  border-radius: var(--radius-md);
-  padding: 32px 24px;
-  text-align: center;
-  color: var(--muted);
-}
-
-.empty-state h4 {
-  margin: 0 0 6px;
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--text);
-}
-
-.empty-state p { margin: 0; font-size: 13px; }
-
-.alert {
-  border-radius: var(--radius-md);
-  padding: 10px 14px;
-  margin-bottom: 10px;
-  border: 1px solid transparent;
-  font-size: 13px;
-  font-weight: 500;
-}
-
-.alert--error {
-  background: var(--danger-bg);
-  color: var(--danger);
-  border-color: var(--danger-border);
-}
-
-.alert--success {
-  background: var(--success-bg);
-  color: var(--success);
-  border-color: var(--success-border);
-}
-
-.alert--info {
-  background: #eff6ff;
-  color: #1d4ed8;
-  border-color: #bfdbfe;
-}
-
-.form-hint {
-  color: var(--muted);
-  font-size: 12px;
-  margin-top: 6px;
-}
-
-.muted { color: var(--muted); font-size: 12px; }
-.required { color: var(--danger); }
-
-/* ==========================================
-   MODAL
-   ========================================== */
-
-.modal {
-  position: fixed;
-  inset: 0;
-  z-index: 40;
-  display: grid;
-  place-items: center;
-  padding: 16px;
-}
-
-.modal__backdrop {
-  position: absolute;
-  inset: 0;
-  background: rgba(15, 23, 42, .55);
-  backdrop-filter: blur(4px);
-}
-
-.modal__content {
-  position: relative;
-  width: min(900px, calc(100vw - 24px));
-  max-height: calc(100vh - 30px);
-  overflow: auto;
-  padding: 20px;
-}
-
-.modal__header,
-.modal__footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-}
-
-.modal__title {
-  margin: 0 0 2px;
-  font-size: 16px;
-  font-weight: 600;
-}
-
-.modal__subtitle {
-  margin: 0;
-  font-size: 13px;
-  color: var(--muted);
-}
-
-.modal__body { margin: 14px 0; }
-.modal__actions { display: flex; gap: 8px; flex-wrap: wrap; }
-
-/* Confirmation dialog (substituindo confirm() nativo) */
-.confirm-dialog {
-  position: fixed;
-  inset: 0;
-  z-index: 60;
-  display: grid;
-  place-items: center;
-  padding: 16px;
-}
-
-.confirm-dialog__backdrop {
-  position: absolute;
-  inset: 0;
-  background: rgba(15,23,42,.5);
-  backdrop-filter: blur(4px);
-}
-
-.confirm-dialog__card {
-  position: relative;
-  width: min(380px, 100%);
-  background: #fff;
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 24px;
-  box-shadow: var(--shadow-md);
-}
-
-.confirm-dialog__icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: var(--danger-bg);
-  display: grid;
-  place-items: center;
-  font-size: 18px;
-  margin-bottom: 14px;
-  border: 1px solid var(--danger-border);
-}
-
-.confirm-dialog__title {
-  margin: 0 0 6px;
-  font-size: 16px;
-  font-weight: 600;
-}
-
-.confirm-dialog__message {
-  margin: 0 0 18px;
-  font-size: 14px;
-  color: var(--muted);
-  line-height: 1.6;
-}
-
-.confirm-dialog__actions {
-  display: flex;
-  gap: 8px;
-  justify-content: flex-end;
-}
-
-/* ==========================================
-   LOADING
-   ========================================== */
-
-.loading-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(255,255,255,.8);
-  display: grid;
-  place-items: center;
-  z-index: 80;
-  backdrop-filter: blur(2px);
-}
-
-.loading-overlay__content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-}
-
-.loading-overlay__text {
-  font-size: 14px;
-  color: var(--muted);
-  margin: 0;
-  font-weight: 500;
-}
-
-.spinner {
-  display: inline-block;
-  border: 2px solid var(--border);
-  border-top-color: var(--primary);
-  border-radius: 50%;
-  animation: spin .75s linear infinite;
-}
-
-.spinner--sm { width: 14px; height: 14px; }
-.spinner--lg { width: 32px; height: 32px; border-width: 3px; }
-
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* ==========================================
-   SITE CONFIG
-   ========================================== */
-
-.site-config-grid {
-  display: grid;
-  gap: 14px;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.card { padding: 16px; }
-
-.card__header { margin-bottom: 14px; }
-
-.card__title {
-  margin: 0 0 4px;
-  font-size: 15px;
-  font-weight: 600;
-}
-
-.card__desc {
-  margin: 0;
-  color: var(--muted);
-  font-size: 13px;
-}
-
-/* ==========================================
-   REPEATER ITEMS
-   ========================================== */
-
-.repeater-item {
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 14px;
-  background: var(--surface-soft);
-  transition: border-color var(--transition);
-}
-
-.repeater-item:hover { border-color: var(--border-focus); }
-
-.repeater-item__header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--border);
-}
-
-.repeater-item__title {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: .05em;
-}
-
-.repeater__header {
-  margin-bottom: 10px;
-}
-
-/* CSV preview */
-.csv-preview {
-  background: var(--surface-soft);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 12px;
-  margin-top: 12px;
-}
-
-.csv-preview__header {
-  margin-bottom: 10px;
-  font-weight: 600;
-  font-size: 13px;
-}
-
-.csv-preview-item {
-  padding: 8px 0;
-  border-bottom: 1px solid var(--border);
-  font-size: 13px;
-}
-
-.csv-preview-item:last-child { border-bottom: none; }
-
-/* ==========================================
-   RESPONSIVE
-   ========================================== */
-
-@media (max-width: 1024px) {
-  .app-shell { grid-template-columns: 1fr; }
-
-  .nav-sidebar {
-    position: static;
-    height: auto;
-    overflow: visible;
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 12px;
-    padding: 14px 16px;
-  }
-
-  .nav-brand { border-bottom: none; padding: 0; }
-  .nav-footer { margin-top: 0; padding-top: 0; border-top: none; }
-
-  .nav-tabs {
-    flex: 1;
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 4px;
-    min-width: 0;
-  }
-
-  .nav-tab::before { display: none; }
-  .nav-tab[aria-selected="true"] { background: var(--primary); color: #fff; }
-
-  .workspace { padding: 16px; }
-  .site-config-grid { grid-template-columns: 1fr; }
-}
-
-@media (max-width: 700px) {
-  .form-grid--2,
-  .upload-grid,
-  .upload-grid--sm { grid-template-columns: 1fr; }
-
-  .editor-head { flex-direction: column; align-items: flex-start; }
-  .panel__toolbar { flex-direction: column; align-items: stretch; }
-  .modal__content { padding: 14px; }
-  .dashboard__hero { padding: 20px; }
-  .dashboard__hero-title { font-size: 20px; }
-}
-
-/* ==========================================
-   UTILITIES
-   ========================================== */
-
-.text-mono { font-family: var(--font-mono); }
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Painel administrativo do Instituto Sumaúma - Gestão de pesquisas e mapas" />
+    <title>Painel Sumaúma • Admin V6</title>
+    <link rel="stylesheet" href="./admin.css" />
+  </head>
+  <body data-auth-state="logged-out" data-active-panel="pesquisas">
+    <div class="app-shell">
+      <aside class="nav-sidebar" role="navigation" aria-label="Navegação principal">
+        <div class="nav-brand">
+          <div class="nav-brand__mark">
+            <img id="navLogo" class="nav-brand__logo" alt="Instituto Sumaúma" hidden />
+            <div class="nav-brand__fallback">S</div>
+          </div>
+          <div class="nav-brand__text">
+            <span class="nav-brand__kicker">Instituto Sumaúma</span>
+            <h1 class="nav-brand__title">Painel Admin</h1>
+          </div>
+        </div>
+        <nav class="nav-tabs" aria-label="Seções do painel">
+          <button class="nav-tab" data-tab="pesquisas" aria-selected="true" role="tab" type="button">Pesquisas</button>
+          <button class="nav-tab" data-tab="editor" aria-selected="false" role="tab" type="button">Editor de Pesquisas</button>
+          <button class="nav-tab" data-tab="mapa" aria-selected="false" role="tab" type="button">Mapa e Pontos</button>
+          <button class="nav-tab" data-tab="site" aria-selected="false" role="tab" type="button">Configurações do Site</button>
+        </nav>
+        <div class="nav-footer">
+          <div class="nav-user">
+            <span class="nav-user__label">Sessão</span>
+            <span id="userEmail" class="nav-user__email">Não autenticado</span>
+          </div>
+          <button id="btnLogout" class="btn btn--icon btn--danger-outline" type="button" aria-label="Sair do sistema" title="Sair">⎋</button>
+        </div>
+      </aside>
+
+      <main class="workspace">
+        <section id="loginStage" class="login-stage" aria-labelledby="loginTitle">
+          <div class="login-stage__bg" id="loginBg"></div>
+          <div class="login-stage__overlay"></div>
+          <div class="login-card">
+            <div class="login-card__brand">
+              <img id="loginLogo" class="login-card__logo" alt="Instituto Sumaúma" hidden />
+              <div class="login-card__fallback">Sumaúma</div>
+            </div>
+            <form id="loginForm" class="login-form" novalidate>
+              <h2 id="loginTitle" class="login-form__title">Acesso restrito</h2>
+              <div class="form-group">
+                <label class="form-label" for="loginEmail">E-mail</label>
+                <input id="loginEmail" class="form-input" type="email" name="email" required autocomplete="email" placeholder="seu@email.com" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="loginPassword">Senha</label>
+                <input id="loginPassword" class="form-input" type="password" name="password" required autocomplete="current-password" placeholder="••••••••" />
+              </div>
+              <div id="loginError" class="alert alert--error" role="alert" hidden></div>
+              <div id="loginHelp" class="login-form__help"></div>
+              <div class="login-form__actions">
+                <button class="btn btn--primary btn--block" type="submit"><span class="btn__text">Entrar</span><span class="btn__loader" hidden><span class="spinner spinner--sm"></span></span></button>
+                <button id="btnRequestAccess" class="btn btn--ghost btn--block" type="button">Solicitar acesso</button>
+              </div>
+            </form>
+          </div>
+        </section>
+
+        <section id="adminDashboard" class="dashboard" hidden>
+          <header class="dashboard__hero" id="dashboardHero">
+            <div class="dashboard__hero-bg" id="dashboardBg"></div>
+            <div class="dashboard__hero-overlay"></div>
+            <div class="dashboard__hero-content">
+              <img id="dashboardLogo" class="dashboard__hero-logo" alt="" hidden />
+              <span class="dashboard__hero-kicker">Painel de pesquisas</span>
+              <h2 class="dashboard__hero-title">Workspace de gestão editorial</h2>
+              <p class="dashboard__hero-desc">Edite pesquisas por seções, mantenha o mapa atualizado e publique configurações do site.</p>
+            </div>
+          </header>
+
+          <section class="panel" data-panel="pesquisas">
+            <div class="panel-card panel-card--list">
+              <div class="panel__sidebar-header">
+                <div>
+                  <span class="kicker">Acervo</span>
+                  <h3 class="panel__sidebar-title">Pesquisas</h3>
+                </div>
+                <button id="btnNewResearch" class="btn btn--primary btn--sm" type="button">+ Nova</button>
+              </div>
+              <div class="panel__toolbar">
+                <div class="search-box">
+                  <input id="researchSearch" class="search-box__input" type="search" placeholder="Buscar pesquisa..." autocomplete="off" />
+                </div>
+                <select id="researchFilter" class="form-select form-select--sm">
+                  <option value="all">Todos</option>
+                  <option value="published">Publicados</option>
+                  <option value="draft">Rascunhos</option>
+                </select>
+              </div>
+              <div id="researchList" class="research-list"></div>
+              <div id="researchEmpty" class="empty-state" hidden>
+                <h4>Nenhuma pesquisa encontrada</h4>
+                <p>Crie uma nova pesquisa para começar.</p>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel" data-panel="editor" hidden>
+            <div class="panel-card editor-shell">
+              <header class="editor-head">
+                <div>
+                  <span class="kicker">Edição modular</span>
+                  <h3 id="editorTitle">Editor de Pesquisas</h3>
+                </div>
+                <div class="editor-head__actions">
+                  <button id="btnPreviewPublic" class="btn btn--secondary" type="button">Pré-visualizar</button>
+                  <button id="btnDeleteResearch" class="btn btn--danger-outline" type="button" hidden>Excluir</button>
+                  <button id="btnSaveResearch" class="btn btn--primary" type="submit" form="researchForm"><span class="btn__text">Salvar pesquisa</span><span class="btn__loader" hidden><span class="spinner spinner--sm"></span></span></button>
+                </div>
+              </header>
+              <div id="editorAlert" class="alert" hidden></div>
+              <div id="editorEmpty" class="empty-state">
+                <h4>Selecione uma pesquisa</h4>
+                <p>Abra uma pesquisa existente em <strong>Pesquisas</strong> ou crie uma nova para começar a edição.</p>
+              </div>
+
+              <form id="researchForm" hidden>
+                <nav class="editor-tabs" aria-label="Seções do editor">
+                  <button class="editor-tab active" data-tab="general" aria-selected="true" type="button">General</button>
+                  <button class="editor-tab" data-tab="content" aria-selected="false" type="button">Content</button>
+                  <button class="editor-tab" data-tab="media" aria-selected="false" type="button">Media</button>
+                  <button class="editor-tab" data-tab="team" aria-selected="false" type="button">Team</button>
+                  <button class="editor-tab" data-tab="publishing" aria-selected="false" type="button">Publishing</button>
+                </nav>
+
+                <section class="editor__panel" data-tab-panel="general">
+                  <article class="settings-block">
+                    <header><h4>Basic Information</h4><p>Campos essenciais da pesquisa.</p></header>
+                    <div class="form-grid form-grid--2">
+                      <div class="form-group"><label class="form-label" for="cfgSlug">Slug</label><input id="cfgSlug" class="form-input" type="text" name="slug" required /></div>
+                      <div class="form-group"><label class="form-label" for="cfgTitle">Título <span class="required">*</span></label><input id="cfgTitle" class="form-input" type="text" name="titulo" required /></div>
+                      <div class="form-group"><label class="form-label" for="cfgYear">Ano base</label><input id="cfgYear" class="form-input" type="text" name="anoBase" placeholder="2024" /></div>
+                      <div class="form-group"><label class="form-label" for="cfgOrder">Ordem</label><input id="cfgOrder" class="form-input" type="number" name="ordem" min="0" value="0" /></div>
+                    </div>
+                    <footer class="block-actions"><button class="btn btn--secondary btn-section-cancel" type="button">Cancelar mudanças</button><button class="btn btn--primary btn-section-save" type="button">Salvar seção</button></footer>
+                  </article>
+
+                  <article class="settings-block">
+                    <header><h4>Summary</h4><p>Descrição curta da pesquisa para listagens.</p></header>
+                    <div class="form-group"><label class="form-label" for="cfgShortDesc">Descrição curta</label><textarea id="cfgShortDesc" class="form-input" name="descricaoCurta" rows="3"></textarea></div>
+                    <footer class="block-actions"><button class="btn btn--secondary btn-section-cancel" type="button">Cancelar mudanças</button><button class="btn btn--primary btn-section-save" type="button">Salvar seção</button></footer>
+                  </article>
+                </section>
+
+                <section class="editor__panel" data-tab-panel="content" hidden>
+                  <article class="settings-block">
+                    <header><h4>Introduction</h4><p>Resumo e introdução principal da pesquisa.</p></header>
+                    <div class="form-group"><label class="form-label">Resumo geral</label><textarea class="form-input" name="resumo" rows="4"></textarea></div>
+                    <div class="form-grid form-grid--2">
+                      <div class="form-group"><label class="form-label">Título da introdução</label><input type="text" class="form-input" name="introTitulo" /></div>
+                      <div class="form-group form-group--full"><label class="form-label">Texto da introdução</label><textarea class="form-input" name="introTexto" rows="4"></textarea></div>
+                    </div>
+                  </article>
+
+                  <article class="settings-block">
+                    <header><h4>Quote</h4><p>Destaque editorial em formato de citação.</p></header>
+                    <div class="form-grid form-grid--2">
+                      <div class="form-group"><label class="form-label">Citação</label><textarea class="form-input" name="citacaoTexto" rows="3"></textarea></div>
+                      <div class="form-group"><label class="form-label">Autor da citação</label><input type="text" class="form-input" name="citacaoAutor" /></div>
+                    </div>
+                    <footer class="block-actions"><button class="btn btn--secondary btn-section-cancel" type="button">Cancelar mudanças</button><button class="btn btn--primary btn-section-save" type="button">Salvar seção</button></footer>
+                  </article>
+
+                  <article class="settings-block">
+                    <header><h4>Tópicos</h4><p>Estrutura de tópicos do conteúdo.</p></header>
+                    <div class="repeater"><div class="repeater__header"><button id="btnAddTopico" class="btn btn--secondary btn--sm" type="button">+ Adicionar tópico</button></div><div id="topicosList" class="repeater__list"></div></div>
+                    <footer class="block-actions"><button class="btn btn--secondary btn-section-cancel" type="button">Cancelar mudanças</button><button class="btn btn--primary btn-section-save" type="button">Salvar seção</button></footer>
+                  </article>
+                </section>
+
+                <section class="editor__panel" data-tab-panel="media" hidden>
+                  <article class="settings-block">
+                    <header><h4>Cover</h4><p>Imagem principal e arquivos do relatório.</p></header>
+                    <div class="upload-grid">
+                      <div class="upload-card">
+                        <h4 class="upload-card__title">Capa da pesquisa</h4>
+                        <div class="upload-zone" data-upload="cover"><input type="file" name="capaFile" accept="image/*" hidden /><div class="upload-zone__prompt"><span class="upload-zone__text">Arraste ou clique para upload</span></div><img class="upload-zone__preview" hidden /></div>
+                        <input type="hidden" name="capaUrl" />
+                      </div>
+                      <div class="upload-card">
+                        <h4 class="upload-card__title">Report</h4>
+                        <div class="upload-zone" data-upload="report"><input type="file" name="relatorioFile" accept="application/pdf" hidden /><div class="upload-zone__prompt"><span class="upload-zone__text">Arraste ou clique para upload</span></div></div>
+                        <div class="form-group"><label class="form-label">URL de leitura (opcional)</label><input type="url" class="form-input" name="relatorioLeituraUrl" placeholder="https://..." /></div>
+                        <input type="hidden" name="relatorioUrl" />
+                      </div>
+                    </div>
+                    <footer class="block-actions"><button class="btn btn--secondary btn-section-cancel" type="button">Cancelar mudanças</button><button class="btn btn--primary btn-section-save" type="button">Salvar seção</button></footer>
+                  </article>
+
+                  <article class="settings-block">
+                    <header><h4>Banner</h4><p>Banner de topo da página da pesquisa.</p></header>
+                    <div class="form-grid form-grid--2">
+                      <div class="upload-zone upload-zone--sm" data-upload="banner"><input type="file" id="bannerFile" accept="image/*" hidden /><div class="upload-zone__prompt"><span class="upload-zone__text">Upload banner</span></div><img class="upload-zone__preview" hidden /></div>
+                      <div>
+                        <div class="form-group"><label class="form-label">URL do banner</label><input id="bannerUrl" type="url" class="form-input" placeholder="https://..." /></div>
+                        <div class="form-group"><label class="form-label">Crédito da imagem</label><input type="text" class="form-input" name="bannerCredito" /></div>
+                        <button id="btnSaveBanner" class="btn btn--secondary btn--sm" type="button">Salvar banner</button>
+                        <div id="bannerMsg" class="form-hint"></div>
+                      </div>
+                    </div>
+                  </article>
+                </section>
+
+                <section class="editor__panel" data-tab-panel="team" hidden>
+                  <article class="settings-block">
+                    <header><h4>Institutional Logos</h4><p>Logos e informações institucionais vinculadas.</p></header>
+                    <div class="form-grid form-grid--2">
+                      <div class="form-group"><label class="form-label">Realização</label><input type="text" class="form-input" name="realizacaoNome" /></div>
+                      <div class="form-group"><label class="form-label">Financiamento</label><input type="text" class="form-input" name="financiadorNome" /></div>
+                    </div>
+                    <div class="upload-grid upload-grid--sm">
+                      <div class="upload-zone upload-zone--sm" data-upload="logoRealizacao"><input type="file" name="realizacaoLogoFile" accept="image/*" hidden /><div class="upload-zone__prompt"><span class="upload-zone__text">Logo realização</span></div><img class="upload-zone__preview" hidden /></div>
+                      <div class="upload-zone upload-zone--sm" data-upload="logoFinanciador"><input type="file" name="financiadorLogoFile" accept="image/*" hidden /><div class="upload-zone__prompt"><span class="upload-zone__text">Logo financiador</span></div><img class="upload-zone__preview" hidden /></div>
+                    </div>
+                    <input type="hidden" name="realizacaoLogoUrl" /><input type="hidden" name="financiadorLogoUrl" />
+                  </article>
+                  <article class="settings-block">
+                    <header><h4>Team Members</h4><p>Equipe técnica e colaboradores.</p></header>
+                    <div class="form-grid form-grid--2"><div class="form-group"><label class="form-label">Coordenação</label><textarea class="form-input" name="coordenacao" rows="2"></textarea></div><div class="form-group"><label class="form-label">Parceiros / apoiadores</label><textarea class="form-input" name="parceirosApoiadores" rows="2"></textarea></div></div>
+                    <div class="form-group"><label class="form-label">Texto sobre a equipe</label><textarea class="form-input" name="equipeTexto" rows="2"></textarea></div>
+                    <div class="repeater"><div class="repeater__header"><button id="btnAddEquipe" class="btn btn--secondary btn--sm" type="button">+ Adicionar membro</button></div><div id="equipeList" class="repeater__list"></div></div>
+                    <footer class="block-actions"><button class="btn btn--secondary btn-section-cancel" type="button">Cancelar mudanças</button><button class="btn btn--primary btn-section-save" type="button">Salvar seção</button></footer>
+                  </article>
+                </section>
+
+                <section class="editor__panel" data-tab-panel="publishing" hidden>
+                  <article class="settings-block">
+                    <header><h4>Publication Settings</h4><p>Controle de status e metadados de publicação.</p></header>
+                    <div class="form-grid form-grid--2">
+                      <div class="form-group"><label class="form-label" for="cfgStatus">Status</label><select id="cfgStatus" class="form-select" name="status"><option value="true">Publicado</option><option value="false">Rascunho</option></select></div>
+                      <div class="form-group"><label class="form-label" for="cfgSynopsis">Sinopse do relatório</label><textarea id="cfgSynopsis" class="form-input" name="sinopse" rows="2"></textarea></div>
+                    </div>
+                    <footer class="block-actions"><button class="btn btn--secondary btn-section-cancel" type="button">Cancelar mudanças</button><button class="btn btn--primary btn-section-save" type="button">Salvar seção</button></footer>
+                  </article>
+                </section>
+              </form>
+            </div>
+          </section>
+
+          <section class="panel" data-panel="mapa" hidden>
+            <div class="panel-card">
+              <div class="map-section__header">
+                <div><h4 class="map-section__title">Pontos do mapa</h4><p class="map-section__desc">Importe via CSV ou edite manualmente por pesquisa.</p></div>
+                <label class="btn btn--secondary btn--file"><span>Importar CSV</span><input id="csvImport" type="file" accept=".csv" hidden /></label>
+              </div>
+              <div id="csvPreview" class="csv-preview" hidden><div class="csv-preview__header"><span id="csvPreviewMeta" class="csv-preview__meta"></span></div><div id="csvPreviewList" class="csv-preview__list"></div></div>
+              <div class="map-preview"><div id="mapSurface" class="map-preview__surface"><div class="map-preview__empty"><p>Selecione uma pesquisa para visualizar o mapa</p></div></div><div class="map-preview__caption"><strong id="mapTitle">Mapa</strong><span id="mapMeta" class="muted">0 pontos</span></div></div>
+            </div>
+            <div class="panel-card">
+              <div class="panel__sidebar-header"><h4>Lista de pontos</h4><button id="btnNewPoint" class="btn btn--primary btn--sm" type="button">+ Novo ponto</button></div>
+              <div class="panel__toolbar"><input id="pointsSearch" class="form-input" type="search" placeholder="Buscar ponto..." /><span id="pointsCounter" class="muted">0 pontos</span></div>
+              <div id="pointsList" class="points-list"></div>
+            </div>
+          </section>
+
+          <section class="panel" data-panel="site" hidden>
+            <div class="site-config-grid">
+              <div class="card card--config">
+                <div class="card__header"><h4 class="card__title">Banner da home</h4><p class="card__desc">Imagem de fundo da página inicial pública.</p></div>
+                <div class="upload-zone" data-upload="homeBanner"><input id="homeBannerFile" type="file" accept="image/*" hidden /><div class="upload-zone__prompt"><span class="upload-zone__text">Upload do banner</span></div><img class="upload-zone__preview" hidden /></div>
+                <div class="form-group"><label class="form-label">Ou URL direta</label><input id="homeBannerUrl" type="url" class="form-input" placeholder="https://..." /></div>
+                <button id="btnSaveHomeBanner" class="btn btn--primary btn--block" type="button">Salvar banner</button>
+                <div id="homeBannerMsg" class="form-hint"></div>
+              </div>
+              <div class="card card--config">
+                <div class="card__header"><h4 class="card__title">Logo do site</h4><p class="card__desc">Exibido no cabeçalho público.</p></div>
+                <div class="upload-zone" data-upload="siteLogo"><input id="siteLogoFile" type="file" accept="image/*" hidden /><div class="upload-zone__prompt"><span class="upload-zone__text">Upload do logo</span></div><img class="upload-zone__preview" hidden /></div>
+                <div class="form-group"><label class="form-label">Ou URL direta</label><input id="siteLogoUrl" type="url" class="form-input" placeholder="https://..." /></div>
+                <button id="btnSaveSiteLogo" class="btn btn--primary btn--block" type="button">Salvar logo</button>
+                <div id="siteLogoMsg" class="form-hint"></div>
+              </div>
+              <div class="card card--config">
+                <div class="card__header"><h4 class="card__title">Favicon</h4><p class="card__desc">Ícone exibido na aba do navegador.</p></div>
+                <div class="upload-zone upload-zone--sm" data-upload="favicon"><input id="faviconFile" type="file" accept="image/png,image/x-icon,image/svg+xml" hidden /><div class="upload-zone__prompt"><span class="upload-zone__text">Upload favicon</span></div><img class="upload-zone__preview" hidden /></div>
+                <div class="form-group"><label class="form-label">Ou URL direta</label><input id="faviconUrl" type="url" class="form-input" placeholder="https://..." /></div>
+                <button id="btnSaveFavicon" class="btn btn--primary btn--block" type="button">Salvar favicon</button>
+                <div id="faviconMsg" class="form-hint"></div>
+              </div>
+            </div>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <div id="pointModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="pointModalTitle" hidden>
+      <div class="modal__backdrop"></div>
+      <div class="modal__content">
+        <header class="modal__header"><div><h3 id="pointModalTitle" class="modal__title">Editar ponto</h3><p class="modal__subtitle">Atualize as informações do ponto no mapa.</p></div><button id="btnCloseModal" class="btn btn--icon btn--ghost" type="button" aria-label="Fechar">✕</button></header>
+        <form id="pointForm" class="modal__body form-grid form-grid--2">
+          <input type="hidden" id="pointId" />
+          <div class="form-group"><label class="form-label">Nome <span class="required">*</span></label><input id="ptNome" class="form-input" type="text" required /></div>
+          <div class="form-group"><label class="form-label">Categoria</label><input id="ptCategoria" class="form-input" type="text" /></div>
+          <div class="form-group"><label class="form-label">Cidade</label><input id="ptCidade" class="form-input" type="text" /></div>
+          <div class="form-group"><label class="form-label">UF</label><input id="ptUf" class="form-input" type="text" maxlength="2" /></div>
+          <div class="form-group"><label class="form-label">Latitude</label><input id="ptLat" class="form-input" type="number" step="any" /></div>
+          <div class="form-group"><label class="form-label">Longitude</label><input id="ptLng" class="form-input" type="number" step="any" /></div>
+          <div class="form-group form-group--full"><label class="form-label">Descrição</label><textarea id="ptDescricao" class="form-input" rows="3"></textarea></div>
+          <div class="form-group"><label class="form-label">Site</label><input id="ptSite" class="form-input" type="url" /></div>
+          <div class="form-group"><label class="form-label">Instagram</label><input id="ptInstagram" class="form-input" type="text" /></div>
+          <div class="form-group"><label class="form-label">WhatsApp</label><input id="ptWhatsapp" class="form-input" type="text" /></div>
+          <div class="form-group"><label class="form-label">E-mail</label><input id="ptEmail" class="form-input" type="email" /></div>
+          <div class="form-group"><label class="form-label">Ativo</label><select id="ptAtivo" class="form-select"><option value="true">Sim</option><option value="false">Não</option></select></div>
+        </form>
+        <footer class="modal__footer"><div id="modalMsg" class="form-hint"></div><div class="modal__actions"><button id="btnCancelModal" class="btn btn--secondary" type="button">Cancelar</button><button id="btnSavePoint" class="btn btn--primary" type="button"><span class="btn__text">Salvar</span><span class="btn__loader" hidden><span class="spinner spinner--sm"></span></span></button></div></footer>
+      </div>
+    </div>
+
+    <div id="loadingOverlay" class="loading-overlay" hidden><div class="loading-overlay__content"><span class="spinner spinner--lg"></span><p class="loading-overlay__text">Processando...</p></div></div>
+
+    <script>
+      (function() {
+        const paths = ['../js/supabase-config.js', '/js/supabase-config.js', '../src/js/supabase-config.js'];
+        let chain = Promise.reject();
+        paths.forEach(src => {
+          chain = chain.catch(() => new Promise((resolve, reject) => {
+            const s = document.createElement('script');
+            s.src = src;
+            s.onload = () => resolve(src);
+            s.onerror = () => reject(new Error(src));
+            document.head.appendChild(s);
+          }));
+        });
+        window.__SUPABASE_CONFIG_LOADED__ = chain.catch(() => null);
+      })();
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/supabase-client.js"></script>
+    <script type="module" src="./admin_fixed.js"></script>
+  </body>
+</html>
