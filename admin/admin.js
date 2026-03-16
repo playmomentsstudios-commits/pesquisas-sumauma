@@ -13,6 +13,7 @@ let currentResearchId = null;
 let researchCache = [];
 
 const els = {
+  shell: document.getElementById("admin-shell"),
   loginPanel: document.getElementById("login-panel"),
   loginForm: document.getElementById("login-form"),
   loginError: document.getElementById("login-error"),
@@ -319,9 +320,10 @@ function restoreMainTab(){
 }
 
 async function init(){
-  state.supabase = await window.getSupabaseClient?.();
+  setAuthLayout(false);
+  state.supabase = await ensureSupabaseReady();
   await loadBrandAssets();
-  if (!state.supabase || !window.__SUPABASE_CONFIG_OK__) {
+  if (!state.supabase) {
     els.loginError.textContent = "Supabase não configurado. Crie o arquivo js/supabase-config.js.";
     setDiag("Supabase não configurado: confira /js/supabase-config.js e caminhos no /admin/index.html");
     els.loginForm?.querySelector("button")?.setAttribute("disabled", "disabled");
@@ -459,43 +461,88 @@ function createEmptyPesquisa(){
   };
 }
 
+function setAuthLayout(loggedIn){
+  document.body.classList.toggle("auth-login", !loggedIn);
+  els.shell?.classList.toggle("auth-logged-out", !loggedIn);
+  els.shell?.classList.toggle("auth-logged-in", loggedIn);
+}
+
+async function ensureSupabaseReady(){
+  if (state.supabase) return state.supabase;
+  try {
+    if (window.__SUPABASE_CONFIG_LOADED__) {
+      await window.__SUPABASE_CONFIG_LOADED__;
+    }
+  } catch {}
+
+  if (typeof window.getSupabaseClient === "function") {
+    state.supabase = await window.getSupabaseClient();
+  }
+
+  if (!state.supabase && window.supabase?.createClient && window.SUPABASE_URL && window.SUPABASE_ANON_KEY) {
+    state.supabase = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+    window.supabaseClient = state.supabase;
+  }
+
+  return state.supabase;
+}
+
+function setLoginBusy(isBusy){
+  const btn = els.loginForm?.querySelector('button[type="submit"]');
+  if (!btn) return;
+  btn.disabled = !!isBusy;
+  btn.textContent = isBusy ? "Entrando..." : "Entrar";
+}
+
+
 function setSession(session){
   state.session = session;
   const loggedIn = !!session;
-  els.loginPanel.classList.toggle("hidden", loggedIn);
-  els.adminPanel.classList.toggle("hidden", !loggedIn);
-  els.logout.classList.toggle("hidden", !loggedIn);
-  els.user.textContent = session?.user?.email || "";
-  if (loggedIn) {
-    refreshListAndSelect(null);
-    restoreMainTab();
-  } else {
+  setAuthLayout(loggedIn);
+  els.loginPanel?.classList.toggle("hidden", loggedIn);
+  els.adminPanel?.classList.toggle("hidden", !loggedIn);
+  els.logout?.classList.toggle("hidden", !loggedIn);
+  if (els.user) els.user.textContent = session?.user?.email || "";
+  if (!loggedIn) {
     setMainTab("pesquisas");
+    return;
   }
+  refreshListAndSelect(currentResearchId || null);
+  restoreMainTab();
 }
 
 async function handleLogin(e){
   e.preventDefault();
-  els.loginError.textContent = "";
-  if (!state.supabase || !window.__SUPABASE_CONFIG_OK__) {
-    setDiag("Supabase não configurado: confira /js/supabase-config.js e caminhos no /admin/index.html");
-    return;
-  }
-  const formData = new FormData(els.loginForm);
-  const email = formData.get("email");
-  const password = formData.get("password");
+  if (els.loginError) els.loginError.textContent = "";
+  setLoginBusy(true);
+  try {
+    const client = await ensureSupabaseReady();
+    if (!client) {
+      throw new Error("Supabase não configurado. Verifique o supabase-config.js e o supabase-client.js.");
+    }
 
-  const { error } = await state.supabase.auth.signInWithPassword({ email, password });
-  if (error) {
+    const formData = new FormData(els.loginForm);
+    const email = String(formData.get("email") || "").trim();
+    const password = String(formData.get("password") || "");
+
+    if (!email || !password) {
+      throw new Error("Preencha e-mail e senha.");
+    }
+
+    const { data, error } = await client.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+
+    setDiag(`Login OK: ${data?.user?.email || email}`);
+    const { data: sessionData } = await client.auth.getSession();
+    setSession(sessionData?.session || data?.session || null);
+  } catch (error) {
     console.error("[Login] erro:", error);
-    const status = error.status ? ` (status ${error.status})` : "";
-    els.loginError.textContent = `${error.message}${status}`;
-    setDiag(`Falha login: ${error.message}`);
-    return;
+    const status = error?.status ? ` (status ${error.status})` : "";
+    if (els.loginError) els.loginError.textContent = `${error.message || "Falha ao entrar."}${status}`;
+    setDiag(`Falha login: ${error?.message || error}`);
+  } finally {
+    setLoginBusy(false);
   }
-  setDiag("Login OK: sessão ativa.");
-  const sess = await state.supabase.auth.getSession();
-  console.log("[Session]", sess);
 }
 
 async function handleLogout(){
@@ -565,7 +612,7 @@ function clearForm(){
   fillForm(empty);
   updatePdfPreview("");
   updateMapPreview("");
-  setTab("config", { persist: false });
+  setTab("config");
   loadPontos();
   setSaveMsg("");
   adminMsg("");
@@ -590,7 +637,7 @@ async function loadResearchToForm(pesquisa){
       link: membro.linkedin || membro.link || ""
     })));
   }
-  setTab("config", { persist: false });
+  restoreLastTab("config");
   loadPontos();
   setSaveMsg(pesquisa?.id ? `Editando: ${pesquisa.slug || ""}` : "", true);
   adminMsg(pesquisa?.id ? `Editando: ${pesquisa.slug || ""}` : "", "muted");
@@ -1115,29 +1162,30 @@ function setTab(tab, options = {}){
   const { persist = true } = options;
   const tabs = document.querySelectorAll("#pesquisa-form .tabs .tab");
   const panels = document.querySelectorAll("#pesquisa-form [data-tab-panel]");
+  const availableTabs = Array.from(tabs).map((btn) => btn.dataset.tab);
+  const safeTab = availableTabs.includes(tab) ? tab : (availableTabs[0] || "config");
 
-  tabs.forEach((btn) => btn.classList.remove("active"));
-  panels.forEach((panel) => panel.classList.add("hidden"));
+  tabs.forEach((btn) => btn.classList.toggle("active", btn.dataset.tab === safeTab));
+  panels.forEach((panel) => panel.classList.toggle("hidden", panel.dataset.tabPanel !== safeTab));
 
-  const activeTab = Array.from(tabs).find((btn) => btn.dataset.tab === tab);
-  const activePanel = Array.from(panels).find((panel) => panel.dataset.tabPanel === tab);
-
-  if (activeTab) activeTab.classList.add("active");
-  if (activePanel) activePanel.classList.remove("hidden");
-
-  if (persist && tab) {
-    localStorage.setItem(getTabStorageKey(), tab);
+  if (persist && safeTab) {
+    try {
+      localStorage.setItem(getTabStorageKey(), safeTab);
+    } catch {}
   }
 
-  if (tab === "mapa") {
+  if (safeTab === "mapa") {
     loadPontos().catch(console.error);
   }
 }
 
 function restoreLastTab(defaultTab = "config"){
-  const stored = localStorage.getItem(getTabStorageKey());
+  let stored = "";
+  try {
+    stored = localStorage.getItem(getTabStorageKey()) || "";
+  } catch {}
   const hasTab = stored && document.querySelector(`#pesquisa-form .tabs .tab[data-tab="${stored}"]`);
-  setTab(hasTab ? stored : defaultTab);
+  setTab(hasTab ? stored : defaultTab, { persist: false });
 }
 
 async function loadPontos(){
