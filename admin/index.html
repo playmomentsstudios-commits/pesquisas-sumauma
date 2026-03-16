@@ -1,33 +1,33 @@
 <section class="login-stage">
 
-  <!-- imagem de fundo -->
+  <!-- fundo -->
   <div class="login-stage__bg">
-    <img id="loginBg" src="/img/capa.jpg" style="width:100%;height:100%;object-fit:cover;">
+    <img id="loginBg" src="/img/capa.jpg">
   </div>
 
-  <!-- overlay escuro -->
+  <!-- overlay gradiente -->
   <div class="login-stage__overlay"></div>
 
-  <!-- card de login -->
+  <!-- login -->
   <div class="login-card">
 
-      <div style="text-align:center;margin-bottom:20px;">
-          <img id="loginLogo" src="/img/logo.png" style="max-width:120px;">
+      <div class="login-card__logo">
+          <img id="loginLogo" src="/img/logo.png">
       </div>
 
       <form id="loginForm">
 
           <div class="form-group">
               <label class="form-label">Email</label>
-              <input class="form-input" id="emailInput" type="email" required>
+              <input class="form-input" id="emailInput" type="email" placeholder="seu@email.com" required>
           </div>
 
           <div class="form-group">
               <label class="form-label">Senha</label>
-              <input class="form-input" id="passwordInput" type="password" required>
+              <input class="form-input" id="passwordInput" type="password" placeholder="••••••••" required>
           </div>
 
-          <button class="btn btn--primary btn--block" type="submit">
+          <button class="btn-login" type="submit">
               Entrar
           </button>
 
@@ -36,4 +36,5 @@
       <div id="loginError" class="alert alert--error" hidden></div>
 
   </div>
+
 </section>
