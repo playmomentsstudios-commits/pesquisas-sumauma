@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="./admin.css" />
   </head>
   <body>
-    <div class="admin-shell">
+    <div class="admin-shell auth-logged-out" id="admin-shell">
       <aside class="app-sidebar">
         <div class="brand-block">
           <div class="brand-kicker">Sumaúma</div>
@@ -36,30 +36,25 @@
       </aside>
 
       <main class="workspace">
-        <section id="login-panel" class="login-stage card">
+        <section id="login-panel" class="login-stage">
           <div class="login-stage-bg" id="loginHeroBg"></div>
           <div class="login-stage-overlay"></div>
-          <div class="login-card-surface">
+          <div class="login-card-surface login-card-clean">
             <div class="login-brand-slot">
-              <img id="loginSiteLogo" class="brand-logo hidden" alt="Logo do Instituto Sumaúma" />
+              <img id="loginSiteLogo" class="brand-logo hidden" alt="Logo do site" />
             </div>
-            <div class="login-copy">
-              <span class="eyebrow">Acesso restrito</span>
-              <h2>Entrar no painel</h2>
-              <p class="muted">A logo e o fundo acompanham automaticamente as configurações visuais do site.</p>
-            </div>
-            <form id="login-form" class="login-form">
+            <form id="login-form" class="login-form login-form-clean">
               <label>
-                <span>Usuário / e-mail</span>
-                <input type="email" name="email" required />
+                <span>E-mail</span>
+                <input type="email" name="email" autocomplete="email" placeholder="seu@email.com" required />
               </label>
               <label>
                 <span>Senha</span>
-                <input type="password" name="password" required />
+                <input type="password" name="password" autocomplete="current-password" placeholder="••••••••" required />
               </label>
-              <button class="btn primary" type="submit">Entrar</button>
+              <button class="btn primary login-submit" type="submit">Entrar</button>
             </form>
-            <p id="login-error" class="error"></p>
+            <p id="login-error" class="error login-error"></p>
           </div>
         </section>
 
