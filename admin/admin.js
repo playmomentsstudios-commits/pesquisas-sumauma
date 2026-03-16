@@ -23,7 +23,6 @@ const CONFIG = {
 
 const state = {
   supabase: null,
-  authSubscription: null,
   session: null,
   user: null,
   researches: [],
@@ -53,16 +52,6 @@ const utils = {
       clearTimeout(timeout);
       timeout = setTimeout(() => fn(...args), delay);
     };
-  },
-
-  /**
-   * Revoga URL temporaria de preview para evitar vazamento de memoria
-   */
-  revokeObjectUrl(url) {
-    if (!url || typeof url !== 'string' || !url.startsWith('blob:')) return;
-    try {
-      URL.revokeObjectURL(url);
-    } catch (_) {}
   },
 
   /**
@@ -204,18 +193,32 @@ const api = {
    */
   async init() {
     try {
-      await window.__SUPABASE_CONFIG_LOADED__;
-      
-      if (!window.getSupabaseClient) {
-        throw new Error('Supabase client nao configurado');
+      if (window.__SUPABASE_CONFIG_LOADED__ && typeof window.__SUPABASE_CONFIG_LOADED__.then === 'function') {
+        await window.__SUPABASE_CONFIG_LOADED__;
       }
-      
-      state.supabase = await window.getSupabaseClient();
-      
+
+      await new Promise((resolve, reject) => {
+        const startedAt = Date.now();
+        const check = () => {
+          if (window.getSupabaseClient || window.supabase) return resolve();
+          if (Date.now() - startedAt > 5000) return reject(new Error('Supabase client nao configurado'));
+          setTimeout(check, 50);
+        };
+        check();
+      });
+
+      if (window.getSupabaseClient) {
+        state.supabase = await window.getSupabaseClient();
+      }
+
+      if (!state.supabase && window.supabase?.createClient && window.SUPABASE_URL && window.SUPABASE_ANON_KEY) {
+        state.supabase = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+      }
+
       if (!state.supabase) {
         throw new Error('Falha ao inicializar Supabase');
       }
-      
+
       return true;
     } catch (err) {
       console.error('[API] Init error:', err);
@@ -229,20 +232,26 @@ const api = {
   auth: {
     async getSession() {
       if (!state.supabase) return null;
-      const { data } = await state.supabase.auth.getSession();
+      const { data, error } = await state.supabase.auth.getSession();
+      if (error) throw error;
       return data?.session || null;
     },
 
     async signIn(email, password) {
       if (!state.supabase) throw new Error('Supabase nao inicializado');
-      const { data, error } = await state.supabase.auth.signInWithPassword({ email, password });
+      const credentials = { email: String(email || '').trim(), password: String(password || '') };
+      const { data, error } = await state.supabase.auth.signInWithPassword(credentials);
       if (error) throw error;
+      if (!data?.user) throw new Error('Autenticação não retornou usuário.');
+      state.session = data.session || null;
+      state.user = data.user;
       return data;
     },
 
     async signOut() {
       if (!state.supabase) return;
-      await state.supabase.auth.signOut();
+      const { error } = await state.supabase.auth.signOut();
+      if (error) throw error;
     },
 
     onAuthChange(callback) {
@@ -483,19 +492,34 @@ const ui = {
    */
   setAuthState(isAuthenticated) {
     document.body.setAttribute('data-auth-state', isAuthenticated ? 'logged-in' : 'logged-out');
-    
+
     const loginStage = document.getElementById('loginStage');
     const adminDashboard = document.getElementById('adminDashboard');
-    
+    const userEmail = document.getElementById('userEmail');
+    const loginForm = document.getElementById('loginForm');
+    const loginError = document.getElementById('loginError');
+    const loginHelp = document.getElementById('loginHelp');
+
     if (loginStage) loginStage.hidden = isAuthenticated;
     if (adminDashboard) adminDashboard.hidden = !isAuthenticated;
-    
+
     if (isAuthenticated && state.user) {
-      const userEmail = document.getElementById('userEmail');
       if (userEmail) userEmail.textContent = state.user.email || 'Autenticado';
+      if (loginError) {
+        loginError.hidden = true;
+        loginError.textContent = '';
+      }
     } else {
-      const userEmail = document.getElementById('userEmail');
       if (userEmail) userEmail.textContent = 'Não autenticado';
+      if (loginForm) loginForm.reset();
+      if (loginError) {
+        loginError.hidden = true;
+        loginError.textContent = '';
+      }
+      if (loginHelp) {
+        loginHelp.hidden = true;
+        loginHelp.textContent = '';
+      }
     }
   },
 
@@ -1058,6 +1082,8 @@ const handlers = {
       return;
     }
     
+    await this.loadSiteConfig();
+
     // Verifica sessao existente
     const session = await api.auth.getSession();
     if (session) {
@@ -1070,21 +1096,24 @@ const handlers = {
     }
     
     // Observa mudancas de auth
-    const authListener = api.auth.onAuthChange((event, session) => {
+    api.auth.onAuthChange(async (event, session) => {
       state.session = session;
       state.user = session?.user || null;
       ui.setAuthState(!!session);
-      
+
       if (session) {
-        this.loadResearches();
+        await this.loadResearches();
       } else {
+        state.researches = [];
+        state.currentResearch = null;
         state.points = [];
-        ui.renderPointsList([]);
-        ui.renderMap([], '');
+        ui.renderResearchList([]);
+        const pointsList = document.getElementById('pointsList');
+        const pointsCounter = document.getElementById('pointsCounter');
+        if (pointsList) pointsList.innerHTML = '';
+        if (pointsCounter) pointsCounter.textContent = '0 pontos';
       }
     });
-
-    state.authSubscription = authListener?.data?.subscription || null;
     
     // Bind de eventos
     this.bindEvents();
@@ -1100,13 +1129,6 @@ const handlers = {
       loginForm.addEventListener('submit', this.handleLogin.bind(this));
     }
     
-    const btnRequestAccess = document.getElementById('btnRequestAccess');
-    if (btnRequestAccess) {
-      btnRequestAccess.addEventListener('click', () => {
-        const loginHelp = document.getElementById('loginHelp');
-        utils.setText(loginHelp, 'Entre em contato com o administrador do sistema para solicitar acesso.');
-      });
-    }
     
     // Logout
     const btnLogout = document.getElementById('btnLogout');
@@ -1361,29 +1383,34 @@ const handlers = {
    */
   async handleLogin(e) {
     e.preventDefault();
-    
+
     const form = e.target;
     const btn = form.querySelector('button[type="submit"]');
     const loginError = document.getElementById('loginError');
-    
+
     const email = form.email.value.trim();
     const password = form.password.value;
-    
+
     if (!email || !password) {
       utils.showAlert(loginError, 'Preencha e-mail e senha', 'error');
       return;
     }
-    
+
     utils.setButtonLoading(btn, true);
-    loginError.hidden = true;
-    
+    if (loginError) {
+      loginError.hidden = true;
+      loginError.textContent = '';
+    }
+
     try {
-      const { user } = await api.auth.signIn(email, password);
-      state.user = user;
+      const data = await api.auth.signIn(email, password);
+      state.session = data.session || state.session;
+      state.user = data.user || state.user;
       ui.setAuthState(true);
       await this.loadResearches();
     } catch (err) {
       console.error('[Login] Error:', err);
+      ui.setAuthState(false);
       utils.showAlert(loginError, utils.formatError(err), 'error', 0);
     } finally {
       utils.setButtonLoading(btn, false);
@@ -1400,11 +1427,7 @@ const handlers = {
       state.user = null;
       state.researches = [];
       state.currentResearch = null;
-      state.points = [];
       ui.setAuthState(false);
-      ui.renderResearchList([]);
-      ui.renderPointsList([]);
-      ui.renderMap([], '');
     } catch (err) {
       console.error('[Logout] Error:', err);
     }
@@ -1692,29 +1715,21 @@ const handlers = {
       };
       
       let result;
-      let researchId = state.currentResearch?.id;
-
-      if (researchId) {
+      
+      if (state.currentResearch?.id) {
         // Update
-        result = await api.researches.update(researchId, payload);
+        result = await api.researches.update(state.currentResearch.id, payload);
         utils.showAlert(alert, 'Pesquisa atualizada com sucesso!', 'success');
       } else {
         // Create
         result = await api.researches.create(payload);
-        researchId = result.id;
+        state.currentResearch = result;
         document.getElementById('btnDeleteResearch').hidden = false;
         utils.showAlert(alert, 'Pesquisa criada com sucesso!', 'success');
       }
-
-      // Recarrega lista e estado atual com dados completos
+      
+      // Recarrega lista
       await this.loadResearches();
-      if (researchId) {
-        const refreshedResearch = await api.researches.getById(researchId);
-        state.currentResearch = refreshedResearch;
-        ui.fillResearchForm(refreshedResearch);
-        const editorTitle = document.getElementById('editorTitle');
-        if (editorTitle) editorTitle.textContent = refreshedResearch.titulo || 'Editar pesquisa';
-      }
       
     } catch (err) {
       console.error('[SaveResearch] Error:', err);
@@ -1841,16 +1856,10 @@ const handlers = {
    * Handler de selecao de arquivo
    */
   async handleFileSelect(zone, file) {
-    const previousUrl = zone?.dataset?.tempUrl;
-    if (previousUrl) {
-      utils.revokeObjectUrl(previousUrl);
-      delete zone.dataset.tempUrl;
-    }
-
     // Preview local temporario
     const previewUrl = URL.createObjectURL(file);
     ui.setUploadPreview(zone, previewUrl);
-
+    
     // Limpa URL temporaria apos uso
     zone.dataset.tempUrl = previewUrl;
   },
@@ -1883,9 +1892,6 @@ const handlers = {
       }
       
       await api.researches.update(state.currentResearch.id, { banner_url: finalUrl });
-      if (state.currentResearch) {
-        state.currentResearch.banner_url = finalUrl;
-      }
       
       utils.setText(msgEl, 'Banner salvo com sucesso!');
       setTimeout(() => utils.setText(msgEl, ''), 3000);
@@ -2009,52 +2015,43 @@ const handlers = {
    * Parser de CSV
    */
   parseCsv(text) {
-    const normalized = String(text || '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-    if (!normalized.trim()) return [];
-
-    const headerLine = normalized.split('\n').find(line => line.trim());
-    if (!headerLine) return [];
-    const delimiter = headerLine.includes(';') && !headerLine.includes(',') ? ';' : ',';
-
-    const rows = [];
-    let row = [];
-    let current = '';
-    let inQuotes = false;
-
-    for (let i = 0; i < normalized.length; i++) {
-      const char = normalized[i];
-      const nextChar = normalized[i + 1];
-
-      if (char === '"') {
-        if (inQuotes && nextChar === '"') {
-          current += '"';
-          i++;
+    const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n').filter(Boolean);
+    if (lines.length < 2) return [];
+    
+    const delimiter = lines[0].includes(';') && !lines[0].includes(',') ? ';' : ',';
+    
+    const parseLine = (line) => {
+      const result = [];
+      let current = '';
+      let inQuotes = false;
+      
+      for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+        const nextChar = line[i + 1];
+        
+        if (char === '"') {
+          if (inQuotes && nextChar === '"') {
+            current += '"';
+            i++;
+          } else {
+            inQuotes = !inQuotes;
+          }
+        } else if (char === delimiter && !inQuotes) {
+          result.push(current.trim());
+          current = '';
         } else {
-          inQuotes = !inQuotes;
+          current += char;
         }
-      } else if (char === delimiter && !inQuotes) {
-        row.push(current.trim());
-        current = '';
-      } else if (char === '\n' && !inQuotes) {
-        row.push(current.trim());
-        if (row.some(cell => cell !== '')) rows.push(row);
-        row = [];
-        current = '';
-      } else {
-        current += char;
       }
-    }
-
-    if (current || row.length) {
-      row.push(current.trim());
-      if (row.some(cell => cell !== '')) rows.push(row);
-    }
-
-    if (rows.length < 2) return [];
-
-    const headers = rows[0].map(h => h.toLowerCase().trim());
-
-    return rows.slice(1).map(values => {
+      
+      result.push(current.trim());
+      return result;
+    };
+    
+    const headers = parseLine(lines[0]).map(h => h.toLowerCase().trim());
+    
+    return lines.slice(1).map(line => {
+      const values = parseLine(line);
       const obj = {};
       headers.forEach((header, i) => {
         obj[header] = values[i] || '';
@@ -2260,37 +2257,34 @@ const handlers = {
    * Atualiza logos na marca da interface
    */
   updateBrandLogos(logoUrl, bannerUrl) {
-    // Login
-    const loginLogo = document.getElementById('loginLogo');
-    if (loginLogo && logoUrl) {
-      loginLogo.src = logoUrl;
-      loginLogo.hidden = false;
-      loginLogo.parentElement?.querySelector('.login-card__fallback')?.setAttribute('hidden', 'hidden');
-    }
-    
-    // Dashboard
-    const dashboardLogo = document.getElementById('dashboardLogo');
-    if (dashboardLogo && logoUrl) {
-      dashboardLogo.src = logoUrl;
-      dashboardLogo.hidden = false;
-    }
-    
-    const navLogo = document.getElementById('navLogo');
-    if (navLogo && logoUrl) {
-      navLogo.src = logoUrl;
-      navLogo.hidden = false;
-      navLogo.parentElement?.querySelector('.nav-brand__fallback')?.setAttribute('hidden', 'hidden');
-    }
-    
-    // Backgrounds
+    const bindLogo = (imgId, fallbackSelector) => {
+      const img = document.getElementById(imgId);
+      const fallback = fallbackSelector ? document.querySelector(fallbackSelector) : null;
+      if (!img) return;
+
+      if (logoUrl) {
+        img.src = logoUrl;
+        img.hidden = false;
+        if (fallback) fallback.hidden = true;
+      } else {
+        img.hidden = true;
+        img.removeAttribute('src');
+        if (fallback) fallback.hidden = false;
+      }
+    };
+
+    bindLogo('loginLogo', '.login-card__fallback');
+    bindLogo('dashboardLogo');
+    bindLogo('navLogo', '.nav-brand__fallback');
+
     const loginBg = document.getElementById('loginBg');
-    if (loginBg && bannerUrl) {
-      loginBg.style.backgroundImage = `url("${bannerUrl}")`;
+    if (loginBg) {
+      loginBg.style.backgroundImage = bannerUrl ? `url("${bannerUrl}")` : 'none';
     }
-    
+
     const dashboardBg = document.getElementById('dashboardBg');
-    if (dashboardBg && bannerUrl) {
-      dashboardBg.style.backgroundImage = `url("${bannerUrl}")`;
+    if (dashboardBg) {
+      dashboardBg.style.backgroundImage = bannerUrl ? `url("${bannerUrl}")` : 'none';
     }
   }
 };
@@ -2298,14 +2292,6 @@ const handlers = {
 // ==========================================
 // SECAO 6: INICIALIZACAO
 // ==========================================
-window.addEventListener('beforeunload', () => {
-  document.querySelectorAll('.upload-zone[data-temp-url], .upload-zone').forEach(zone => {
-    if (zone.dataset?.tempUrl) {
-      utils.revokeObjectUrl(zone.dataset.tempUrl);
-    }
-  });
-});
-
 
 // Inicia aplicacao quando DOM estiver pronto
 if (document.readyState === 'loading') {
