@@ -23,6 +23,7 @@ const CONFIG = {
 
 const state = {
   supabase: null,
+  authSubscription: null,
   session: null,
   user: null,
   researches: [],
@@ -50,8 +51,18 @@ const utils = {
     let timeout;
     return (...args) => {
       clearTimeout(timeout);
-      timeout = setTimeout(() => fn.apply(this, args), delay);
+      timeout = setTimeout(() => fn(...args), delay);
     };
+  },
+
+  /**
+   * Revoga URL temporaria de preview para evitar vazamento de memoria
+   */
+  revokeObjectUrl(url) {
+    if (!url || typeof url !== 'string' || !url.startsWith('blob:')) return;
+    try {
+      URL.revokeObjectURL(url);
+    } catch (_) {}
   },
 
   /**
@@ -482,6 +493,9 @@ const ui = {
     if (isAuthenticated && state.user) {
       const userEmail = document.getElementById('userEmail');
       if (userEmail) userEmail.textContent = state.user.email || 'Autenticado';
+    } else {
+      const userEmail = document.getElementById('userEmail');
+      if (userEmail) userEmail.textContent = 'Não autenticado';
     }
   },
 
@@ -1056,15 +1070,21 @@ const handlers = {
     }
     
     // Observa mudancas de auth
-    api.auth.onAuthChange((event, session) => {
+    const authListener = api.auth.onAuthChange((event, session) => {
       state.session = session;
       state.user = session?.user || null;
       ui.setAuthState(!!session);
       
       if (session) {
         this.loadResearches();
+      } else {
+        state.points = [];
+        ui.renderPointsList([]);
+        ui.renderMap([], '');
       }
     });
+
+    state.authSubscription = authListener?.data?.subscription || null;
     
     // Bind de eventos
     this.bindEvents();
@@ -1380,7 +1400,11 @@ const handlers = {
       state.user = null;
       state.researches = [];
       state.currentResearch = null;
+      state.points = [];
       ui.setAuthState(false);
+      ui.renderResearchList([]);
+      ui.renderPointsList([]);
+      ui.renderMap([], '');
     } catch (err) {
       console.error('[Logout] Error:', err);
     }
@@ -1668,21 +1692,29 @@ const handlers = {
       };
       
       let result;
-      
-      if (state.currentResearch?.id) {
+      let researchId = state.currentResearch?.id;
+
+      if (researchId) {
         // Update
-        result = await api.researches.update(state.currentResearch.id, payload);
+        result = await api.researches.update(researchId, payload);
         utils.showAlert(alert, 'Pesquisa atualizada com sucesso!', 'success');
       } else {
         // Create
         result = await api.researches.create(payload);
-        state.currentResearch = result;
+        researchId = result.id;
         document.getElementById('btnDeleteResearch').hidden = false;
         utils.showAlert(alert, 'Pesquisa criada com sucesso!', 'success');
       }
-      
-      // Recarrega lista
+
+      // Recarrega lista e estado atual com dados completos
       await this.loadResearches();
+      if (researchId) {
+        const refreshedResearch = await api.researches.getById(researchId);
+        state.currentResearch = refreshedResearch;
+        ui.fillResearchForm(refreshedResearch);
+        const editorTitle = document.getElementById('editorTitle');
+        if (editorTitle) editorTitle.textContent = refreshedResearch.titulo || 'Editar pesquisa';
+      }
       
     } catch (err) {
       console.error('[SaveResearch] Error:', err);
@@ -1809,10 +1841,16 @@ const handlers = {
    * Handler de selecao de arquivo
    */
   async handleFileSelect(zone, file) {
+    const previousUrl = zone?.dataset?.tempUrl;
+    if (previousUrl) {
+      utils.revokeObjectUrl(previousUrl);
+      delete zone.dataset.tempUrl;
+    }
+
     // Preview local temporario
     const previewUrl = URL.createObjectURL(file);
     ui.setUploadPreview(zone, previewUrl);
-    
+
     // Limpa URL temporaria apos uso
     zone.dataset.tempUrl = previewUrl;
   },
@@ -1845,6 +1883,9 @@ const handlers = {
       }
       
       await api.researches.update(state.currentResearch.id, { banner_url: finalUrl });
+      if (state.currentResearch) {
+        state.currentResearch.banner_url = finalUrl;
+      }
       
       utils.setText(msgEl, 'Banner salvo com sucesso!');
       setTimeout(() => utils.setText(msgEl, ''), 3000);
@@ -1968,43 +2009,52 @@ const handlers = {
    * Parser de CSV
    */
   parseCsv(text) {
-    const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n').filter(Boolean);
-    if (lines.length < 2) return [];
-    
-    const delimiter = lines[0].includes(';') && !lines[0].includes(',') ? ';' : ',';
-    
-    const parseLine = (line) => {
-      const result = [];
-      let current = '';
-      let inQuotes = false;
-      
-      for (let i = 0; i < line.length; i++) {
-        const char = line[i];
-        const nextChar = line[i + 1];
-        
-        if (char === '"') {
-          if (inQuotes && nextChar === '"') {
-            current += '"';
-            i++;
-          } else {
-            inQuotes = !inQuotes;
-          }
-        } else if (char === delimiter && !inQuotes) {
-          result.push(current.trim());
-          current = '';
+    const normalized = String(text || '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+    if (!normalized.trim()) return [];
+
+    const headerLine = normalized.split('\n').find(line => line.trim());
+    if (!headerLine) return [];
+    const delimiter = headerLine.includes(';') && !headerLine.includes(',') ? ';' : ',';
+
+    const rows = [];
+    let row = [];
+    let current = '';
+    let inQuotes = false;
+
+    for (let i = 0; i < normalized.length; i++) {
+      const char = normalized[i];
+      const nextChar = normalized[i + 1];
+
+      if (char === '"') {
+        if (inQuotes && nextChar === '"') {
+          current += '"';
+          i++;
         } else {
-          current += char;
+          inQuotes = !inQuotes;
         }
+      } else if (char === delimiter && !inQuotes) {
+        row.push(current.trim());
+        current = '';
+      } else if (char === '\n' && !inQuotes) {
+        row.push(current.trim());
+        if (row.some(cell => cell !== '')) rows.push(row);
+        row = [];
+        current = '';
+      } else {
+        current += char;
       }
-      
-      result.push(current.trim());
-      return result;
-    };
-    
-    const headers = parseLine(lines[0]).map(h => h.toLowerCase().trim());
-    
-    return lines.slice(1).map(line => {
-      const values = parseLine(line);
+    }
+
+    if (current || row.length) {
+      row.push(current.trim());
+      if (row.some(cell => cell !== '')) rows.push(row);
+    }
+
+    if (rows.length < 2) return [];
+
+    const headers = rows[0].map(h => h.toLowerCase().trim());
+
+    return rows.slice(1).map(values => {
       const obj = {};
       headers.forEach((header, i) => {
         obj[header] = values[i] || '';
@@ -2215,6 +2265,7 @@ const handlers = {
     if (loginLogo && logoUrl) {
       loginLogo.src = logoUrl;
       loginLogo.hidden = false;
+      loginLogo.parentElement?.querySelector('.login-card__fallback')?.setAttribute('hidden', 'hidden');
     }
     
     // Dashboard
@@ -2228,6 +2279,7 @@ const handlers = {
     if (navLogo && logoUrl) {
       navLogo.src = logoUrl;
       navLogo.hidden = false;
+      navLogo.parentElement?.querySelector('.nav-brand__fallback')?.setAttribute('hidden', 'hidden');
     }
     
     // Backgrounds
@@ -2246,6 +2298,14 @@ const handlers = {
 // ==========================================
 // SECAO 6: INICIALIZACAO
 // ==========================================
+window.addEventListener('beforeunload', () => {
+  document.querySelectorAll('.upload-zone[data-temp-url], .upload-zone').forEach(zone => {
+    if (zone.dataset?.tempUrl) {
+      utils.revokeObjectUrl(zone.dataset.tempUrl);
+    }
+  });
+});
+
 
 // Inicia aplicacao quando DOM estiver pronto
 if (document.readyState === 'loading') {
